@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<canvas id="chart"></canvas>
+
+<script>
+fetch("https://script.google.com/macros/s/AKfycbwj8TX_Lwv_oRLd3CtFL7ORBSu4CyweKfdoxF5vi-7UBqPeml6EBNmCCLDJ7qmsKqjD/exec?action=dashboard")
+.then(r=>r.json())
+.then(d=>{
+  new Chart(chart,{
+    type:"bar",
+    data:{
+      labels:Object.keys(d),
+      datasets:[{
+        label:"จำนวนครุภัณฑ์",
+        data:Object.values(d)
+      }]
+    }
+  });
+});
+</script>
+</body>
+</html>
