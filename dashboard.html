@@ -1,28 +1,17 @@
 <!DOCTYPE html>
 <html>
-<head>
-<title>Dashboard</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
 <body>
-
-<canvas id="chart"></canvas>
+<h2>Dashboard</h2>
+<pre id="out"></pre>
 
 <script>
-fetch("https://script.google.com/macros/s/AKfycbwj8TX_Lwv_oRLd3CtFL7ORBSu4CyweKfdoxF5vi-7UBqPeml6EBNmCCLDJ7qmsKqjD/exec?action=dashboard")
-.then(r=>r.json())
-.then(d=>{
-  new Chart(chart,{
-    type:"bar",
-    data:{
-      labels:Object.keys(d),
-      datasets:[{
-        label:"จำนวนครุภัณฑ์",
-        data:Object.values(d)
-      }]
-    }
-  });
-});
+const API="PUT_SCRIPT_URL";
+let s=document.createElement("script");
+s.src=API+"?action=dashboard&callback=cb";
+document.body.appendChild(s);
+function cb(d){
+  out.textContent = JSON.stringify(d,null,2);
+}
 </script>
 </body>
 </html>
