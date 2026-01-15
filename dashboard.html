@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <script src="config.js"></script>
+</head>
+<body>
+
+<h2>Dashboard</h2>
+<div id="out"></div>
+
+<script>
+const role = localStorage.getItem("role");
+const dept = localStorage.getItem("dept");
+
+if(!role){
+  location.href="index.html";
+}
+
+api("dashboard").then(d=>{
+  out.innerHTML = "<pre>"+JSON.stringify(d,null,2)+"</pre>";
+});
+</script>
+
+</body>
+</html>
