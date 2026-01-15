@@ -1,34 +1,24 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="utf-8">
-<title>ระบบสำรวจครุภัณฑ์คอมพิวเตอร์ โรงพยาบาลอุดรธานี</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<script src="config.js"></script>
+  <meta charset="UTF-8">
+  <title>ระบบสำรวจครุภัณฑ์คอมพิวเตอร์</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
-
 <body>
-<h2>ระบบสำรวจครุภัณฑ์คอมพิวเตอร์<br>โรงพยาบาลอุดรธานี</h2>
 
-<input id="u" placeholder="Username"><br><br>
-<input id="p" type="password" placeholder="Password"><br><br>
-<button onclick="login()">เข้าสู่ระบบ</button>
+<h2>ระบบสำรวจครุภัณฑ์คอมพิวเตอร์</h2>
+<h3>โรงพยาบาลอุดรธานี</h3>
 
-<script>
-function login(){
-  fetch(API +
-    "?action=login&username=" + encodeURIComponent(u.value) +
-    "&password=" + encodeURIComponent(p.value))
-  .then(r=>r.json())
-  .then(d=>{
-    if(d.success){
-      sessionStorage.setItem("user", JSON.stringify(d));
-      location.href="dashboard.html";
-    }else{
-      alert("Login ไม่ผ่าน");
-    }
-  });
-}
-</script>
+<form id="loginForm">
+  <input id="username" placeholder="Username" required><br><br>
+  <input id="password" type="password" placeholder="Password" required><br><br>
+  <button type="submit">เข้าสู่ระบบ</button>
+</form>
+
+<p id="msg"></p>
+
+<script src="config.js"></script>
+<script src="index.js"></script>
 </body>
 </html>
