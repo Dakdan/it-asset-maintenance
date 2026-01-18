@@ -3,174 +3,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบสำรวจครุภัณฑ์คอมพิวเตอร์</title>
+    <title>ระบบสำรวจครุภัณฑ์คอมพิวเตอร์ - รพ.อุดรธานี</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --pink: #ff85a2; --dark-pink: #f06292; --border: #333; }
-        body { font-family: 'Kanit', sans-serif; background-color: #fff5f7; color: #333; }
-        .cute-card { 
-            background: white; border: 3px solid var(--border); 
-            border-radius: 20px; box-shadow: 8px 8px 0px var(--pink); 
-        }
-        .header-section { 
-            background: white; border-bottom: 5px solid var(--pink); padding: 15px;
-            margin-bottom: 30px;
-        }
-        .btn-cute { 
-            background-color: var(--pink); border: 2px solid var(--border);
-            color: white; border-radius: 12px; font-weight: 600;
-            transition: 0.3s;
-        }
-        .btn-cute:hover { background-color: var(--dark-pink); transform: translateY(-2px); color: white; }
-        .highlight { background-color: #ffeb3b; font-weight: bold; border-radius: 4px; padding: 0 2px; }
-        .form-control { border: 2px solid #eee; border-radius: 10px; }
-        .form-control:focus { border-color: var(--pink); box-shadow: none; }
+        :root { --pink-main: #ff85a2; --pink-soft: #fff0f3; --dark: #2d3436; }
+        body { font-family: 'Kanit', sans-serif; background-color: var(--pink-soft); color: var(--dark); }
+        .cute-border { border: 2px solid var(--dark) !important; border-radius: 15px !important; }
+        .btn-cute { background: var(--pink-main); color: white; border: 2px solid var(--dark); border-radius: 12px; font-weight: bold; transition: 0.2s; }
+        .btn-cute:hover { background: #f06292; transform: scale(1.02); color: white; }
+        .header-card { background: white; border-bottom: 5px solid var(--pink-main); padding: 20px; border-radius: 0 0 30px 30px; }
+        .asset-card { background: white; border: 2px solid #eee; border-radius: 15px; margin-bottom: 10px; padding: 15px; }
+        .highlight { background: #fff176; font-weight: bold; padding: 0 2px; }
+        .hidden { display: none; }
+        @media print { .no-print { display: none; } .print-only { display: block !important; } }
+        .print-only { display: none; }
     </style>
 </head>
 <body>
 
-<div class="header-section text-center">
-    <img src="https://img2.pic.in.th/pic/ink.png" style="width: 70px;">
-    <h4 class="mt-2 mb-0">โรงพยาบาลอุดรธานี</h4>
-    <p class="small text-muted mb-0">กลุ่มงาน: เทคโนโลยีสารสนเทศคอมพิวเตอร์ โทร 1125, 1126, 1485</p>
-</div>
-
-<div class="container mb-5">
-    <div id="registerSection" class="row justify-content-center">
-        <div class="col-md-6 card cute-card p-4">
-            <h5 class="text-center mb-4"><i class="fas fa-user-plus me-2"></i>ลงทะเบียนเข้าใช้งาน</h5>
-            <div class="mb-3">
-                <label>Email</label>
-                <input type="email" id="email" class="form-control" placeholder="example@mail.com">
-            </div>
-            <div class="mb-3">
-                <label>ชื่อ-สกุล</label>
-                <input type="text" id="fullname" class="form-control">
-            </div>
-            <div class="mb-3">
-                <label>หน่วยงาน</label>
-                <input list="deptList" id="dept" class="form-control" placeholder="พิมพ์เพื่อค้นหาหน่วยงาน...">
-                <datalist id="deptList"></datalist>
-            </div>
-            <button class="btn btn-cute w-100 p-2" onclick="register()">ลงทะเบียนรับรหัสผ่าน</button>
-        </div>
+<div class="no-print">
+    <div class="header-card text-center shadow-sm">
+        <img src="https://img2.pic.in.th/pic/ink.png" width="60">
+        <h4 class="mt-2 mb-0">โรงพยาบาลอุดรธานี</h4>
+        <p class="small text-muted mb-0">กลุ่มงาน: เทคโนโลยีสารสนเทศคอมพิวเตอร์ โทร 1125, 1126, 1485</p>
     </div>
 
-    <div id="surveySection" class="d-none">
-        <div class="card cute-card p-4 mb-4 text-center">
-            <h5 id="displayDeptName">หน่วยงาน: -</h5>
-            <p>สำรวจตรวจสอบครุภัณฑ์คอมพิวเตอร์ ประจำปี 2568</p>
-            <div class="input-group">
-                <input type="text" id="searchInput" class="form-control" placeholder="ใส่เลขท้ายของรหัสครุภัณฑ์">
-                <button class="btn btn-cute px-4" onclick="searchAsset()"><i class="fas fa-search"></i> ค้นหา</button>
+    <div class="container mt-4">
+        <div id="section-reg" class="row justify-content-center">
+            <div class="col-md-5 card cute-border p-4 shadow">
+                <h5 class="text-center mb-4"><i class="fas fa-user-edit"></i> ลงทะเบียนเข้าใช้งาน</h5>
+                <input type="email" id="reg-email" class="form-control mb-3 cute-border" placeholder="อีเมล">
+                <input type="text" id="reg-name" class="form-control mb-3 cute-border" placeholder="ชื่อ-นามสกุล">
+                <input list="depts" id="reg-dept" class="form-control mb-3 cute-border" placeholder="ค้นหาหน่วยงาน...">
+                <datalist id="depts"></datalist>
+                <button class="btn btn-cute w-100" onclick="register()">ลงทะเบียนและรับ OTP</button>
             </div>
         </div>
 
-        <div id="resultTable" class="table-responsive mt-3">
+        <div id="section-survey" class="hidden">
+            <div class="asset-card text-center mb-4 border-dark border-2">
+                <h5 id="user-dept-display" class="text-pink">หน่วยงาน: -</h5>
+                <p>แบบสำรวจครุภัณฑ์คอมพิวเตอร์ ประจำปี 2568</p>
+                <div class="input-group mb-3">
+                    <input type="text" id="asset-query" class="form-control cute-border" placeholder="ใส่เลขท้ายรหัสครุภัณฑ์">
+                    <button class="btn btn-cute px-4" onclick="searchAsset()">ค้นหา</button>
+                </div>
             </div>
+
+            <div id="search-results"></div>
+            
+            <div id="confirmed-list" class="mt-4 hidden">
+                <h6><i class="fas fa-list-check"></i> รายการที่ยืนยันแล้ว</h6>
+                <div id="survey-items"></div>
+                <button class="btn btn-success w-100 mt-3 cute-border" onclick="submitSurvey()">ส่งแบบสำรวจทั้งหมด</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="section-report" class="print-only container mt-5 p-5 bg-white">
+    <div class="text-center">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Garuda_Embarkment.svg/150px-Garuda_Embarkment.svg.png" width="60">
+        <h5 class="mt-3">บันทึกข้อความ</h5>
+    </div>
+    <p><b>ส่วนราชการ:</b> <span id="report-dept"></span> โรงพยาบาลอุดรธานี</p>
+    <p><b>ที่:</b> อด ๐๐๓๒.๒๐๑/........ <b>วันที่:</b> <span id="report-date"></span></p>
+    <p><b>เรื่อง:</b> รายงานผลการสำรวจครุภัณฑ์คอมพิวเตอร์ประจำปี</p>
+    <hr>
+    <p>เรียน ผู้อำนวยการโรงพยาบาลอุดรธานี</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ตามที่กลุ่มงานไอทีได้ให้สำรวจครุภัณฑ์ บัดนี้หน่วยงานได้ตรวจสอบเรียบร้อยแล้ว มีรายการดังนี้:</p>
+    <table class="table table-bordered border-dark mt-3">
+        <thead><tr><th>รหัสครุภัณฑ์</th><th>รายการ</th><th>สถานะ</th></tr></thead>
+        <tbody id="report-table-body"></tbody>
+    </table>
+    <div class="row mt-5">
+        <div class="col-7"></div>
+        <div class="col-5 text-center">
+            <p>(ลงชื่อ)...........................................</p>
+            <p>(<span id="report-user"></span>)</p>
+            <button class="btn btn-primary no-print" onclick="window.print()">ปริ้นรายงาน</button>
+            <button class="btn btn-secondary no-print" onclick="location.reload()">กลับหน้าหลัก</button>
+        </div>
     </div>
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyaZCEVnz-5M-FC5Sr_8TJsrsnEk-gxwAW9iG0554doOqcwYOkP-pFueXGuZ4UO5MJDcg/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbyaZCEVnz-5M-FC5Sr_8TJsrsnEk-gxwAW9iG0554doOqcwYOkP-pFueXGuZ4UO5MJDcg/exec";
+    let confirmedData = [];
+    let userData = {};
 
-    // 1. โหลดข้อมูลหน่วยงาน
-    function loadDepartments() {
-        callApi({ action: 'getDepartments' }, (res) => {
-            const list = document.getElementById('deptList');
-            res.data.forEach(d => {
-                let opt = document.createElement('option');
-                opt.value = d;
-                list.appendChild(opt);
-            });
-        });
-    }
-
-    // 2. ลงทะเบียน
-    function register() {
-        const data = {
-            action: 'register',
-            email: document.getElementById('email').value,
-            name: document.getElementById('fullname').value,
-            dept: document.getElementById('dept').value
-        };
-        Swal.fire({ title: 'กำลังส่งข้อมูล...', didOpen: () => Swal.showLoading() });
-        callApi(data, (res) => {
-            Swal.fire('สำเร็จ', res.message, 'success').then(() => {
-                document.getElementById('registerSection').classList.add('d-none');
-                document.getElementById('surveySection').classList.remove('d-none');
-                document.getElementById('displayDeptName').innerText = "หน่วยงาน: " + data.dept;
-            });
-        });
-    }
-
-    // 3. ค้นหาครุภัณฑ์
-    function searchAsset() {
-        const query = document.getElementById('searchInput').value;
-        if(!query) return;
-        
-        Swal.fire({ title: 'กำลังค้นหา...', didOpen: () => Swal.showLoading() });
-        callApi({ action: 'searchAssets', query: query }, (res) => {
-            Swal.close();
-            let html = `<table class="table table-hover bg-white border">
-                <thead class="table-light"><tr><th>รหัสครุภัณฑ์</th><th>รายการ</th><th>จัดการ</th></tr></thead><tbody>`;
-            
-            res.data.forEach(item => {
-                // Highlight ตัวอักษร
-                let highlightedId = item.assetId.replace(new RegExp(query, "gi"), (match) => `<span class="highlight">${match}</span>`);
-                html += `<tr>
-                    <td>${highlightedId}</td>
-                    <td>${item.name}</td>
-                    <td><button class="btn btn-sm btn-outline-primary" onclick="showDetail('${encodeURIComponent(JSON.stringify(item))}')">รายละเอียด</button></td>
-                </tr>`;
-            });
-            html += `</tbody></table>`;
-            document.getElementById('resultTable').innerHTML = html;
-        });
-    }
-
-    function showDetail(itemStr) {
-        const item = JSON.parse(decodeURIComponent(itemStr));
-        Swal.fire({
-            title: 'รายละเอียดครุภัณฑ์',
-            html: `<div class="text-start">
-                <p><b>รหัส:</b> ${item.assetId}</p>
-                <p><b>ชื่อ:</b> ${item.name}</p>
-                <p><b>สเปค:</b> ${item.spec}</p>
-                <p><b>ราคา:</b> ${item.price} บาท</p>
-            </div>`,
-            showCancelButton: true,
-            confirmButtonText: 'ยืนยันการใช้งาน',
-            cancelButtonText: 'กลับ',
-            confirmButtonColor: '#ff85a2'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // ส่งข้อมูลบันทึก
-                Swal.fire('บันทึกสำเร็จ', '', 'success');
-            }
-        });
-    }
-
-    // ฟังก์ชันช่วยเรียก JSONP
-    function callApi(params, callback) {
-        const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
-        window[callbackName] = function(data) {
+    // JSONP Helper
+    function callAPI(params, cb) {
+        const callbackName = 'jsonp_' + Date.now();
+        window[callbackName] = (data) => {
             delete window[callbackName];
             document.body.removeChild(script);
-            callback(data);
+            cb(data);
         };
-
         const script = document.createElement('script');
-        let queryString = Object.keys(params).map(key => key + '=' + encodeURIComponent(params[key])).join('&');
-        script.src = `${SCRIPT_URL}?${queryString}&callback=${callbackName}`;
+        const query = new URLSearchParams({...params, callback: callbackName}).toString();
+        script.src = `${API_URL}?${query}`;
         document.body.appendChild(script);
     }
 
-    window.onload = loadDepartments;
+    // Load Depts on Start
+    window.onload = () => {
+        callAPI({action: 'getDepartments'}, (res) => {
+            const dl = document.getElementById('depts');
+            res.data.forEach(d => dl.innerHTML += `<option value="${d.name}">`);
+        });
+    };
+
+    function register() {
+        userData = { 
+            name: document.getElementById('reg-name').value, 
+            dept: document.getElementById('reg-dept').value,
+            email: document.getElementById('reg-email').value
+        };
+        if(!userData.name || !userData.dept) return Swal.fire('กรุณากรอกข้อมูลให้ครบ');
+
+        Swal.fire({title:'กำลังส่งรหัส...', didOpen:()=>Swal.showLoading()});
+        callAPI({action:'register', ...userData}, (res) => {
+            Swal.fire('สำเร็จ', 'กรุณาเช็ค Email เพื่อรับรหัสผ่าน', 'success').then(() => {
+                document.getElementById('section-reg').classList.add('hidden');
+                document.getElementById('section-survey').classList.remove('hidden');
+                document.getElementById('user-dept-display').innerText = "หน่วยงาน: " + userData.dept;
+            });
+        });
+    }
+
+    function searchAsset() {
+        const query = document.getElementById('asset-query').value;
+        Swal.fire({title:'ค้นหา...', didOpen:()=>Swal.showLoading()});
+        callAPI({action:'searchAssets', query: query}, (res) => {
+            Swal.close();
+            const container = document.getElementById('search-results');
+            container.innerHTML = '';
+            res.data.forEach(item => {
+                const highlightedId = item.assetId.replace(query, `<span class="highlight">${query}</span>`);
+                container.innerHTML += `
+                    <div class="asset-card shadow-sm border-start border-4 border-primary">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <small class="text-muted">รหัส: ${highlightedId}</small>
+                                <h6 class="mb-1">${item.name}</h6>
+                                <p class="small mb-0">${item.detail}</p>
+                            </div>
+                            <button class="btn btn-cute btn-sm" onclick='confirmItem(${JSON.stringify(item)})'>เลือก</button>
+                        </div>
+                    </div>`;
+            });
+        });
+    }
+
+    function confirmItem(item) {
+        if(confirmedData.some(x => x.assetId === item.assetId)) return Swal.fire('รายการนี้เลือกไปแล้ว');
+        confirmedData.push(item);
+        renderConfirmed();
+    }
+
+    function renderConfirmed() {
+        const div = document.getElementById('survey-items');
+        const listDiv = document.getElementById('confirmed-list');
+        listDiv.classList.remove('hidden');
+        div.innerHTML = confirmedData.map(x => `<div class="badge bg-white text-dark border p-2 m-1 cute-border">${x.assetId} - ${x.name}</div>`).join('');
+    }
+
+    function submitSurvey() {
+        Swal.fire({title:'กำลังบันทึก...', didOpen:()=>Swal.showLoading()});
+        // ส่งข้อมูลทีละรายการ (หรือปรับเป็น Batch ถ้าต้องการ)
+        const promises = confirmedData.map(item => {
+            return new Promise(resolve => {
+                callAPI({action:'saveSurvey', data: JSON.stringify({...item, deptName: userData.dept})}, resolve);
+            });
+        });
+
+        Promise.all(promises).then(() => {
+            Swal.fire('บันทึกสำเร็จ!', 'ระบบกำลังจัดเตรียมรายงาน', 'success').then(showReport);
+        });
+    }
+
+    function showReport() {
+        document.querySelector('.no-print').classList.add('hidden');
+        document.getElementById('section-report').classList.add('print-only');
+        document.getElementById('report-dept').innerText = userData.dept;
+        document.getElementById('report-user').innerText = userData.name;
+        document.getElementById('report-date').innerText = new Date().toLocaleDateString('th-TH');
+        
+        const tbody = document.getElementById('report-table-body');
+        tbody.innerHTML = confirmedData.map(x => `<tr><td>${x.assetId}</td><td>${x.name}</td><td>ปกติ/ใช้งานอยู่</td></tr>`).join('');
+        window.print();
+    }
 </script>
 </body>
 </html>
