@@ -1,88 +1,136 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ระบบสำรวจครุภัณฑ์คอมพิวเตอร์</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    body { font-family: 'Kanit', sans-serif; background:#fff0f3; }
+    .card { border-radius:16px; }
+    .hidden { display:none; }
+  </style>
+</head>
+<body>
+
+<div class="container mt-5">
+
+  <div class="text-center mb-4">
+    <img src="https://img2.pic.in.th/pic/ink.png" width="60"><br>
+    <h4>ระบบสำรวจครุภัณฑ์คอมพิวเตอร์</h4>
+    <p>โรงพยาบาลอุดรธานี</p>
+  </div>
+
+  <!-- REGISTER -->
+  <div id="section-reg" class="card p-4 mx-auto" style="max-width:420px">
+    <h5 class="text-center mb-3">ลงทะเบียนเข้าใช้งาน</h5>
+
+    <input id="reg-email" class="form-control mb-2" placeholder="Email">
+    <input id="reg-name" class="form-control mb-2" placeholder="ชื่อ - สกุล">
+    <input list="depts" id="reg-dept" class="form-control mb-3" placeholder="หน่วยงาน">
+    <datalist id="depts"></datalist>
+
+    <button class="btn btn-primary w-100" onclick="register()">เข้าใช้งาน</button>
+  </div>
+
+  <!-- SURVEY -->
+  <div id="section-survey" class="hidden mt-4">
+    <div class="card p-4">
+      <h5 id="user-dept"></h5>
+      <p>แบบสำรวจครุภัณฑ์ (ตัวอย่าง)</p>
+      <button class="btn btn-success" onclick="showReport()">ดูรายงาน</button>
+    </div>
+  </div>
+
+  <!-- REPORT -->
+  <div id="section-report" class="hidden mt-4">
+    <div class="card p-4">
+      <h5>รายงานการสำรวจ</h5>
+      <p>หน่วยงาน: <span id="r-dept"></span></p>
+      <p>ผู้รายงาน: <span id="r-name"></span></p>
+
+      <table class="table table-bordered">
+        <tr>
+          <th>รหัส</th><th>รายการ</th><th>สถานะ</th>
+        </tr>
+        <tr>
+          <td>COM-001</td><td>คอมพิวเตอร์</td><td>ปกติ</td>
+        </tr>
+      </table>
+
+      <button class="btn btn-secondary" onclick="location.reload()">กลับหน้าแรก</button>
+    </div>
+  </div>
+
+</div>
+
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbwj8TX_Lwv_oRLd3CtFL7ORBSu4CyweKfdoxF5vi-7UBqPeml6EBNmCCLDJ7qmsKqjD/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwj8TX_Lwv_oRLd3CtFL7ORBSu4CyweKfdoxF5vi-7UBqPeml6EBNmCCLDJ7qmsKqjD/exec";
+let user = {};
 
-let confirmedData = [];
-let userData = {};
+// ---------- JSONP ----------
+function api(action, params, cb){
+  const fn = "cb_" + Date.now();
+  params.action = action;
+  params.callback = fn;
 
-// ===== JSONP CALL (FIXED) =====
-function callAPI(params, cb) {
-    const callbackName = "cb_" + Date.now();
+  const q = Object.keys(params)
+    .map(k => k + "=" + encodeURIComponent(params[k]))
+    .join("&");
 
-    const script = document.createElement("script");
+  const s = document.createElement("script");
+  s.src = GAS_URL + "?" + q;
 
-    window[callbackName] = function (res) {
-        cb(res);
-        delete window[callbackName];
-        script.remove();
-    };
+  window[fn] = (res) => {
+    cb(res);
+    delete window[fn];
+    document.body.removeChild(s);
+  };
 
-    const query = new URLSearchParams({
-        ...params,
-        callback: callbackName
-    }).toString();
-
-    script.src = `${API_URL}?${query}`;
-    document.body.appendChild(script);
+  document.body.appendChild(s);
 }
 
-// ===== LOAD DEPARTMENTS =====
-window.onload = function () {
-    callAPI({ action: "departments" }, function (res) {
-        const dl = document.getElementById("depts");
-        dl.innerHTML = "";
-
-        if (!Array.isArray(res)) {
-            Swal.fire("ผิดพลาด", "ไม่พบข้อมูลหน่วยงาน", "error");
-            return;
-        }
-
-        res.forEach(d => {
-            dl.innerHTML += `<option value="${d}">`;
-        });
+// ---------- LOAD DEPT ----------
+window.onload = () => {
+  api("departments", {}, (res) => {
+    const dl = document.getElementById("depts");
+    dl.innerHTML = "";
+    res.forEach(d => {
+      dl.innerHTML += `<option value="${d}">`;
     });
+  });
 };
 
-// ===== REGISTER =====
-function register() {
-    userData = {
-        email: document.getElementById("reg-email").value.trim(),
-        name: document.getElementById("reg-name").value.trim(),
-        dept: document.getElementById("reg-dept").value.trim()
-    };
+// ---------- REGISTER ----------
+function register(){
+  user.email = reg-email.value.trim();
+  user.name  = reg-name.value.trim();
+  user.dept  = reg-dept.value.trim();
 
-    if (!userData.email || !userData.name || !userData.dept) {
-        Swal.fire("กรุณากรอกข้อมูลให้ครบ");
-        return;
-    }
+  if(!user.email || !user.name || !user.dept){
+    Swal.fire("กรอกข้อมูลให้ครบ");
+    return;
+  }
 
-    document.getElementById("section-reg").classList.add("hidden");
-    document.getElementById("section-survey").classList.remove("hidden");
-    document.getElementById("user-dept-display").innerText =
-        "หน่วยงาน: " + userData.dept;
+  // ใช้ login mock (ตาม GAS ที่มีจริง)
+  api("login", { username:user.email, password:"-" }, () => {
+    section-reg.classList.add("hidden");
+    section-survey.classList.remove("hidden");
+    document.getElementById("user-dept").innerText = "หน่วยงาน: " + user.dept;
+  });
 }
 
-// ===== DUMMY FUNCTIONS =====
-function searchAsset() {
-    Swal.fire("ตัวอย่าง", "ยังไม่ได้เชื่อมข้อมูลครุภัณฑ์", "info");
-}
-
-function submitSurvey() {
-    Swal.fire("สำเร็จ", "ตัวอย่างการส่งข้อมูล", "success")
-        .then(showReport);
-}
-
-function showReport() {
-    document.querySelector(".no-print").classList.add("hidden");
-    document.getElementById("section-report").classList.add("print-only");
-
-    document.getElementById("report-dept").innerText = userData.dept;
-    document.getElementById("report-user").innerText = userData.name;
-    document.getElementById("report-date").innerText =
-        new Date().toLocaleDateString("th-TH");
-
-    document.getElementById("report-table-body").innerHTML =
-        `<tr><td>-</td><td>ตัวอย่าง</td><td>ปกติ</td></tr>`;
-
-    window.print();
+// ---------- REPORT ----------
+function showReport(){
+  section-survey.classList.add("hidden");
+  section-report.classList.remove("hidden");
+  document.getElementById("r-dept").innerText = user.dept;
+  document.getElementById("r-name").innerText = user.name;
 }
 </script>
+
+</body>
+</html>
