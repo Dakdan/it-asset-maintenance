@@ -35,9 +35,9 @@ button { background:#ff69b4; color:#fff; border:none; border-radius:5px; }
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbwj8TX_Lwv_oRLd3CtFL7ORBSu4CyweKfdoxF5vi-7UBqPeml6EBNmCCLDJ7qmsKqjD/exec";
+let userData = {};
 
-/* ===== JSONP ===== */
-function callAPI(params, cb) {
+function callAPI(params, cb){
   const cbName = "cb_" + Date.now();
   params.callback = cbName;
 
@@ -47,42 +47,58 @@ function callAPI(params, cb) {
     cb(res);
   };
 
-  const q = Object.keys(params).map(k=>`${k}=${encodeURIComponent(params[k])}`).join("&");
+  const query = Object.keys(params)
+    .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`)
+    .join("&");
+
   const script = document.createElement("script");
-  script.src = API_URL + "?" + q;
+  script.src = `${API_URL}?${query}`;
   document.body.appendChild(script);
 }
 
-/* ===== LOAD DEPARTMENTS ===== */
+/* โหลดหน่วยงาน */
 window.onload = () => {
-  callAPI({ action:"departments" }, (res) => {
-    if (!res.success) {
-      Swal.fire("โหลดหน่วยงานไม่สำเร็จ");
-      return;
-    }
+  callAPI({ action: "departments" }, (res) => {
     const dl = document.getElementById("depts");
     dl.innerHTML = "";
-    res.data.forEach(d => {
+
+    if (!Array.isArray(res)) {
+      Swal.fire("ผิดพลาด", "ไม่พบข้อมูลหน่วยงาน", "error");
+      return;
+    }
+
+    res.forEach(dep => {
       const opt = document.createElement("option");
-      opt.value = d;
+      opt.value = dep;
       dl.appendChild(opt);
     });
   });
 };
 
-function register() {
-  const name = reg-name.value.trim();
-  const dept = reg-dept.value.trim();
-  const email = reg-email.value.trim();
+/* ลงทะเบียน */
+function register(){
+  const name = document.getElementById("reg-name").value.trim();
+  const dept = document.getElementById("reg-dept").value.trim();
+  const email = document.getElementById("reg-email").value.trim();
 
   if(!name || !dept || !email){
     Swal.fire("กรุณากรอกข้อมูลให้ครบ");
     return;
   }
 
-  Swal.fire("สำเร็จ","เลือกหน่วยงานได้แล้ว","success");
+  // ✅ ทดสอบให้ผ่านก่อน
+  Swal.fire({
+    icon: "success",
+    title: "ลงทะเบียนสำเร็จ",
+    html: `
+      <b>ชื่อ:</b> ${name}<br>
+      <b>หน่วยงาน:</b> ${dept}<br>
+      <b>Email:</b> ${email}
+    `
+  });
 }
 </script>
+
 
 </body>
 </html>
