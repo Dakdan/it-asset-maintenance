@@ -5,11 +5,6 @@
 <title>ระบบสำรวจครุภัณฑ์คอมพิวเตอร์</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- กัน cache GitHub Pages -->
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-<meta http-equiv="Pragma" content="no-cache" />
-<meta http-equiv="Expires" content="0" />
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
@@ -21,7 +16,7 @@ body { font-family: sans-serif; background:#f5f5f5; }
   padding:20px;
   border-radius:8px;
 }
-input,button {
+input, select, button {
   width:100%;
   padding:10px;
   margin-top:8px;
@@ -42,8 +37,12 @@ button {
   <h3>ลงทะเบียนเข้าใช้งาน</h3>
 
   <input id="reg-name" placeholder="ชื่อ - สกุล">
-  <input list="depts" id="reg-dept" placeholder="เลือกหน่วยงาน">
-  <datalist id="depts"></datalist>
+
+  <!-- ✅ ใช้ SELECT แทน datalist -->
+  <select id="reg-dept">
+    <option value="">-- เลือกหน่วยงาน --</option>
+  </select>
+
   <input id="reg-email" placeholder="Email">
 
   <button onclick="register()">ลงทะเบียน</button>
@@ -51,8 +50,6 @@ button {
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbwj8TX_Lwv_oRLd3CtFL7ORBSu4CyweKfdoxF5vi-7UBqPeml6EBNmCCLDJ7qmsKqjD/exec";
-
-let deptMap = {};   // name => deptId
 
 /* ===== JSONP ===== */
 function callAPI(params, cb){
@@ -77,22 +74,18 @@ function callAPI(params, cb){
 /* ===== โหลดหน่วยงาน ===== */
 window.onload = () => {
   callAPI({ action: "departments" }, (res) => {
-    const dl = document.getElementById("depts");
-    dl.innerHTML = "";
-    deptMap = {};
+    const select = document.getElementById("reg-dept");
 
     if (!Array.isArray(res)) {
       Swal.fire("ผิดพลาด", "ไม่พบข้อมูลหน่วยงาน", "error");
       return;
     }
 
-    res.forEach(d => {
-      // d = { name, deptId }
-      deptMap[d.name] = d.deptId;
-
+    res.forEach(dep => {
       const opt = document.createElement("option");
-      opt.value = d.name;
-      dl.appendChild(opt);
+      opt.value = dep;   // ชื่อหน่วยงานจาก Sheet
+      opt.textContent = dep;
+      select.appendChild(opt);
     });
   });
 };
@@ -100,21 +93,11 @@ window.onload = () => {
 /* ===== ลงทะเบียน ===== */
 function register(){
   const name  = document.getElementById("reg-name").value.trim();
-  const dept  = document.getElementById("reg-dept").value.trim();
+  const dept  = document.getElementById("reg-dept").value;
   const email = document.getElementById("reg-email").value.trim();
-  const deptId = deptMap[dept];
 
   if(!name || !dept || !email){
     Swal.fire("กรุณากรอกข้อมูลให้ครบ");
-    return;
-  }
-
-  if(!deptId){
-    Swal.fire(
-      "หน่วยงานไม่ถูกต้อง",
-      "กรุณาเลือกหน่วยงานจากรายการที่ระบบแสดง",
-      "warning"
-    );
     return;
   }
 
@@ -124,7 +107,6 @@ function register(){
     html: `
       <b>ชื่อ:</b> ${name}<br>
       <b>หน่วยงาน:</b> ${dept}<br>
-      <b>DeptID:</b> ${deptId}<br>
       <b>Email:</b> ${email}
     `
   });
