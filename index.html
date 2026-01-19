@@ -2,9 +2,10 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>ลงทะเบียน</title>
+<title>ลงทะเบียนระบบสำรวจครุภัณฑ์</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <style>
 body{font-family:sans-serif;background:#f5f5f5}
 .box{max-width:420px;background:#fff;margin:30px auto;padding:20px;border-radius:8px}
@@ -22,13 +23,14 @@ button{background:#ff69b4;color:#fff;border:none;border-radius:5px}
   <option value="">-- เลือกหน่วยงาน --</option>
 </select>
 <input id="email" placeholder="Email">
+
 <button onclick="register()">ลงทะเบียน</button>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbwj8TX_Lwv_oRLd3CtFL7ORBSu4CyweKfdoxF5vi-7UBqPeml6EBNmCCLDJ7qmsKqjD/exec";
+const API_URL = "PUT_YOUR_GAS_URL_HERE";
 
-/* JSONP */
+/* ===== JSONP ===== */
 function callAPI(params, cb){
   const fn = "cb_" + Date.now();
   params.callback = fn;
@@ -48,12 +50,16 @@ function callAPI(params, cb){
   document.body.appendChild(script);
 }
 
-/* โหลดหน่วยงาน */
+/* ===== โหลดหน่วยงาน ===== */
 window.onload = () => {
-  callAPI({ action: "departments" }, res => {
-    if (!res.success) return alert("โหลดหน่วยงานไม่สำเร็จ");
+  callAPI({ action:"departments" }, res => {
+    if(!res.success){
+      Swal.fire("โหลดหน่วยงานไม่สำเร็จ");
+      return;
+    }
+
     const sel = document.getElementById("deptSelect");
-    res.data.forEach(d => {
+    res.data.forEach(d=>{
       const o = document.createElement("option");
       o.value = d.deptId;
       o.textContent = d.name;
@@ -62,11 +68,11 @@ window.onload = () => {
   });
 };
 
-/* ลงทะเบียน */
+/* ===== ลงทะเบียน ===== */
 function register(){
-  const name = fullname.value.trim();
-  const email = email.value.trim();
-  const sel = deptSelect;
+  const name = document.getElementById("fullname").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const sel = document.getElementById("deptSelect");
 
   if(!name || !email || !sel.value){
     Swal.fire("กรุณากรอกข้อมูลให้ครบ");
@@ -80,15 +86,20 @@ function register(){
     deptId: sel.value,
     deptName: sel.options[sel.selectedIndex].text
   }, res => {
+
     if(!res.success){
-      Swal.fire("ผิดพลาด", res.message, "error");
+      Swal.fire("บันทึกไม่สำเร็จ");
       return;
     }
 
     Swal.fire({
       icon:"success",
       title:"ลงทะเบียนสำเร็จ",
-      html:`ชื่อ: ${name}<br>หน่วยงาน: ${sel.options[sel.selectedIndex].text}<br>Email: ${email}`
+      html:`
+        <b>ชื่อ:</b> ${name}<br>
+        <b>หน่วยงาน:</b> ${sel.options[sel.selectedIndex].text}<br>
+        <b>Email:</b> ${email}
+      `
     });
   });
 }
