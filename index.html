@@ -5,7 +5,7 @@
 <title>ระบบสำรวจครุภัณฑ์คอมพิวเตอร์</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- กัน cache -->
+<!-- กัน cache GitHub Pages -->
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
@@ -14,9 +14,25 @@
 
 <style>
 body { font-family: sans-serif; background:#f5f5f5; }
-.container { max-width:400px; background:#fff; margin:30px auto; padding:20px; border-radius:8px; }
-input,button { width:100%; padding:10px; margin-top:8px; }
-button { background:#ff69b4; color:#fff; border:none; border-radius:5px; }
+.container {
+  max-width:420px;
+  background:#fff;
+  margin:30px auto;
+  padding:20px;
+  border-radius:8px;
+}
+input,button {
+  width:100%;
+  padding:10px;
+  margin-top:8px;
+}
+button {
+  background:#ff69b4;
+  color:#fff;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+}
 </style>
 </head>
 
@@ -35,8 +51,10 @@ button { background:#ff69b4; color:#fff; border:none; border-radius:5px; }
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbwj8TX_Lwv_oRLd3CtFL7ORBSu4CyweKfdoxF5vi-7UBqPeml6EBNmCCLDJ7qmsKqjD/exec";
-let deptMap = {};   // เก็บ name => deptId
 
+let deptMap = {};   // name => deptId
+
+/* ===== JSONP ===== */
 function callAPI(params, cb){
   const cbName = "cb_" + Date.now();
   params.callback = cbName;
@@ -61,14 +79,15 @@ window.onload = () => {
   callAPI({ action: "departments" }, (res) => {
     const dl = document.getElementById("depts");
     dl.innerHTML = "";
+    deptMap = {};
 
     if (!Array.isArray(res)) {
-      Swal.fire("ผิดพลาด", "โหลดหน่วยงานไม่สำเร็จ", "error");
+      Swal.fire("ผิดพลาด", "ไม่พบข้อมูลหน่วยงาน", "error");
       return;
     }
 
     res.forEach(d => {
-      // d = { name:"AE / ตึก OPD ใหม่/ F 1", deptId:"001" }
+      // d = { name, deptId }
       deptMap[d.name] = d.deptId;
 
       const opt = document.createElement("option");
@@ -80,12 +99,12 @@ window.onload = () => {
 
 /* ===== ลงทะเบียน ===== */
 function register(){
-  const name = document.getElementById("reg-name").value.trim();
+  const name  = document.getElementById("reg-name").value.trim();
+  const dept  = document.getElementById("reg-dept").value.trim();
   const email = document.getElementById("reg-email").value.trim();
-  const deptName = document.getElementById("reg-dept").value.trim();
-  const deptId = deptMap[deptName];
+  const deptId = deptMap[dept];
 
-  if(!name || !email || !deptName){
+  if(!name || !dept || !email){
     Swal.fire("กรุณากรอกข้อมูลให้ครบ");
     return;
   }
@@ -104,7 +123,7 @@ function register(){
     title: "ลงทะเบียนสำเร็จ",
     html: `
       <b>ชื่อ:</b> ${name}<br>
-      <b>หน่วยงาน:</b> ${deptName}<br>
+      <b>หน่วยงาน:</b> ${dept}<br>
       <b>DeptID:</b> ${deptId}<br>
       <b>Email:</b> ${email}
     `
