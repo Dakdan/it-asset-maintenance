@@ -1,7 +1,7 @@
 {
   "name": "ระบบสำรวจครุภัณฑ์คอมพิวเตอร์",
   "short_name": "AssetSurvey",
-  "start_url": "index.html",
+  "start_url": ".",
   "display": "standalone",
   "theme_color": "#ff69b4",
   "background_color": "#ffffff",
