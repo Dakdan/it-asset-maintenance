@@ -35,7 +35,7 @@ button { background:#ff69b4; color:#fff; border:none; border-radius:5px; }
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbwj8TX_Lwv_oRLd3CtFL7ORBSu4CyweKfdoxF5vi-7UBqPeml6EBNmCCLDJ7qmsKqjD/exec";
-let userData = {};
+let deptMap = {};   // เก็บ name => deptId
 
 function callAPI(params, cb){
   const cbName = "cb_" + Date.now();
@@ -56,49 +56,61 @@ function callAPI(params, cb){
   document.body.appendChild(script);
 }
 
-/* โหลดหน่วยงาน */
+/* ===== โหลดหน่วยงาน ===== */
 window.onload = () => {
   callAPI({ action: "departments" }, (res) => {
     const dl = document.getElementById("depts");
     dl.innerHTML = "";
 
     if (!Array.isArray(res)) {
-      Swal.fire("ผิดพลาด", "ไม่พบข้อมูลหน่วยงาน", "error");
+      Swal.fire("ผิดพลาด", "โหลดหน่วยงานไม่สำเร็จ", "error");
       return;
     }
 
-    res.forEach(dep => {
+    res.forEach(d => {
+      // d = { name:"AE / ตึก OPD ใหม่/ F 1", deptId:"001" }
+      deptMap[d.name] = d.deptId;
+
       const opt = document.createElement("option");
-      opt.value = dep;
+      opt.value = d.name;
       dl.appendChild(opt);
     });
   });
 };
 
-/* ลงทะเบียน */
+/* ===== ลงทะเบียน ===== */
 function register(){
   const name = document.getElementById("reg-name").value.trim();
-  const dept = document.getElementById("reg-dept").value.trim();
   const email = document.getElementById("reg-email").value.trim();
+  const deptName = document.getElementById("reg-dept").value.trim();
+  const deptId = deptMap[deptName];
 
-  if(!name || !dept || !email){
+  if(!name || !email || !deptName){
     Swal.fire("กรุณากรอกข้อมูลให้ครบ");
     return;
   }
 
-  // ✅ ทดสอบให้ผ่านก่อน
+  if(!deptId){
+    Swal.fire(
+      "หน่วยงานไม่ถูกต้อง",
+      "กรุณาเลือกหน่วยงานจากรายการที่ระบบแสดง",
+      "warning"
+    );
+    return;
+  }
+
   Swal.fire({
     icon: "success",
     title: "ลงทะเบียนสำเร็จ",
     html: `
       <b>ชื่อ:</b> ${name}<br>
-      <b>หน่วยงาน:</b> ${dept}<br>
+      <b>หน่วยงาน:</b> ${deptName}<br>
+      <b>DeptID:</b> ${deptId}<br>
       <b>Email:</b> ${email}
     `
   });
 }
 </script>
-
 
 </body>
 </html>
