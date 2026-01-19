@@ -68,67 +68,166 @@
 </div>
 
 <script>
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwj8TX_Lwv_oRLd3CtFL7ORBSu4CyweKfdoxF5vi-7UBqPeml6EBNmCCLDJ7qmsKqjD/exec";
-let user = {};
+const API_URL = "https://script.google.com/macros/s/AKfycbwj8TX_Lwv_oRLd3CtFL7ORBSu4CyweKfdoxF5vi-7UBqPeml6EBNmCCLDJ7qmsKqjD/exec";
 
-// ---------- JSONP ----------
-function api(action, params, cb){
-  const fn = "cb_" + Date.now();
-  params.action = action;
-  params.callback = fn;
+let confirmedData = [];
+let userData = {};
 
-  const q = Object.keys(params)
-    .map(k => k + "=" + encodeURIComponent(params[k]))
-    .join("&");
+/* ================= JSONP ================= */
+function callAPI(params, cb) {
+  const cbName = "cb_" + Date.now();
+  params.callback = cbName;
 
-  const s = document.createElement("script");
-  s.src = GAS_URL + "?" + q;
-
-  window[fn] = (res) => {
+  window[cbName] = (res) => {
+    delete window[cbName];
+    document.body.removeChild(script);
     cb(res);
-    delete window[fn];
-    document.body.removeChild(s);
   };
 
-  document.body.appendChild(s);
+  const script = document.createElement("script");
+  script.src = API_URL + "?" + new URLSearchParams(params).toString();
+  document.body.appendChild(script);
 }
 
-// ---------- LOAD DEPT ----------
+/* ================= LOAD DEPARTMENT ================= */
 window.onload = () => {
-  api("departments", {}, (res) => {
+  callAPI({ action: "departments" }, (res) => {
+    if (!res.success) return;
     const dl = document.getElementById("depts");
     dl.innerHTML = "";
-    res.forEach(d => {
-      dl.innerHTML += `<option value="${d}">`;
+    res.data.forEach(d => {
+      dl.innerHTML += `<option value="${d.name}">`;
     });
   });
 };
 
-// ---------- REGISTER ----------
-function register(){
-  user.email = reg-email.value.trim();
-  user.name  = reg-name.value.trim();
-  user.dept  = reg-dept.value.trim();
+/* ================= REGISTER (mock login) ================= */
+function register() {
+  userData = {
+    email: document.getElementById("reg-email").value.trim(),
+    name: document.getElementById("reg-name").value.trim(),
+    dept: document.getElementById("reg-dept").value.trim()
+  };
 
-  if(!user.email || !user.name || !user.dept){
-    Swal.fire("กรอกข้อมูลให้ครบ");
+  if (!userData.email || !userData.name || !userData.dept) {
+    Swal.fire("กรุณากรอกข้อมูลให้ครบ");
     return;
   }
 
-  // ใช้ login mock (ตาม GAS ที่มีจริง)
-  api("login", { username:user.email, password:"-" }, () => {
-    section-reg.classList.add("hidden");
-    section-survey.classList.remove("hidden");
-    document.getElementById("user-dept").innerText = "หน่วยงาน: " + user.dept;
+  document.getElementById("section-reg").classList.add("hidden");
+  document.getElementById("section-survey").classList.remove("hidden");
+  document.getElementById("user-dept-display").innerText =
+    "หน่วยงาน: " + userData.dept;
+}
+
+/* ================= SEARCH ASSET ================= */
+function searchAsset() {
+  const q = document.getElementById("asset-query").value.trim();
+  if (!q) return;
+
+  Swal.fire({ title: "ค้นหา...", didOpen: () => Swal.showLoading() });
+
+  callAPI({ action: "searchAssets", query: q }, (res) => {
+    Swal.close();
+    const box = document.getElementById("search-results");
+    box.innerHTML = "";
+
+    if (!res.success || res.data.length === 0) {
+      box.innerHTML = `<div class="alert alert-warning">ไม่พบข้อมูล</div>`;
+      return;
+    }
+
+    res.data.forEach(item => {
+      box.innerHTML += `
+        <div class="asset-card border-start border-4 border-primary">
+          <small class="text-muted">AssetID: ${item.assetId}</small>
+          <h6>${item.name}</h6>
+          <p class="small">${item.detail}</p>
+          <button class="btn btn-cute btn-sm"
+            onclick='addAsset(${JSON.stringify(item)})'>
+            เลือก
+          </button>
+        </div>
+      `;
+    });
   });
 }
 
-// ---------- REPORT ----------
-function showReport(){
-  section-survey.classList.add("hidden");
-  section-report.classList.remove("hidden");
-  document.getElementById("r-dept").innerText = user.dept;
-  document.getElementById("r-name").innerText = user.name;
+/* ================= ADD ASSET ================= */
+function addAsset(item) {
+  if (confirmedData.find(x => x.assetId === item.assetId)) {
+    Swal.fire("เลือกไปแล้ว");
+    return;
+  }
+  confirmedData.push(item);
+  renderConfirmed();
+}
+
+/* ================= RENDER CONFIRM ================= */
+function renderConfirmed() {
+  const div = document.getElementById("survey-items");
+  const wrap = document.getElementById("confirmed-list");
+  wrap.classList.remove("hidden");
+
+  div.innerHTML = confirmedData.map(x => `
+    <div class="badge bg-white text-dark border p-2 m-1 cute-border">
+      ${x.assetId} - ${x.name}
+    </div>
+  `).join("");
+}
+
+/* ================= SUBMIT SURVEY ================= */
+function submitSurvey() {
+  if (confirmedData.length === 0) {
+    Swal.fire("ยังไม่ได้เลือกรายการ");
+    return;
+  }
+
+  Swal.fire({ title: "กำลังบันทึก...", didOpen: () => Swal.showLoading() });
+
+  let count = 0;
+  confirmedData.forEach(item => {
+    callAPI({
+      action: "saveSurvey",
+      data: JSON.stringify({
+        assetId: item.assetId,
+        assetGroup: item.assetGroup,
+        name: item.name,
+        detail: item.detail,
+        deptName: userData.dept,
+        maStatus: item.maStatus,
+        coStatus: item.coStatus
+      })
+    }, () => {
+      count++;
+      if (count === confirmedData.length) {
+        Swal.fire("สำเร็จ", "บันทึกข้อมูลเรียบร้อย", "success")
+          .then(showReport);
+      }
+    });
+  });
+}
+
+/* ================= REPORT ================= */
+function showReport() {
+  document.querySelector(".no-print").classList.add("hidden");
+  document.getElementById("section-report").classList.add("print-only");
+
+  document.getElementById("report-dept").innerText = userData.dept;
+  document.getElementById("report-user").innerText = userData.name;
+  document.getElementById("report-date").innerText =
+    new Date().toLocaleDateString("th-TH");
+
+  document.getElementById("report-table-body").innerHTML =
+    confirmedData.map(x => `
+      <tr>
+        <td>${x.assetId}</td>
+        <td>${x.name}</td>
+        <td>ปกติ</td>
+      </tr>
+    `).join("");
+
+  window.print();
 }
 </script>
 
