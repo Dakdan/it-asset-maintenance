@@ -12,14 +12,14 @@ body { font-family: sans-serif; background:#f5f5f5; }
 .container {
   max-width:420px;
   background:#fff;
-  margin:30px auto;
+  margin:40px auto;
   padding:20px;
   border-radius:8px;
 }
 input, select, button {
   width:100%;
   padding:10px;
-  margin-top:8px;
+  margin-top:10px;
 }
 button {
   background:#ff69b4;
@@ -38,7 +38,6 @@ button {
 
   <input id="reg-name" placeholder="ชื่อ - สกุล">
 
-  <!-- ✅ ใช้ SELECT แทน datalist -->
   <select id="reg-dept">
     <option value="">-- เลือกหน่วยงาน --</option>
   </select>
@@ -76,15 +75,15 @@ window.onload = () => {
   callAPI({ action: "departments" }, (res) => {
     const select = document.getElementById("reg-dept");
 
-    if (!Array.isArray(res)) {
+    if (!res.success || !Array.isArray(res.data)) {
       Swal.fire("ผิดพลาด", "ไม่พบข้อมูลหน่วยงาน", "error");
       return;
     }
 
-    res.forEach(dep => {
+    res.data.forEach(dep => {
       const opt = document.createElement("option");
-      opt.value = dep;   // ชื่อหน่วยงานจาก Sheet
-      opt.textContent = dep;
+      opt.value = dep.name;
+      opt.textContent = dep.name;
       select.appendChild(opt);
     });
   });
