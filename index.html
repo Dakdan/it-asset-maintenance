@@ -2,89 +2,42 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>ครุภัณฑ์คอมพิวเตอร์</title>
-
+<title>ระบบสำรวจครุภัณฑ์คอมพิวเตอร์</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- SweetAlert -->
+<!-- กัน cache -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
-  body {
-    font-family: sans-serif;
-    background: #f5f5f5;
-    margin: 0;
-    padding: 0;
-  }
-  header {
-    background: #ff69b4;
-    color: #fff;
-    padding: 15px;
-    text-align: center;
-  }
-  .container {
-    max-width: 500px;
-    background: #fff;
-    margin: 20px auto;
-    padding: 20px;
-    border-radius: 8px;
-  }
-  label {
-    display: block;
-    margin-top: 10px;
-  }
-  input, button {
-    width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-  }
-  button {
-    background: #ff69b4;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    margin-top: 15px;
-    cursor: pointer;
-  }
+body { font-family: sans-serif; background:#f5f5f5; }
+.container { max-width:400px; background:#fff; margin:30px auto; padding:20px; border-radius:8px; }
+input,button { width:100%; padding:10px; margin-top:8px; }
+button { background:#ff69b4; color:#fff; border:none; border-radius:5px; }
 </style>
 </head>
 
 <body>
 
-<header>
-  <h2>ครุภัณฑ์คอมพิวเตอร์</h2>
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
+<div class="container">
+  <h3>ลงทะเบียนเข้าใช้งาน</h3>
 
-</header>
-
-<div class="container" id="section-reg">
-  <h3>ลงทะเบียนผู้ใช้งาน</h3>
-
-  <label>ชื่อ – สกุล</label>
-  <input type="text" id="reg-name" placeholder="ชื่อ – สกุล">
-
-  <label>หน่วยงาน</label>
-  <input list="depts" id="reg-dept" placeholder="พิมพ์เพื่อค้นหาหน่วยงาน">
+  <input id="reg-name" placeholder="ชื่อ - สกุล">
+  <input list="depts" id="reg-dept" placeholder="เลือกหน่วยงาน">
   <datalist id="depts"></datalist>
-
-  <label>Email</label>
-  <input type="email" id="reg-email" placeholder="example@email.com">
+  <input id="reg-email" placeholder="Email">
 
   <button onclick="register()">ลงทะเบียน</button>
 </div>
 
-<!-- ================= SCRIPT ================= -->
 <script>
-const API_URL =
-  "https://script.google.com/macros/s/AKfycbwj8TX_Lwv_oRLd3CtFL7ORBSu4CyweKfdoxF5vi-7UBqPeml6EBNmCCLDJ7qmsKqjD/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwj8TX_Lwv_oRLd3CtFL7ORBSu4CyweKfdoxF5vi-7UBqPeml6EBNmCCLDJ7qmsKqjD/exec";
 
-let userData = {};
-let deptMap = {}; // name -> deptId
-
-/* ========= JSONP CALL ========= */
-function callAPI(params, cb){
+/* ===== JSONP ===== */
+function callAPI(params, cb) {
   const cbName = "cb_" + Date.now();
   params.callback = cbName;
 
@@ -94,59 +47,40 @@ function callAPI(params, cb){
     cb(res);
   };
 
-  const query = Object.keys(params)
-    .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`)
-    .join("&");
-
+  const q = Object.keys(params).map(k=>`${k}=${encodeURIComponent(params[k])}`).join("&");
   const script = document.createElement("script");
-  script.src = `${API_URL}?${query}`;
+  script.src = API_URL + "?" + q;
   document.body.appendChild(script);
 }
 
-/* ========= LOAD DEPARTMENTS ========= */
+/* ===== LOAD DEPARTMENTS ===== */
 window.onload = () => {
-  callAPI({ action: "departments" }, (res) => {
-
-    if (!res.success || !Array.isArray(res.data)) {
-      Swal.fire("ผิดพลาด", "ไม่พบข้อมูลหน่วยงาน", "error");
+  callAPI({ action:"departments" }, (res) => {
+    if (!res.success) {
+      Swal.fire("โหลดหน่วยงานไม่สำเร็จ");
       return;
     }
-
     const dl = document.getElementById("depts");
     dl.innerHTML = "";
-    deptMap = {};
-
     res.data.forEach(d => {
-      deptMap[d.name] = d.deptId;
-      dl.innerHTML += `<option value="${d.name}"></option>`;
+      const opt = document.createElement("option");
+      opt.value = d;
+      dl.appendChild(opt);
     });
   });
 };
 
-/* ========= REGISTER ========= */
-function register(){
-  const deptName = document.getElementById("reg-dept").value.trim();
+function register() {
+  const name = reg-name.value.trim();
+  const dept = reg-dept.value.trim();
+  const email = reg-email.value.trim();
 
-  userData = {
-    email: document.getElementById("reg-email").value.trim(),
-    name: document.getElementById("reg-name").value.trim(),
-    deptName: deptName,
-    deptId: deptMap[deptName]
-  };
-
-  if(!userData.email || !userData.name || !userData.deptName){
+  if(!name || !dept || !email){
     Swal.fire("กรุณากรอกข้อมูลให้ครบ");
     return;
   }
 
-  if(!userData.deptId){
-    Swal.fire("กรุณาเลือกหน่วยงานจากรายการ");
-    return;
-  }
-
-  console.log(userData); // พร้อมส่งไปบันทึก Survey
-
-  Swal.fire("สำเร็จ", "เลือกหน่วยงานเรียบร้อย", "success");
+  Swal.fire("สำเร็จ","เลือกหน่วยงานได้แล้ว","success");
 }
 </script>
 
