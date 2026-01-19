@@ -77,25 +77,45 @@ window.onload = () => {
 
 
 /* ===== Register ===== */
-function registerUser(){
-  const fullName = document.getElementById("fullname").value.trim();
-  const email    = document.getElementById("email").value.trim();
-  const deptSel  = document.getElementById("deptSelect");
+function register(){
+  const name = document.getElementById("reg-name").value.trim();
+  const email = document.getElementById("reg-email").value.trim();
 
-  if(!fullName || !email || !deptSel.value){
+  const sel = document.getElementById("deptSelect");
+  const deptId = sel.value;
+  const deptName = sel.options[sel.selectedIndex].text;
+
+  if(!name || !email || !deptId){
     Swal.fire("กรุณากรอกข้อมูลให้ครบ");
     return;
   }
 
-  Swal.fire({
-    icon:"success",
-    title:"ลงทะเบียนสำเร็จ",
-    html:`
-      <b>ชื่อ:</b> ${fullName}<br>
-      <b>หน่วยงาน:</b> ${deptSel.options[deptSel.selectedIndex].text}<br>
-      <b>DeptID:</b> ${deptSel.value}<br>
-      <b>Email:</b> ${email}
-    `
+  callAPI({
+    action: "register",
+    name,
+    email,
+    deptId,
+    deptName
+  }, res => {
+
+    if(!res.success){
+      Swal.fire("ผิดพลาด", "ไม่สามารถบันทึกข้อมูลได้", "error");
+      return;
+    }
+
+    Swal.fire({
+      icon: "success",
+      title: "ลงทะเบียนสำเร็จ",
+      html: `
+        <b>ชื่อ:</b> ${name}<br>
+        <b>หน่วยงาน:</b> ${deptName}<br>
+        <b>DeptID:</b> ${deptId}<br>
+        <b>Email:</b> ${email}<hr>
+        <b>Username:</b> ${res.username}<br>
+        <b>Password:</b> ${res.password}<br>
+        <b>OTP:</b> ${res.otp}
+      `
+    });
   });
 }
 </script>
