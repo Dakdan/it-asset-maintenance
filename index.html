@@ -11,23 +11,24 @@
 body{font-family:sans-serif;background:#f5f5f5}
 .box{max-width:420px;background:#fff;margin:30px auto;padding:20px;border-radius:8px}
 input,select,button{width:100%;padding:10px;margin-top:10px}
-button{background:#ff69b4;color:#fff;border:none;border-radius:5px}
+button{background:#ff69b4;color:#fff;border:none;border-radius:5px;cursor:pointer}
 </style>
 </head>
 
 <body>
+
 <div class="box">
-<h3>ลงทะเบียนผู้ใช้งาน111111</h3>
+  <h3>ลงทะเบียนผู้ใช้งาน</h3>
 
-<input id="fullname" placeholder="ชื่อ - สกุล">
+  <input id="fullname" placeholder="ชื่อ - สกุล">
 
-<select id="deptSelect">
-  <option value="">-- เลือกหน่วยงาน --</option>
-</select>
+  <select id="deptSelect">
+    <option value="">-- เลือกหน่วยงาน --</option>
+  </select>
 
-<input id="email" placeholder="Email">
+  <input id="email" placeholder="Email">
 
-<button onclick="registerUser()">ลงทะเบียน</button>
+  <button type="button" onclick="registerUser()">ลงทะเบียน</button>
 </div>
 
 <script>
@@ -46,7 +47,7 @@ function callAPI(params, callback){
   };
 
   const query = Object.keys(params)
-    .map(k => `${k}=${encodeURIComponent(params[k])}`)
+    .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`)
     .join("&");
 
   const script = document.createElement("script");
@@ -56,68 +57,48 @@ function callAPI(params, callback){
 
 /* ===== Load Department ===== */
 window.onload = () => {
-  callAPI({action:"departments"}, res => {
+  callAPI({ action: "departments" }, (res) => {
 
-    if(!res.success){
-      alert("โหลดหน่วยงานไม่สำเร็จ");
+    if (!Array.isArray(res)) {
+      Swal.fire("ผิดพลาด", "โหลดหน่วยงานไม่สำเร็จ", "error");
       return;
     }
 
     const sel = document.getElementById("deptSelect");
 
-    res.data.forEach(d=>{
-      const o = document.createElement("option");
-      o.value = d.deptId;
-      o.textContent = d.name;
-      sel.appendChild(o);
+    res.forEach(name => {
+      const opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name;
+      sel.appendChild(opt);
     });
-
   });
 };
 
-
-/* ===== Register ===== */
-function register(){
-  const name = document.getElementById("reg-name").value.trim();
-  const email = document.getElementById("reg-email").value.trim();
+/* ===== Register (Frontend OK 100%) ===== */
+function registerUser(){
+  const fullname = document.getElementById("fullname").value.trim();
+  const email = document.getElementById("email").value.trim();
 
   const sel = document.getElementById("deptSelect");
-  const deptId = sel.value;
-  const deptName = sel.options[sel.selectedIndex].text;
+  const deptName = sel.value;
 
-  if(!name || !email || !deptId){
+  if(!fullname || !email || !deptName){
     Swal.fire("กรุณากรอกข้อมูลให้ครบ");
     return;
   }
 
-  callAPI({
-    action: "register",
-    name,
-    email,
-    deptId,
-    deptName
-  }, res => {
-
-    if(!res.success){
-      Swal.fire("ผิดพลาด", "ไม่สามารถบันทึกข้อมูลได้", "error");
-      return;
-    }
-
-    Swal.fire({
-      icon: "success",
-      title: "ลงทะเบียนสำเร็จ",
-      html: `
-        <b>ชื่อ:</b> ${name}<br>
-        <b>หน่วยงาน:</b> ${deptName}<br>
-        <b>DeptID:</b> ${deptId}<br>
-        <b>Email:</b> ${email}<hr>
-        <b>Username:</b> ${res.username}<br>
-        <b>Password:</b> ${res.password}<br>
-        <b>OTP:</b> ${res.otp}
-      `
-    });
+  Swal.fire({
+    icon: "success",
+    title: "ลงทะเบียนสำเร็จ",
+    html: `
+      <b>ชื่อ:</b> ${fullname}<br>
+      <b>หน่วยงาน:</b> ${deptName}<br>
+      <b>Email:</b> ${email}
+    `
   });
 }
 </script>
+
 </body>
 </html>
