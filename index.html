@@ -78,61 +78,103 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbwj8TX_Lwv_oRLd3CtFL7ORBSu4CyweKfdoxF5vi-7UBqPeml6EBNmCCLDJ7qmsKqjD/exec";
 
 let userData = {};
+let confirmedData = [];
 
-/* ================= API CALL (JSONP) ================= */
-function callAPI(params, cb){
-  const cbName = "cb_" + Date.now();
-  params.callback = cbName;
+/* ================= JSONP CALL ================= */
+function callAPI(params, callback) {
+    const cbName = "cb_" + Date.now();
+    window[cbName] = function (res) {
+        delete window[cbName];
+        document.body.removeChild(script);
+        callback(res);
+    };
 
-  window[cbName] = (res) => {
-    cb(res);
-    delete window[cbName];
-    document.body.removeChild(script);
-  };
-
-  const query = new URLSearchParams(params).toString();
-  const script = document.createElement("script");
-  script.src = `${API_URL}?${query}`;
-  document.body.appendChild(script);
+    const script = document.createElement("script");
+    script.src = API_URL + "?" + new URLSearchParams({
+        ...params,
+        callback: cbName
+    }).toString();
+    document.body.appendChild(script);
 }
 
 /* ================= LOAD DEPARTMENTS ================= */
-window.onload = () => {
-  callAPI({ action: "departments" }, (res) => {
-    const dl = document.getElementById("depts");
-    dl.innerHTML = "";
+window.onload = function () {
+    callAPI({ action: "departments" }, function (res) {
+        const dl = document.getElementById("depts");
+        dl.innerHTML = "";
 
-    res.forEach(d => {
-      const opt = document.createElement("option");
-      opt.value = d.name;      // Note3
-      opt.dataset.id = d.deptId;
-      dl.appendChild(opt);
+        if (!res || !Array.isArray(res)) {
+            console.error("Department data invalid", res);
+            Swal.fire("ผิดพลาด", "ไม่พบข้อมูลหน่วยงาน", "error");
+            return;
+        }
+
+        res.forEach(name => {
+            if (name && name.toString().trim() !== "") {
+                const opt = document.createElement("option");
+                opt.value = name;
+                dl.appendChild(opt);
+            }
+        });
     });
-  });
 };
 
 /* ================= REGISTER ================= */
-function register(){
-  userData = {
-    name: document.getElementById("reg-name").value.trim(),
-    dept: document.getElementById("reg-dept").value.trim(),
-    email: document.getElementById("reg-email").value.trim()
-  };
+function register() {
+    userData = {
+        email: document.getElementById("reg-email").value.trim(),
+        name: document.getElementById("reg-name").value.trim(),
+        dept: document.getElementById("reg-dept").value.trim()
+    };
 
-  if (!userData.name || !userData.dept || !userData.email){
-    Swal.fire("กรุณากรอกข้อมูลให้ครบ");
-    return;
-  }
+    if (!userData.email || !userData.name || !userData.dept) {
+        Swal.fire("กรุณากรอกข้อมูลให้ครบ");
+        return;
+    }
 
-  Swal.fire({
-    icon: "success",
-    title: "สำเร็จ",
-    text: "ลงทะเบียนเรียบร้อย (ตัวอย่าง)"
-  });
+    Swal.fire({
+        title: "กำลังลงทะเบียน...",
+        didOpen: () => Swal.showLoading()
+    });
 
-  console.log("REGISTER DATA", userData);
+    // mock ผ่าน (ยังไม่ผูก Register sheet)
+    setTimeout(() => {
+        Swal.close();
+        document.getElementById("section-reg").classList.add("hidden");
+        document.getElementById("section-survey").classList.remove("hidden");
+        document.getElementById("user-dept-display").innerText =
+            "หน่วยงาน: " + userData.dept;
+    }, 800);
+}
+
+/* ================= SEARCH ASSET (ตัวอย่าง) ================= */
+function searchAsset() {
+    Swal.fire("ตัวอย่าง", "ฟังก์ชันค้นหา Asset จะเชื่อม BackupData ขั้นถัดไป", "info");
+}
+
+/* ================= SUBMIT SURVEY (ตัวอย่าง) ================= */
+function submitSurvey() {
+    Swal.fire("สำเร็จ", "ตัวอย่างการบันทึกข้อมูลสำรวจ", "success")
+        .then(showReport);
+}
+
+/* ================= REPORT ================= */
+function showReport() {
+    document.querySelector(".no-print").classList.add("hidden");
+    document.getElementById("section-report").classList.add("print-only");
+
+    document.getElementById("report-dept").innerText = userData.dept;
+    document.getElementById("report-user").innerText = userData.name;
+    document.getElementById("report-date").innerText =
+        new Date().toLocaleDateString("th-TH");
+
+    document.getElementById("report-table-body").innerHTML =
+        `<tr><td colspan="3">- ตัวอย่างข้อมูล -</td></tr>`;
+
+    window.print();
 }
 </script>
+
 
 </body>
 </html>
