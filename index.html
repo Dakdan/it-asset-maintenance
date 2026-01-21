@@ -110,65 +110,62 @@
 
 <body>
 
-  <!-- ===== HEADER ===== -->
-  <header>
-    <h1>⛑ IT UDH Maintenance & Service</h1>
-    <p>กลุ่มงานเทคโนโลยีสารสนเทศ</p>
-  </header>
+<header>
+  <h1>⛑ IT UDH Maintenance & Service</h1>
+  <p>กลุ่มงานเทคโนโลยีสารสนเทศ</p>
+</header>
 
-  <!-- ===== MAIN ===== -->
-  <div class="container">
+<div class="container">
 
-    <!-- ===== USER INFO (ตัวอย่าง IT) ===== -->
-    <div class="card">
-      <h2>👤 ผู้เข้าใช้งานระบบ</h2>
-      <div class="status">
-        ชื่อ: <strong>โกวิท กันคำเชิด</strong><br>
-        ตำแหน่ง: <strong>เจ้าหน้าที่ IT</strong><br>
-        หน่วยงาน: <strong>เทคโนโลยีสารสนเทศ / OPD / F2</strong>
-      </div>
+  <!-- ข้อมูล IT -->
+  <div class="card">
+    <h2>👤 ผู้เข้าใช้งานระบบ</h2>
+    <div class="status">
+      ชื่อ: <strong id="itName">โกวิท กันคำเชิด</strong><br>
+      ตำแหน่ง: <strong>เจ้าหน้าที่ IT</strong><br>
+      หน่วยงาน: <strong>เทคโนโลยีสารสนเทศ / OPD / F2</strong>
     </div>
-
-    <!-- ===== OPEN JOB ===== -->
-    <div class="card">
-      <h2>📄 เปิดใบงาน IT</h2>
-
-      <form id="jobForm">
-
-        <label>ประเภทงาน</label>
-        <select id="jobType" class="input" required>
-          <option value="">เลือกประเภทงาน</option>
-        </select>
-
-        <label>งานย่อย</label>
-        <select id="jobSubType" class="input" required>
-          <option value="">เลือกงานย่อย</option>
-        </select>
-
-        <label>รายละเอียดงาน / ปัญหา</label>
-        <textarea id="problem" class="input"
-          placeholder="อธิบายปัญหา หรือรายละเอียดการดำเนินงาน"></textarea>
-
-        <label>เบอร์ติดต่อกลับ</label>
-        <input id="contact" class="input" placeholder="เช่น 1234 / 08x-xxx-xxxx">
-
-        <button type="submit" class="btn btn-primary">
-          ➕ เปิดงาน
-        </button>
-
-      </form>
-
-    </div>
-
   </div>
 
-  <footer>
-    IT Maintenance System · Phase 1
-  </footer>
+  <!-- เปิดงาน -->
+  <div class="card">
+    <h2>📄 เปิดใบงาน IT</h2>
 
-  <!-- ===== SCRIPT ===== -->
-  <script src="js/api.js"></script>
-  <script src="js/main.js"></script>
+    <form id="jobForm">
 
+      <label>ประเภทงาน</label>
+      <select id="jobType" class="input" required>
+        <option value="">เลือกประเภทงาน</option>
+      </select>
+
+      <label>งานย่อย</label>
+      <select id="jobSubType" class="input" required>
+        <option value="">เลือกงานย่อย</option>
+      </select>
+
+      <label>รายละเอียดงาน / ปัญหา</label>
+      <textarea id="problem" class="input"></textarea>
+
+      <label>ผู้แจ้ง / ผู้รับผิดชอบ</label>
+      <input id="reporter" class="input" value="IT เปิดงานเอง">
+
+      <label>เบอร์ติดต่อกลับ</label>
+      <input id="contact" class="input" placeholder="ภายใน / มือถือ">
+
+      <button type="submit" class="btn btn-primary">
+        ➕ เปิดงาน (รอรับงาน)
+      </button>
+
+    </form>
+  </div>
+
+</div>
+
+<footer>
+  IT Maintenance System · Phase 1
+</footer>
+
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
