@@ -1,259 +1,174 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IT UDH Maintenance & Service</title>
+  <meta charset="UTF-8">
+  <title>⛑ IT UDH Maintenance & Service</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-:root{
-  --pink1:#ff5fa2;
-  --pink2:#ff8fc4;
-  --pink3:#ffe4f1;
-  --white:#fff;
-  --dark:#3b1d2a;
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background: linear-gradient(135deg, #ff7eb3, #ffd1e8);
+      min-height: 100vh;
+      color: #333;
+    }
 
-  --open:#ef4444;
-  --progress:#f59e0b;
-  --close:#22c55e;
-}
+    header {
+      background: linear-gradient(90deg, #ff4f9a, #ff85c1);
+      color: white;
+      padding: 16px;
+      text-align: center;
+    }
 
-body{
-  margin:0;
-  font-family:"Prompt","Segoe UI",sans-serif;
-  background:linear-gradient(180deg,var(--pink3),#fff);
-  color:var(--dark);
-}
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+    }
 
-/* HEADER */
-.header{
-  background:linear-gradient(90deg,var(--pink1),var(--pink2));
-  padding:14px;
-  color:#fff;
-  font-size:18px;
-  font-weight:bold;
-  box-shadow:0 4px 10px rgba(0,0,0,.15);
-}
+    header p {
+      margin: 4px 0 0;
+      font-size: 14px;
+      opacity: 0.9;
+    }
 
-/* LOGIN */
-.login{
-  max-width:380px;
-  margin:80px auto;
-  background:#fff;
-  padding:24px;
-  border-radius:18px;
-  box-shadow:0 8px 20px rgba(0,0,0,.2);
-}
-.login h3{text-align:center}
-.login input{
-  width:100%;
-  margin:8px 0;
-  padding:10px;
-  border-radius:10px;
-  border:1px solid #ccc;
-}
-.login button{
-  width:100%;
-  margin-top:10px;
-  padding:10px;
-  border:none;
-  border-radius:20px;
-  background:linear-gradient(90deg,var(--pink1),var(--pink2));
-  color:#fff;
-  font-size:16px;
-}
+    .container {
+      padding: 16px;
+      max-width: 480px;
+      margin: auto;
+    }
 
-/* LAYOUT */
-.container{display:flex}
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
 
-/* SIDEBAR */
-.sidebar{
-  width:240px;
-  background:linear-gradient(180deg,#fff,var(--pink3));
-  padding:16px;
-}
-.profile{text-align:center}
-.profile img{
-  width:90px;height:90px;border-radius:50%;
-  border:4px solid var(--pink2);
-}
-.menu button{
-  width:100%;
-  padding:10px;
-  margin:6px 0;
-  border:none;
-  border-radius:12px;
-  background:#fff;
-}
-.menu .active{
-  background:linear-gradient(90deg,var(--pink1),var(--pink2));
-  color:#fff;
-}
+    .card h2 {
+      margin-top: 0;
+      color: #ff4f9a;
+      font-size: 18px;
+    }
 
-/* CONTENT */
-.content{flex:1;padding:20px}
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: 600;
+      font-size: 14px;
+    }
 
-/* TABLE */
-table{
-  width:100%;
-  background:#fff;
-  border-radius:16px;
-  border-collapse:collapse;
-  box-shadow:0 6px 15px rgba(0,0,0,.12);
-}
-th,td{padding:12px;border-bottom:1px solid #eee}
-th{background:var(--pink3)}
+    .input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
 
-.open{color:var(--open);font-weight:bold}
-.progress{color:var(--progress);font-weight:bold}
-.close{color:var(--close);font-weight:bold}
+    textarea.input {
+      resize: vertical;
+      min-height: 80px;
+    }
 
-.btn{
-  border:none;
-  padding:8px 14px;
-  border-radius:20px;
-}
-.btn-view{background:#e5e7eb}
-.btn-open{background:var(--progress);color:#fff}
-.btn-close{background:var(--close);color:#fff}
+    .btn {
+      width: 100%;
+      padding: 12px;
+      margin-top: 16px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
 
-/* MODAL */
-.modal{
-  position:fixed;inset:0;
-  background:rgba(0,0,0,.4);
-  display:none;
-  justify-content:center;
-  align-items:center;
-}
-.modal-box{
-  background:#fff;
-  width:90%;
-  max-width:420px;
-  padding:20px;
-  border-radius:18px;
-}
-</style>
+    .btn-primary {
+      background: linear-gradient(90deg, #ff4f9a, #ff85c1);
+      color: white;
+      font-weight: bold;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+    }
+
+    .status {
+      font-size: 14px;
+      margin-top: 8px;
+      color: #555;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 12px;
+      color: #555;
+      padding: 12px;
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="header">⛑ IT UDH Maintenance & Service</div>
+  <!-- ===== HEADER ===== -->
+  <header>
+    <h1>⛑ IT UDH Maintenance & Service</h1>
+    <p>กลุ่มงานเทคโนโลยีสารสนเทศ</p>
+  </header>
 
-<!-- LOGIN -->
-<div class="login" id="loginBox">
-  <h3>เข้าสู่ระบบ IT</h3>
-  <input id="name" placeholder="ชื่อ - สกุล">
-  <input id="position" placeholder="ตำแหน่ง">
-  <input id="password" type="password" placeholder="รหัสผ่าน">
-  <button onclick="login()">เข้าสู่ระบบ</button>
-</div>
+  <!-- ===== MAIN ===== -->
+  <div class="container">
 
-<!-- MAIN -->
-<div class="container" id="app" style="display:none">
+    <!-- ===== USER INFO (ตัวอย่าง IT) ===== -->
+    <div class="card">
+      <h2>👤 ผู้เข้าใช้งานระบบ</h2>
+      <div class="status">
+        ชื่อ: <strong>โกวิท กันคำเชิด</strong><br>
+        ตำแหน่ง: <strong>เจ้าหน้าที่ IT</strong><br>
+        หน่วยงาน: <strong>เทคโนโลยีสารสนเทศ / OPD / F2</strong>
+      </div>
+    </div>
 
-<div class="sidebar">
-  <div class="profile">
-    <img id="avatar" src="https://i.pravatar.cc/150">
-    <h4 id="pname"></h4>
-    <small id="ppos"></small>
+    <!-- ===== OPEN JOB ===== -->
+    <div class="card">
+      <h2>📄 เปิดใบงาน IT</h2>
+
+      <form id="jobForm">
+
+        <label>ประเภทงาน</label>
+        <select id="jobType" class="input" required>
+          <option value="">เลือกประเภทงาน</option>
+        </select>
+
+        <label>งานย่อย</label>
+        <select id="jobSubType" class="input" required>
+          <option value="">เลือกงานย่อย</option>
+        </select>
+
+        <label>รายละเอียดงาน / ปัญหา</label>
+        <textarea id="problem" class="input"
+          placeholder="อธิบายปัญหา หรือรายละเอียดการดำเนินงาน"></textarea>
+
+        <label>เบอร์ติดต่อกลับ</label>
+        <input id="contact" class="input" placeholder="เช่น 1234 / 08x-xxx-xxxx">
+
+        <button type="submit" class="btn btn-primary">
+          ➕ เปิดงาน
+        </button>
+
+      </form>
+
+    </div>
+
   </div>
-  <div class="menu">
-    <button class="active">📋 งานแจ้งซ่อม</button>
-    <button disabled>📦 ครุภัณฑ์</button>
-    <button disabled>📊 รายงาน</button>
-    <button disabled>⚙ ตั้งค่า</button>
-  </div>
-</div>
 
-<div class="content">
-<h3>รายการงานแจ้งซ่อม</h3>
-<table>
-<thead>
-<tr>
-<th>JobID</th>
-<th>หน่วยงาน</th>
-<th>ประเภท</th>
-<th>สถานะ</th>
-<th></th>
-</tr>
-</thead>
-<tbody id="jobs"></tbody>
-</table>
-</div>
-</div>
+  <footer>
+    IT Maintenance System · Phase 1
+  </footer>
 
-<!-- MODAL -->
-<div class="modal" id="modal">
-  <div class="modal-box" id="modalBox"></div>
-</div>
-
-<script>
-/* LOGIN */
-function login(){
-  const user={
-    name:name.value,
-    pos:position.value,
-    pass:password.value
-  };
-  localStorage.setItem("itUser",JSON.stringify(user));
-  loadUser();
-}
-
-/* LOAD USER */
-function loadUser(){
-  const u=JSON.parse(localStorage.getItem("itUser"));
-  if(!u) return;
-  loginBox.style.display="none";
-  app.style.display="flex";
-  pname.innerText=u.name;
-  ppos.innerText="ตำแหน่ง: "+u.pos;
-}
-
-/* JOB DATA */
-const data=[
- {id:"ITJ-2026-001",dept:"OPD / F2",type:"คอมพิวเตอร์",status:"OPEN",problem:"เปิดไม่ติด"},
- {id:"ITJ-2026-002",dept:"ER / F1",type:"Network",status:"IN_PROGRESS",problem:"เน็ตช้า"}
-];
-
-function stTH(s){return s==="OPEN"?"เปิดงาน":s==="IN_PROGRESS"?"กำลังดำเนินการ":"ปิดงาน"}
-function stCL(s){return s==="OPEN"?"open":s==="IN_PROGRESS"?"progress":"close"}
-
-function render(){
- jobs.innerHTML="";
- data.forEach(j=>{
-  jobs.innerHTML+=`
-   <tr>
-    <td>${j.id}</td>
-    <td>${j.dept}</td>
-    <td>${j.type}</td>
-    <td class="${stCL(j.status)}">${stTH(j.status)}</td>
-    <td><button class="btn btn-view" onclick="openJob('${j.id}')">ดู</button></td>
-   </tr>`;
- });
-}
-
-function openJob(id){
- const j=data.find(x=>x.id===id);
- let btn="";
- if(j.status==="OPEN") btn=`<button class="btn btn-open" onclick="take('${id}')">รับงาน</button>`;
- if(j.status==="IN_PROGRESS") btn=`<button class="btn btn-close" onclick="closeJob('${id}')">ปิดงาน</button>`;
- modalBox.innerHTML=`
- <h3>รายละเอียดงาน</h3>
- <p><b>${j.id}</b></p>
- <p>หน่วยงาน: ${j.dept}</p>
- <p>ปัญหา: ${j.problem}</p>
- <p>สถานะ: ${stTH(j.status)}</p>
- ${btn}
- <button class="btn" onclick="modal.style.display='none'">ปิด</button>`;
- modal.style.display="flex";
-}
-
-function take(id){data.find(j=>j.id===id).status="IN_PROGRESS";modal.style.display="none";render();}
-function closeJob(id){data.find(j=>j.id===id).status="CLOSED";modal.style.display="none";render();}
-
-loadUser();
-render();
-</script>
+  <!-- ===== SCRIPT ===== -->
+  <script src="js/api.js"></script>
+  <script src="js/main.js"></script>
 
 </body>
 </html>
