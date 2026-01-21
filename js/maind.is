@@ -1,38 +1,41 @@
-const jobList = document.getElementById("jobList");
+document.addEventListener("DOMContentLoaded", loadJobs);
 
-api({ action: "list" }).then(res => {
-  jobList.innerHTML = "";
-  res.data.forEach(job => renderJob(job));
-});
+async function loadJobs() {
+  const box = document.getElementById("jobList");
+  box.innerHTML = "⏳ กำลังโหลดข้อมูล...";
 
-function renderJob(job) {
-  const div = document.createElement("div");
-  div.className = "card";
+  try {
+    const data = await apiGetJobs();
 
-  div.innerHTML = `
-    <h3>${job.JobID}</h3>
-    <p>สถานะ: <b>${job.Status || "NEW"}</b></p>
+    if (!data.length) {
+      box.innerHTML = "ไม่มีงาน";
+      return;
+    }
 
-    <div class="btn-group">
-      <button class="btn" onclick="acceptJob('${job.JobID}')">รับงาน</button>
-      <button class="btn" onclick="openJob('${job.JobID}')">เปิดงาน</button>
-    </div>
-  `;
-
-  jobList.appendChild(div);
+    box.innerHTML = "";
+    data.forEach(job => {
+      const div = document.createElement("div");
+      div.className = "job";
+      div.innerHTML = `
+        <b>${job.JobID}</b><br>
+        ประเภท: ${job.JobType || "-"}<br>
+        สถานะ: ${job.Status || "ใหม่"}<br><br>
+        <button onclick="takeJob('${job.JobID}')">รับงาน</button>
+        <button class="close" onclick="closeJob('${job.JobID}')">ปิดงาน</button>
+      `;
+      box.appendChild(div);
+    });
+  } catch (e) {
+    box.innerHTML = "❌ โหลดข้อมูลไม่สำเร็จ";
+  }
 }
 
-function acceptJob(jobId) {
-  api({
-    action: "update",
-    JobID: jobId,
-    Status: "IN_PROGRESS"
-  }).then(() => {
-    alert("รับงานแล้ว");
-    location.reload();
-  });
+async function takeJob(jobId) {
+  await apiUpdateStatus(jobId, "In Progress");
+  loadJobs();
 }
 
-function openJob(jobId) {
-  location.href = `work.html?job=${jobId}`;
+async function closeJob(jobId) {
+  await apiUpdateStatus(jobId, "Closed");
+  loadJobs();
 }
