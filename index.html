@@ -1,19 +1,17 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IT UDH Maintenance & Service</title>
 
-<!-- ===== THEME ===== -->
 <style>
 :root{
-  --pink-1:#ff5fa2;
-  --pink-2:#ff8fc4;
-  --pink-3:#ffd6e9;
-  --white:#ffffff;
-  --text:#3b1d2a;
+  --pink1:#ff5fa2;
+  --pink2:#ff8fc4;
+  --pink3:#ffe4f1;
+  --white:#fff;
+  --dark:#3b1d2a;
 
   --open:#ef4444;
   --progress:#f59e0b;
@@ -23,197 +21,237 @@
 body{
   margin:0;
   font-family:"Prompt","Segoe UI",sans-serif;
-  background:linear-gradient(180deg,#ffe4f1,#ffffff);
-  color:var(--text);
+  background:linear-gradient(180deg,var(--pink3),#fff);
+  color:var(--dark);
 }
 
-/* ===== HEADER ===== */
+/* HEADER */
 .header{
-  background:linear-gradient(90deg,var(--pink-1),var(--pink-2));
+  background:linear-gradient(90deg,var(--pink1),var(--pink2));
+  padding:14px;
   color:#fff;
-  padding:14px 18px;
-  display:flex;
-  align-items:center;
-  gap:12px;
+  font-size:18px;
+  font-weight:bold;
   box-shadow:0 4px 10px rgba(0,0,0,.15);
 }
-.header h2{margin:0;font-size:18px}
 
-/* ===== LAYOUT ===== */
-.container{display:flex;min-height:100vh}
+/* LOGIN */
+.login{
+  max-width:380px;
+  margin:80px auto;
+  background:#fff;
+  padding:24px;
+  border-radius:18px;
+  box-shadow:0 8px 20px rgba(0,0,0,.2);
+}
+.login h3{text-align:center}
+.login input{
+  width:100%;
+  margin:8px 0;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #ccc;
+}
+.login button{
+  width:100%;
+  margin-top:10px;
+  padding:10px;
+  border:none;
+  border-radius:20px;
+  background:linear-gradient(90deg,var(--pink1),var(--pink2));
+  color:#fff;
+  font-size:16px;
+}
 
-/* ===== SIDEBAR ===== */
+/* LAYOUT */
+.container{display:flex}
+
+/* SIDEBAR */
 .sidebar{
   width:240px;
-  background:linear-gradient(180deg,#fff,#ffe4f1);
+  background:linear-gradient(180deg,#fff,var(--pink3));
   padding:16px;
-  box-shadow:2px 0 8px rgba(0,0,0,.1);
 }
-.profile{text-align:center;margin-bottom:20px}
+.profile{text-align:center}
 .profile img{
   width:90px;height:90px;border-radius:50%;
-  border:4px solid var(--pink-2);
+  border:4px solid var(--pink2);
 }
 .menu button{
-  width:100%;margin:6px 0;padding:10px;
-  border:none;border-radius:10px;
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+  border:none;
+  border-radius:12px;
   background:#fff;
-  cursor:pointer;
 }
-.menu button.active{
-  background:linear-gradient(90deg,var(--pink-1),var(--pink-2));
+.menu .active{
+  background:linear-gradient(90deg,var(--pink1),var(--pink2));
   color:#fff;
 }
 
-/* ===== CONTENT ===== */
+/* CONTENT */
 .content{flex:1;padding:20px}
 
-/* ===== TABLE ===== */
+/* TABLE */
 table{
-  width:100%;border-collapse:collapse;
-  background:#fff;border-radius:14px;
-  overflow:hidden;
+  width:100%;
+  background:#fff;
+  border-radius:16px;
+  border-collapse:collapse;
   box-shadow:0 6px 15px rgba(0,0,0,.12);
 }
-th{background:var(--pink-3);padding:12px}
-td{padding:10px;border-bottom:1px solid #eee}
+th,td{padding:12px;border-bottom:1px solid #eee}
+th{background:var(--pink3)}
 
-/* ===== STATUS ===== */
-.open{color:var(--open);font-weight:700}
-.progress{color:var(--progress);font-weight:700}
-.close{color:var(--close);font-weight:700}
+.open{color:var(--open);font-weight:bold}
+.progress{color:var(--progress);font-weight:bold}
+.close{color:var(--close);font-weight:bold}
 
-/* ===== BUTTON ===== */
 .btn{
-  border:none;padding:8px 14px;
-  border-radius:20px;cursor:pointer;
+  border:none;
+  padding:8px 14px;
+  border-radius:20px;
 }
+.btn-view{background:#e5e7eb}
 .btn-open{background:var(--progress);color:#fff}
 .btn-close{background:var(--close);color:#fff}
-.btn-gray{background:#e5e7eb}
 
-/* ===== MODAL ===== */
+/* MODAL */
 .modal{
   position:fixed;inset:0;
   background:rgba(0,0,0,.4);
   display:none;
-  align-items:center;justify-content:center;
+  justify-content:center;
+  align-items:center;
 }
 .modal-box{
   background:#fff;
-  width:90%;max-width:420px;
-  padding:20px;border-radius:18px;
-}
-
-/* ===== MOBILE ===== */
-@media(max-width:768px){
-  .sidebar{display:none}
+  width:90%;
+  max-width:420px;
+  padding:20px;
+  border-radius:18px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- ===== HEADER ===== -->
-<div class="header">
-  <h2>⛑ IT UDH Maintenance & Service</h2>
+<div class="header">⛑ IT UDH Maintenance & Service</div>
+
+<!-- LOGIN -->
+<div class="login" id="loginBox">
+  <h3>เข้าสู่ระบบ IT</h3>
+  <input id="name" placeholder="ชื่อ - สกุล">
+  <input id="position" placeholder="ตำแหน่ง">
+  <input id="password" type="password" placeholder="รหัสผ่าน">
+  <button onclick="login()">เข้าสู่ระบบ</button>
 </div>
 
-<div class="container">
+<!-- MAIN -->
+<div class="container" id="app" style="display:none">
 
-<!-- ===== SIDEBAR ===== -->
 <div class="sidebar">
   <div class="profile">
-    <img src="https://i.pravatar.cc/150?img=12">
-    <h4>โกวิท กันคำเชิด</h4>
-    <small>ตำแหน่ง: IT Support</small>
+    <img id="avatar" src="https://i.pravatar.cc/150">
+    <h4 id="pname"></h4>
+    <small id="ppos"></small>
   </div>
   <div class="menu">
     <button class="active">📋 งานแจ้งซ่อม</button>
-    <button disabled>📦 ครุภัณฑ์ (รอพัฒนา)</button>
-    <button disabled>📊 รายงาน (รอพัฒนา)</button>
-    <button disabled>⚙ ตั้งค่า (รอพัฒนา)</button>
+    <button disabled>📦 ครุภัณฑ์</button>
+    <button disabled>📊 รายงาน</button>
+    <button disabled>⚙ ตั้งค่า</button>
   </div>
 </div>
 
-<!-- ===== CONTENT ===== -->
 <div class="content">
-  <h3>รายการงานแจ้งซ่อม</h3>
-
-  <table>
-    <thead>
-      <tr>
-        <th>JobID</th>
-        <th>หน่วยงาน</th>
-        <th>ประเภท</th>
-        <th>สถานะ</th>
-        <th>จัดการ</th>
-      </tr>
-    </thead>
-    <tbody id="jobTable"></tbody>
-  </table>
+<h3>รายการงานแจ้งซ่อม</h3>
+<table>
+<thead>
+<tr>
+<th>JobID</th>
+<th>หน่วยงาน</th>
+<th>ประเภท</th>
+<th>สถานะ</th>
+<th></th>
+</tr>
+</thead>
+<tbody id="jobs"></tbody>
+</table>
 </div>
 </div>
 
-<!-- ===== MODAL ===== -->
+<!-- MODAL -->
 <div class="modal" id="modal">
   <div class="modal-box" id="modalBox"></div>
 </div>
 
-<footer>IT Maintenance System © 2026</footer>
-
-<!-- ===== SCRIPT ===== -->
 <script>
-/* ===== ตัวอย่างข้อมูล (แทน API ได้ทันที) ===== */
-const jobs=[
-  {id:"ITJ-2026-001",dept:"OPD / F2",type:"คอมพิวเตอร์",status:"OPEN",problem:"เปิดไม่ติด"},
-  {id:"ITJ-2026-002",dept:"ER / F1",type:"Network",status:"IN_PROGRESS",problem:"เน็ตช้า"}
+/* LOGIN */
+function login(){
+  const user={
+    name:name.value,
+    pos:position.value,
+    pass:password.value
+  };
+  localStorage.setItem("itUser",JSON.stringify(user));
+  loadUser();
+}
+
+/* LOAD USER */
+function loadUser(){
+  const u=JSON.parse(localStorage.getItem("itUser"));
+  if(!u) return;
+  loginBox.style.display="none";
+  app.style.display="flex";
+  pname.innerText=u.name;
+  ppos.innerText="ตำแหน่ง: "+u.pos;
+}
+
+/* JOB DATA */
+const data=[
+ {id:"ITJ-2026-001",dept:"OPD / F2",type:"คอมพิวเตอร์",status:"OPEN",problem:"เปิดไม่ติด"},
+ {id:"ITJ-2026-002",dept:"ER / F1",type:"Network",status:"IN_PROGRESS",problem:"เน็ตช้า"}
 ];
 
-function statusTH(s){
-  return s==="OPEN"?"เปิดงาน":s==="IN_PROGRESS"?"กำลังดำเนินการ":"ปิดงาน";
-}
-function statusClass(s){
-  return s==="OPEN"?"open":s==="IN_PROGRESS"?"progress":"close";
-}
+function stTH(s){return s==="OPEN"?"เปิดงาน":s==="IN_PROGRESS"?"กำลังดำเนินการ":"ปิดงาน"}
+function stCL(s){return s==="OPEN"?"open":s==="IN_PROGRESS"?"progress":"close"}
 
 function render(){
-  const tb=document.getElementById("jobTable");
-  tb.innerHTML="";
-  jobs.forEach(j=>{
-    tb.innerHTML+=`
-    <tr>
-      <td>${j.id}</td>
-      <td>${j.dept}</td>
-      <td>${j.type}</td>
-      <td class="${statusClass(j.status)}">${statusTH(j.status)}</td>
-      <td><button class="btn btn-gray" onclick="openModal('${j.id}')">ดู</button></td>
-    </tr>`;
-  });
+ jobs.innerHTML="";
+ data.forEach(j=>{
+  jobs.innerHTML+=`
+   <tr>
+    <td>${j.id}</td>
+    <td>${j.dept}</td>
+    <td>${j.type}</td>
+    <td class="${stCL(j.status)}">${stTH(j.status)}</td>
+    <td><button class="btn btn-view" onclick="openJob('${j.id}')">ดู</button></td>
+   </tr>`;
+ });
 }
 
-function openModal(id){
-  const j=jobs.find(x=>x.id===id);
-  let btn="";
-  if(j.status==="OPEN") btn=`<button class="btn btn-open" onclick="takeJob('${id}')">รับงาน</button>`;
-  if(j.status==="IN_PROGRESS") btn=`<button class="btn btn-close" onclick="closeJob('${id}')">ปิดงาน</button>`;
-
-  document.getElementById("modalBox").innerHTML=`
-    <h3>รายละเอียดงาน</h3>
-    <p><b>JobID:</b> ${j.id}</p>
-    <p><b>หน่วยงาน:</b> ${j.dept}</p>
-    <p><b>ปัญหา:</b> ${j.problem}</p>
-    <p><b>สถานะ:</b> ${statusTH(j.status)}</p>
-    ${btn}
-    <button class="btn btn-gray" onclick="closeModal()">ปิด</button>
-  `;
-  document.getElementById("modal").style.display="flex";
+function openJob(id){
+ const j=data.find(x=>x.id===id);
+ let btn="";
+ if(j.status==="OPEN") btn=`<button class="btn btn-open" onclick="take('${id}')">รับงาน</button>`;
+ if(j.status==="IN_PROGRESS") btn=`<button class="btn btn-close" onclick="closeJob('${id}')">ปิดงาน</button>`;
+ modalBox.innerHTML=`
+ <h3>รายละเอียดงาน</h3>
+ <p><b>${j.id}</b></p>
+ <p>หน่วยงาน: ${j.dept}</p>
+ <p>ปัญหา: ${j.problem}</p>
+ <p>สถานะ: ${stTH(j.status)}</p>
+ ${btn}
+ <button class="btn" onclick="modal.style.display='none'">ปิด</button>`;
+ modal.style.display="flex";
 }
 
-function closeModal(){document.getElementById("modal").style.display="none";}
-function takeJob(id){jobs.find(j=>j.id===id).status="IN_PROGRESS";closeModal();render();}
-function closeJob(id){jobs.find(j=>j.id===id).status="CLOSED";closeModal();render();}
+function take(id){data.find(j=>j.id===id).status="IN_PROGRESS";modal.style.display="none";render();}
+function closeJob(id){data.find(j=>j.id===id).status="CLOSED";modal.style.display="none";render();}
 
+loadUser();
 render();
 </script>
 
