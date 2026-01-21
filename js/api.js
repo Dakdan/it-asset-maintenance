@@ -8,7 +8,11 @@ async function apiGetJobs() {
 async function apiUpdateJob(jobId, action, user) {
   const res = await fetch(API_URL, {
     method: "POST",
-    body: JSON.stringify({ jobId, action, user })
+    body: JSON.stringify({
+      jobId: jobId,
+      action: action,
+      user: user
+    })
   });
   return await res.json();
 }
