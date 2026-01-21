@@ -1,64 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
-<meta charset="utf-8">
-<title>IT Job Center</title>
-<style>
-body {
-  font-family: sans-serif;
-  background: linear-gradient(135deg,#ff9a9e,#fff);
-}
-.card {
-  background:#fff;
-  margin:10px;
-  padding:15px;
-  border-radius:12px;
-}
-button {
-  background:#ff5fa2;
-  color:#fff;
-  border:none;
-  padding:8px 12px;
-  border-radius:8px;
-}
-</style>
+  <meta charset="UTF-8">
+  <title>IT งานซ่อม</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<h2>🔧 IT งานซ่อม</h2>
-<div id="jobs"></div>
+<header class="header">
+  🔧 IT งานซ่อม
+</header>
 
-<script>
-const API = "https://script.google.com/macros/s/AKfycbzNSgpYNigJX7W-RUPq8SLN4e687pE55p72KsbM-nWFcPefKDhjzYAflsm78i42IW7qrw/exec";
+<div id="jobList"></div>
 
-fetch(API,{
-  method:"POST",
-  body:JSON.stringify({action:"LIST_JOB"})
-})
-.then(r=>r.json())
-.then(d=>{
-  document.getElementById("jobs").innerHTML = d.map(j=>`
-    <div class="card">
-      <b>${j.JobID}</b><br>
-      สถานะ: ${j.Status}<br>
-      <button onclick="update('${j.JobID}','IN_PROGRESS')">รับงาน</button>
-      <button onclick="update('${j.JobID}','CLOSED')">ปิดงาน</button>
-    </div>
-  `).join("");
-});
-
-function update(id,status){
-  fetch(API,{
-    method:"POST",
-    body:JSON.stringify({
-      action:"UPDATE_STATUS",
-      jobId:id,
-      status:status,
-      owner:"IT"
-    })
-  }).then(()=>location.reload());
-}
-</script>
-
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
