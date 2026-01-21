@@ -1,112 +1,132 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
 <meta charset="UTF-8">
 <title>IT UDH Maintenance & Service</title>
-
 <style>
-body{
-  margin:0;
-  font-family:Arial;
-  background:linear-gradient(135deg,#ff5fa2,#ffd1e6);
+body {
+  font-family: sans-serif;
+  background: linear-gradient(135deg,#ff5fa2,#ffffff);
+  margin: 0;
 }
-.container{
-  max-width:420px;
-  margin:40px auto;
+header {
   background:#fff;
-  border-radius:20px;
-  padding:20px;
-  border:3px solid #ff5fa2;
+  padding:15px;
+  border-bottom:4px solid #ff5fa2;
+  display:flex;
+  align-items:center;
+  gap:10px;
 }
-h1{
-  text-align:center;
-  color:#ff2f92;
+header img { height:40px; }
+.container {
+  padding:15px;
 }
-.input{
+.input {
   width:100%;
-  padding:12px;
-  margin:8px 0;
-  border-radius:10px;
+  padding:10px;
+  margin:6px 0;
   border:1px solid #ff5fa2;
-  font-size:16px;
+  border-radius:8px;
 }
-button{
-  width:100%;
-  padding:14px;
-  background:#ff2f92;
+button {
+  background:#ff5fa2;
   color:#fff;
   border:none;
-  border-radius:14px;
-  font-size:18px;
+  padding:10px 16px;
+  border-radius:8px;
 }
-button:hover{opacity:0.9;}
+table {
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+}
+th,td {
+  border:1px solid #ffd1e3;
+  padding:6px;
+}
 </style>
 </head>
 
 <body>
+
+<header>
+  <img src="https://i.imgur.com/LOGO.png">
+  <strong>IT UDH Maintenance & Service</strong>
+</header>
+
 <div class="container">
-  <h1>🖥️ IT SERVICE DESK</h1>
 
-  <select id="jobType" class="input">
-    <option value="">เลือกประเภทงาน</option>
-  </select>
+<h3>เข้าสู่ระบบ IT</h3>
+<input id="u" class="input" placeholder="Username">
+<input id="p" type="password" class="input" placeholder="Password">
+<button onclick="login()">Login</button>
 
-  <select id="jobSubType" class="input">
-    <option value="">เลือกงานย่อย</option>
-  </select>
+<hr>
 
-  <textarea id="detail" class="input" placeholder="รายละเอียดงาน / อาการปัญหา"></textarea>
-  <input id="phone" class="input" placeholder="เบอร์ติดต่อกลับ">
-  <input id="reporter" class="input" placeholder="ผู้แจ้ง">
+<h3>สร้าง / รับงาน</h3>
 
-  <button onclick="submitJob()">🔒 บันทึกแจ้งงาน</button>
+<select id="jobType" class="input" onchange="loadSubType()">
+  <option value="">เลือกประเภทงาน</option>
+</select>
+
+<select id="jobSubType" class="input">
+  <option value="">เลือกงานย่อย</option>
+</select>
+
+<hr>
+
+<h3>งานทั้งหมด</h3>
+<table id="tbl"></table>
+
 </div>
 
 <script>
-function loadJobTypes(){
+let itName = '';
+
+function login() {
+  google.script.run.withSuccessHandler(res=>{
+    if(res.success){
+      itName = res.name;
+      alert('ยินดีต้อนรับ '+res.name);
+      loadJobType();
+      loadTickets();
+    } else {
+      alert('Login ไม่ถูกต้อง');
+    }
+  }).itLogin(u.value,p.value);
+}
+
+function loadJobType(){
   google.script.run.withSuccessHandler(data=>{
-    const sel=document.getElementById("jobType");
-    data.forEach(d=>{
-      const o=document.createElement("option");
-      o.value=d.code;
-      o.text=d.name;
-      sel.appendChild(o);
+    data.forEach(r=>{
+      jobType.innerHTML += `<option value="${r[0]}">${r[1]}</option>`;
     });
   }).getJobTypes();
 }
 
-document.getElementById("jobType").onchange=function(){
-  const code=this.value;
-  const sub=document.getElementById("jobSubType");
-  sub.innerHTML='<option value="">เลือกงานย่อย</option>';
-  if(!code) return;
-
+function loadSubType(){
+  jobSubType.innerHTML='<option value="">เลือกงานย่อย</option>';
   google.script.run.withSuccessHandler(data=>{
-    data.forEach(d=>{
-      const o=document.createElement("option");
-      o.value=d.code;
-      o.text=d.name;
-      sub.appendChild(o);
+    data.forEach(r=>{
+      jobSubType.innerHTML += `<option value="${r[0]}">${r[2]}</option>`;
     });
-  }).getJobSubTypes(code);
-};
-
-function submitJob(){
-  const form={
-    jobType:jobType.value,
-    jobSubType:jobSubType.value,
-    detail:detail.value,
-    phone:phone.value,
-    reporter:reporter.value
-  };
-
-  google.script.run.withSuccessHandler(id=>{
-    alert("บันทึกสำเร็จ เลขที่งาน: "+id);
-    location.reload();
-  }).saveJob(form);
+  }).getJobSubTypes(jobType.value);
 }
 
-loadJobTypes();
+function loadTickets(){
+  google.script.run.withSuccessHandler(data=>{
+    let h = '<tr><th>JobID</th><th>ปัญหา</th><th>สถานะ</th></tr>';
+    for(let i=1;i<data.length;i++){
+      h+=`<tr>
+        <td>${data[i][0]}</td>
+        <td>${data[i][8]}</td>
+        <td>${data[i][10]}</td>
+      </tr>`;
+    }
+    tbl.innerHTML=h;
+  }).getAllTickets();
+}
 </script>
+
 </body>
 </html>
