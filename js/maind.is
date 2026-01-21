@@ -1,0 +1,38 @@
+const jobList = document.getElementById("jobList");
+
+api({ action: "list" }).then(res => {
+  jobList.innerHTML = "";
+  res.data.forEach(job => renderJob(job));
+});
+
+function renderJob(job) {
+  const div = document.createElement("div");
+  div.className = "card";
+
+  div.innerHTML = `
+    <h3>${job.JobID}</h3>
+    <p>สถานะ: <b>${job.Status || "NEW"}</b></p>
+
+    <div class="btn-group">
+      <button class="btn" onclick="acceptJob('${job.JobID}')">รับงาน</button>
+      <button class="btn" onclick="openJob('${job.JobID}')">เปิดงาน</button>
+    </div>
+  `;
+
+  jobList.appendChild(div);
+}
+
+function acceptJob(jobId) {
+  api({
+    action: "update",
+    JobID: jobId,
+    Status: "IN_PROGRESS"
+  }).then(() => {
+    alert("รับงานแล้ว");
+    location.reload();
+  });
+}
+
+function openJob(jobId) {
+  location.href = `work.html?job=${jobId}`;
+}
