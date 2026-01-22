@@ -1,15 +1,7 @@
-// เปลี่ยน URL นี้ให้เป็น Web App URL ที่ได้จากการ Deploy ใน Google Apps Script ของคุณ
-const SCRIPT_URL = "https://script.google.com/macros/s/XXXXX/exec"; 
+// 1. ตั้งค่า URL (กรุณาใส่ URL ของคุณที่นี่)
+const SCRIPT_URL = "YOUR_APPS_SCRIPT_URL_HERE"; 
 
-// 1. ฟังก์ชันช่วยเหลือแปลงไฟล์เป็น Base64
-const toBase64 = file => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
-});
-
-// 2. ฟังก์ชันควบคุมการแสดงผล Loader
+// 2. ระบบควบคุม Feedback Loader (แก้ไขให้เสถียรขึ้น)
 function toggleLoader(show) {
     const loader = document.getElementById('loader');
     if (loader) {
@@ -17,24 +9,32 @@ function toggleLoader(show) {
     }
 }
 
-// 3. ฟังก์ชัน API หลัก (จัดการ GET และ POST)
+// 3. ฟังก์ชันแปลงไฟล์เป็น Base64
+const toBase64 = file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+});
+
+// 4. API Request หลัก
 async function apiRequest(data = null, method = 'GET') {
+    let url = SCRIPT_URL;
     const options = {
         method: method,
-        // สำคัญ: ต้องใช้โหมด 'no-cors' หรือจัดการฝั่ง Server ให้ดี
-        // แต่โดยปกติ Apps Script POST มักส่งแบบ JSON String
-        body: method === 'POST' ? JSON.stringify(data) : null
+        // ใช้โหมดที่รองรับ Apps Script ได้ดีที่สุด
+        mode: 'cors' 
     };
 
-    let url = SCRIPT_URL;
     if (method === 'GET' && data) {
         url += '?' + new URLSearchParams(data).toString();
+    } else if (method === 'POST') {
+        options.body = JSON.stringify(data);
     }
 
     try {
         const response = await fetch(url, options);
-        // หมายเหตุ: หาก Apps Script ไม่ได้ตั้ง CORS อาจจะติดตรงนี้ 
-        // แต่ในฟังก์ชัน output() ของคุณควรทำงานได้
+        if (!response.ok) throw new Error('Network response was not ok');
         return await response.json();
     } catch (error) {
         console.error("API Error:", error);
@@ -42,7 +42,7 @@ async function apiRequest(data = null, method = 'GET') {
     }
 }
 
-// 4. ฟังก์ชันบันทึกงานใหม่ (สำหรับช่าง IT)
+// 5. ฟังก์ชันบันทึกงานใหม่ (สำหรับช่าง IT)
 async function submitJob() {
     const btn = document.getElementById('btnSubmit');
     const docFile = document.getElementById('docFile').files[0];
@@ -54,10 +54,10 @@ async function submitJob() {
         return;
     }
 
-    // --- เริ่มกระบวนการ Feedback ---
-    toggleLoader(true); // แสดง Spinner
-    btn.disabled = true; // ป้องกันการกดซ้ำ
-    btn.innerText = "กำลังอัปโหลดและบันทึก...";
+    // เริ่มแสดงผลสถานะการทำงาน
+    toggleLoader(true);
+    btn.disabled = true;
+    btn.innerText = "กำลังบันทึกข้อมูล...";
 
     try {
         const payload = {
@@ -68,7 +68,6 @@ async function submitJob() {
             assignBy: document.getElementById('assignBy').value,
             detail: document.getElementById('detail').value,
             status: 'รอรับงาน',
-            // แปลงไฟล์เป็น Base64 ก่อนส่ง
             docFile: docFile ? await toBase64(docFile) : null,
             repairPhoto: repairPhoto ? await toBase64(repairPhoto) : null
         };
@@ -76,52 +75,59 @@ async function submitJob() {
         const res = await apiRequest(payload, 'POST');
 
         if (res.success) {
-            alert('บันทึกงานซ่อมและอัปโหลดไฟล์เรียบร้อยแล้ว! เลขที่ใบงาน: ' + res.jobId);
-            location.reload(); // รีเฟรชหน้าเพื่อล้างฟอร์ม
+            alert('บันทึกสำเร็จ!');
+            location.reload();
         } else {
-            alert('เกิดข้อผิดพลาดจากระบบ: ' + (res.error || 'ไม่ทราบสาเหตุ'));
+            alert('เกิดข้อผิดพลาด: ' + (res.error || 'ข้อมูลไม่ถูกต้อง'));
         }
     } catch (e) {
-        console.error(e);
-        alert('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาลองใหม่');
+        alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
     } finally {
-        // --- สิ้นสุดกระบวนการ Feedback ---
-        toggleLoader(false); // ซ่อน Spinner
+        toggleLoader(false);
         btn.disabled = false;
-        btn.innerText = "บันทึกข้อมูลและเปิดใบงาน";
+        btn.innerText = "บันทึกข้อมูล";
     }
 }
 
-// 5. โหลดข้อมูลเมื่อเข้าหน้าเว็บ
+// 6. ควบคุมการโหลดหน้าเว็บ (แก้ไขจุดบกพร่องที่ทำให้จอกระพริบ)
 window.onload = async () => {
-    // กฎความปลอดภัย: ตรวจสอบ Session จาก ITUser (คอลัมน์ที่ 5 ต้อง true)
-    const user = JSON.parse(localStorage.getItem('session'));
-    if (!user) {
-        window.location.href = 'login.html';
+    const session = JSON.parse(localStorage.getItem('session'));
+    const isLoginPage = window.location.pathname.includes('login.html');
+
+    // ถ้าไม่มี Session และไม่ได้อยู่ที่หน้า Login ให้ไปหน้า Login
+    if (!session && !isLoginPage) {
+        window.location.replace('login.html');
         return;
     }
-    
-    // แสดงชื่อช่างที่ล็อกอิน
-    document.getElementById('staffName').innerText = user.name;
 
-    // แสดงสถานะกำลังโหลด Master Data
-    toggleLoader(true);
+    // ถ้ามี Session แล้วพยายามเข้าหน้า Login ให้ส่งไปหน้าหลัก
+    if (session && isLoginPage) {
+        window.location.replace('index.html');
+        return;
+    }
 
-    try {
-        // ดึงข้อมูลครุภัณฑ์จาก BackupData
-        const assets = await apiRequest({ action: 'getAssets' }, 'GET');
-        const assetSelect = document.getElementById('assetID');
-        if (assets && Array.isArray(assets)) {
-            assets.forEach(a => {
-                const opt = document.createElement('option');
-                opt.value = a.assetID;
-                opt.text = `${a.assetID} - ${a.name}`;
-                assetSelect.appendChild(opt);
-            });
+    // ส่วนการทำงานเฉพาะหน้า Dashboard (index.html)
+    const staffNameElem = document.getElementById('staffName');
+    if (staffNameElem && session) {
+        staffNameElem.innerText = session.name;
+        
+        // โหลดข้อมูล Master Data (ทำเพียงครั้งเดียว)
+        toggleLoader(true);
+        try {
+            const assets = await apiRequest({action: 'getAssets'}, 'GET');
+            const select = document.getElementById('assetID');
+            if (select && assets) {
+                assets.forEach(a => {
+                    const opt = document.createElement('option');
+                    opt.value = a.assetID;
+                    opt.text = `${a.assetID} - ${a.name}`;
+                    select.appendChild(opt);
+                });
+            }
+        } catch (e) {
+            console.error("Load Assets Failed");
+        } finally {
+            toggleLoader(false); // ปิด Loader เมื่อทุกอย่างเสร็จ
         }
-    } catch (e) {
-        console.error("Master Data Load Error:", e);
-    } finally {
-        toggleLoader(false); // ปิด Spinner เมื่อโหลดข้อมูลเสร็จ
     }
 };
