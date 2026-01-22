@@ -1,139 +1,143 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Login</title>
+
 <style>
-body{font-family:Arial;background:#f4f4f4;margin:0}
-header{background:#8b004f;color:#fff;padding:10px}
-.card{background:#fff;margin:10px;padding:15px;border-radius:8px}
-button{padding:8px 12px;border:none;border-radius:6px;cursor:pointer}
-.btn{background:#8b004f;color:#fff}
-.top{background:#fff2f7}
+  body{
+    margin:0;
+    font-family: "Segoe UI", sans-serif;
+    min-height:100vh;
+    background: linear-gradient(#ff6aa2,#ffd1df);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+  }
+  .card{
+    width:100%;
+    max-width:420px;
+    background:#fff;
+    border-radius:16px;
+    box-shadow:0 10px 25px rgba(0,0,0,.2);
+    overflow:hidden;
+  }
+  .header{
+    background:linear-gradient(90deg,#ff0080,#ff5fa2);
+    color:#fff;
+    padding:16px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .header img{
+    width:48px;
+    height:48px;
+    border-radius:50%;
+    background:#fff;
+  }
+  .header div{
+    line-height:1.2;
+  }
+  .content{
+    padding:24px;
+  }
+  h2{
+    margin:0 0 20px;
+    color:#ff0080;
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+  input{
+    width:100%;
+    padding:14px;
+    margin-bottom:16px;
+    border-radius:12px;
+    border:2px solid #ff4fa0;
+    font-size:16px;
+    outline:none;
+  }
+  button{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:14px;
+    background:#ff0080;
+    color:#fff;
+    font-size:18px;
+    cursor:pointer;
+  }
+  button:hover{
+    background:#e60073;
+  }
+  .footer{
+    text-align:center;
+    margin-top:16px;
+    font-size:14px;
+  }
+  .footer span{
+    color:#ff0080;
+    cursor:pointer;
+  }
 </style>
 </head>
 
 <body>
 
-<header>
-  <b id="itInfo"></b>
-</header>
-
-<!-- LOGIN -->
-<div class="card" id="loginBox">
-  <h3>IT Login</h3>
-  <input id="email" placeholder="Email"><br><br>
-  <input id="password" type="password" placeholder="Password"><br><br>
-  <button class="btn" onclick="login()">Login</button>
-</div>
-
-<!-- DASHBOARD -->
-<div id="dashboard" style="display:none">
-
-  <!-- WORKING JOB -->
-  <div class="card top">
-    <h3>🔧 งานที่กำลังดำเนินการ</h3>
-    <div id="workingList"></div>
+<div class="card">
+  <div class="header">
+    <img src="logo.png">
+    <div>
+      <strong>โรงพยาบาลอุดรธานี</strong><br>
+      <small>ระบบบริหารจัดการครุภัณฑ์และบริการ</small>
+    </div>
   </div>
 
-  <!-- ALL JOB -->
-  <div class="card">
-    <h3>📋 งานทั้งหมด</h3>
-    <div id="ticketList"></div>
-  </div>
+  <div class="content">
+    <h2>🔐 เข้าสู่ระบบ</h2>
 
-  <!-- APP LINK -->
-  <div class="card">
-    <h3>🔗 ระบบอื่น</h3>
-    <button onclick="openApp('ASSET')">Asset App</button>
-    <button onclick="openApp('SERVICE')">Service App</button>
-  </div>
+    <input id="email" placeholder="Username / Email">
+    <input id="password" type="password" placeholder="Password">
 
+    <button onclick="login()">🛡 Login</button>
+
+    <div class="footer">
+      ยังไม่มีบัญชี? <span onclick="register()">ลงทะเบียน</span>
+    </div>
+  </div>
 </div>
 
 <script>
-let IT=null;
+const API_URL = "https://script.google.com/macros/s/XXXXXXXX/exec";
 
-// ---------- LOGIN ----------
+if(localStorage.getItem("it_login")){
+  location.href = "dashboard.html";
+}
+
 function login(){
-  google.script.run.withSuccessHandler(res=>{
-    if(res.status==='success'){
-      IT=res.it;
-      localStorage.setItem('it',JSON.stringify(IT));
-      showDashboard();
-    }else alert('Login failed');
-  }).itLogin(
-    email.value,password.value
-  );
+  fetch(API_URL,{
+    method:"POST",
+    body:JSON.stringify({
+      action:"loginIT",
+      email:email.value,
+      password:password.value
+    })
+  })
+  .then(r=>r.json())
+  .then(res=>{
+    if(res.status==="success"){
+      localStorage.setItem("it_login",JSON.stringify(res.user));
+      location.href="dashboard.html";
+    }else{
+      alert(res.message);
+    }
+  });
 }
 
-function showDashboard(){
-  loginBox.style.display='none';
-  dashboard.style.display='block';
-  itInfo.innerText = IT.name + ' | ' + IT.position;
-  loadWorking();
-  loadTickets();
-}
-
-// ---------- WORKING ----------
-function loadWorking(){
-  google.script.run.withSuccessHandler(data=>{
-    let html='';
-    if(data.length===0) html='ไม่มีงาน';
-    data.forEach(r=>{
-      html+=`
-        <div class="card">
-          <b>${r[0]}</b><br>
-          ${r[6]}<br>
-          <button onclick="closeJob('${r[0]}')">ปิดงาน</button>
-        </div>`;
-    });
-    workingList.innerHTML=html;
-  }).getMyWorkingJobs(IT.id);
-}
-
-// ---------- ALL ----------
-function loadTickets(){
-  google.script.run.withSuccessHandler(data=>{
-    let html='';
-    data.forEach(r=>{
-      html+=`
-        <div class="card">
-          <b>${r[0]}</b><br>
-          ${r[6]}<br>
-          สถานะ: ${r[8]}<br>
-          <button onclick="assign('${r[0]}')">รับงาน</button>
-        </div>`;
-    });
-    ticketList.innerHTML=html;
-  }).getTickets();
-}
-
-// ---------- ACTION ----------
-function assign(id){
-  google.script.run.withSuccessHandler(()=>{
-    loadWorking();loadTickets();
-  }).assignTicket(id,IT.id);
-}
-
-function closeJob(id){
-  google.script.run.withSuccessHandler(()=>{
-    loadWorking();loadTickets();
-  }).closeTicket(id);
-}
-
-// ---------- LINK APP ----------
-function openApp(app){
-  const base={
-    ASSET:'https://asset-app-url',
-    SERVICE:'https://service-app-url'
-  };
-  window.open(`${base[app]}?it=${IT.id}`,'_blank');
-}
-
-// auto login
-window.onload=()=>{
-  const s=localStorage.getItem('it');
-  if(s){IT=JSON.parse(s);showDashboard();}
+function register(){
+  location.href="register.html";
 }
 </script>
 
