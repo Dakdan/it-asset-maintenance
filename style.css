@@ -1,33 +1,159 @@
-/* (ส่วนเดิมที่ส่งให้แล้วคงไว้ทั้งหมด เพิ่มเติมเฉพาะปุ่มรอง) */
+/* นำเข้า Font Kanit จาก Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap');
 
-.btn-secondary {
-    background: none;
-    border: 2px solid var(--primary-pink);
+:root {
+    --primary-pink: #ff0080;      /* ชมพูเข้มรพ. */
+    --border-neon: #ff00ff;       /* ชมพูสะท้อนแสงสำหรับขอบ Input */
+    --btn-border: #00ff00;        /* ขอบเขียวสะท้อนแสงสำหรับปุ่ม Login */
+    --bg-soft-pink: #fce4ec;      /* พื้นหลังชมพูอ่อน */
+    --white: #ffffff;
+    --deep-maroon: #800040;      /* สีเลือดหมูสำหรับ Gradient Header */
+    --shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+* {
+    box-sizing: border-box;
+    font-family: 'Kanit', sans-serif;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-soft-pink);
+}
+
+/* ================= NAVIGATION & HEADER ================= */
+nav {
+    background: var(--white);
+    padding: 10px 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo {
+    height: 50px;
+    width: auto;
+}
+
+.brand-text {
+    font-size: 1.2rem;
+    font-weight: 500;
     color: var(--primary-pink);
-    padding: 10px 20px;
-    border-radius: 15px;
-    cursor: pointer;
+}
+
+/* ================= LOGIN & REGISTER WRAPPER ================= */
+.login-wrapper {
     width: 100%;
-    margin-top: 15px;
+    max-width: 450px;
+    margin: auto; /* จัดกึ่งกลางหน้าจอ */
+    padding: 20px;
+}
+
+.login-header {
+    background: linear-gradient(to right, var(--deep-maroon), var(--primary-pink));
+    padding: 20px;
+    border-radius: 15px 15px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: white;
+    border: 2px solid #33001a;
+}
+
+.header-logo {
+    width: 60px;
+    height: 60px;
+    background: white;
+    border-radius: 50%;
+    padding: 5px;
+}
+
+.header-text h1 {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.header-text p {
+    font-size: 0.75rem;
+    margin: 0;
+    font-weight: 300;
+}
+
+/* ================= CARD & FORM ELEMENTS ================= */
+.login-card, .card {
+    background: var(--white);
+    padding: 30px;
+    border-radius: 0 0 15px 15px;
+    box-shadow: var(--shadow);
+    border: 2px solid #33001a;
+    border-top: none;
+    text-align: center;
+}
+
+/* สำหรับหน้า Dashboard index.html */
+.container .card {
+    border-radius: 15px;
+    border-top: 2px solid #33001a;
+    text-align: left;
+    margin-top: 20px;
+}
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--primary-pink);
+    margin-bottom: 25px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
     font-size: 0.9rem;
-    transition: 0.3s;
 }
 
-.btn-secondary:hover {
-    background: var(--soft-pink);
-    color: var(--deep-pink);
-}
-
-/* ปรับปรุงให้ select ดูเหมือน input อื่นๆ */
-select {
+/* Input & Select สไตล์สะท้อนแสงตามรูปตัวอย่าง */
+input, select, textarea {
     width: 100%;
     padding: 12px 20px;
     border: 2px solid var(--border-neon);
     border-radius: 15px;
+    font-size: 1rem;
+    outline: none;
+    transition: 0.3s;
     background-color: white;
-    appearance: none; /* ลบลูกศรเดิมออกเพื่อความสวยงาม */
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ff00ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 15px center;
-    background-size: 15px;
 }
+
+input:focus, select:focus, textarea:focus {
+    box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+}
+
+/* ตกแต่ง Dropdown (Select) */
+select {
+    appearance: none;
+    background-image: url("data:image/svg
