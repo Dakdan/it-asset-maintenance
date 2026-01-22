@@ -1,43 +1,28 @@
 const table=document.querySelector("#jobTable tbody");
-const working=document.getElementById("working");
 
 async function loadJobs(){
-  table.innerHTML="";
-  working.innerHTML="";
-
-  let d=await apiGet("getJobs");
-
-  d.forEach(j=>{
-    if(j.Status==="กำลังดำเนินการ"){
-      working.innerHTML+=`
-        <div class="job">
-          <b>${j.JobID}</b><br>
-          ${j.JobType}<br>
-          <button class="btn-close"
-           onclick="update('${j.JobID}','ดำเนินการแล้วเสร็จ')">
-           ปิดงาน
-          </button>
-        </div>`;
-    }
-
-    table.innerHTML+=`
-      <tr>
-        <td>${j.JobID}</td>
-        <td>${j.JobType}</td>
-        <td>${j.Status}</td>
-        <td>
-          ${j.Status==="รอรับงาน"
-            ?`<button class="btn-start"
-              onclick="update('${j.JobID}','กำลังดำเนินการ')">
-              รับงาน</button>`:""}
-        </td>
-      </tr>`;
+ table.innerHTML="";
+ let d=await apiGet("getJobs");
+ d.filter(j=>j.Status!="ดำเนินการแล้วเสร็จ")
+  .forEach(j=>{
+   table.innerHTML+=`
+   <tr>
+    <td>${j.JobID}</td>
+    <td>${j.JobType}</td>
+    <td>${j.Status}</td>
+    <td>
+     ${j.Status=="รอรับงาน"
+      ?`<button onclick="update('${j.JobID}','กำลังดำเนินการ')">รับงาน</button>`:""}
+     ${j.Status=="กำลังดำเนินการ"
+      ?`<button onclick="update('${j.JobID}','ดำเนินการแล้วเสร็จ')">ปิดงาน</button>`:""}
+    </td>
+   </tr>`;
   });
 }
 
 function update(id,status){
-  apiPost({action:"updateStatus",jobId:id,status})
-    .then(loadJobs);
+ apiPost({action:"updateStatus",jobId:id,status})
+ .then(loadJobs);
 }
 
 loadJobs();
