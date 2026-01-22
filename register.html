@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ลงทะเบียน IT - โรงพยาบาลอุดรธานี</title>
-    <link rel="stylesheet" href="style.css?v=1.1">
+    <link rel="stylesheet" href="style.css?v=99">
 </head>
 <body>
 
     <div id="loader" class="loader-overlay">
-        <div style="border: 5px solid #f3f3f3; border-top: 5px solid #ff0080; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite;"></div>
+        <div class="spinner"></div>
     </div>
 
     <div class="login-wrapper">
@@ -22,7 +22,7 @@
         </div>
 
         <div class="login-card">
-            <h2 style="color:#ff0080; margin-bottom: 20px;">📝 ลงทะเบียนใหม่</h2>
+            <h2 style="color:#ff0080; margin-bottom: 20px; text-align: center;">📝 ลงทะเบียนใหม่</h2>
             
             <div class="form-group">
                 <label>ชื่อ-นามสกุล</label>
@@ -46,22 +46,24 @@
                     <option value="หัวหน้างาน IT">หัวหน้างาน IT</option>
                     <option value="นักวิชาการคอมพิวเตอร์">นักวิชาการคอมพิวเตอร์</option>
                     <option value="ช่างเทคนิคคอมพิวเตอร์">ช่างเทคนิคคอมพิวเตอร์</option>
+                    <option value="เจ้าหน้าที่ธุรการ">เจ้าหน้าที่ธุรการ</option>
                 </select>
             </div>
 
-            <button onclick="handleRegister()" class="btn-login">ยืนยันการลงทะเบียน</button>
+            <button onclick="handleRegister()" class="btn-login" id="btnReg">
+                ยืนยันการลงทะเบียน
+            </button>
 
-            <div>
-                <button type="button" onclick="window.location.replace('login.html')" class="btn-back">
-                    ⬅️ กลับหน้า Login
-                </button>
-            </div>
+            <button type="button" onclick="window.location.replace('login.html')" class="btn-back">
+                ⬅️ กลับหน้า Login
+            </button>
         </div>
     </div>
 
     <script src="js/main.js"></script>
     <script>
         async function handleRegister() {
+            const btn = document.getElementById('btnReg');
             const payload = {
                 action: 'registerIT',
                 name: document.getElementById('reg_name').value,
@@ -70,19 +72,31 @@
                 position: document.getElementById('reg_position').value
             };
             
-            if(!payload.name || !payload.email) return alert("กรุณากรอกข้อมูลให้ครบ");
+            if(!payload.name || !payload.email || !payload.password || !payload.position) {
+                return alert("กรุณากรอกข้อมูลให้ครบทุกช่อง");
+            }
 
+            // แสดง Spinner และล็อกปุ่ม
             document.getElementById('loader').style.display = 'flex';
+            btn.disabled = true;
+            btn.innerText = "กำลังบันทึก...";
+
             try {
                 const res = await apiRequest(payload, 'POST');
                 if (res.success) {
-                    alert("ลงทะเบียนแล้ว! รออนุมัติสิทธิ์");
+                    alert("ลงทะเบียนเรียบร้อยแล้ว! กรุณารอหัวหน้าอนุมัติสิทธิ์การใช้งาน");
                     window.location.replace('login.html');
+                } else {
+                    alert("ไม่สามารถลงทะเบียนได้: " + (res.error || "ลองใหม่อีกครั้ง"));
                 }
-            } catch (e) { alert("ล้มเหลว"); } 
-            finally { document.getElementById('loader').style.display = 'none'; }
+            } catch (e) { 
+                alert("การเชื่อมต่อล้มเหลว"); 
+            } finally { 
+                document.getElementById('loader').style.display = 'none';
+                btn.disabled = false;
+                btn.innerText = "ยืนยันการลงทะเบียน";
+            }
         }
     </script>
-    <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
 </body>
 </html>
