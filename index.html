@@ -3,114 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IT Service - โรงพยาบาลอุดรธานี</title>
-    
+    <title>IT Service - ระบบจำการเข้าใช้งาน</title>
     <script>
-        const userSession = localStorage.getItem('session');
-        if (!userSession) {
+        // เช็คทันทีที่เปิดหน้าเว็บ ถ้าไม่มี Session ให้ไปหน้า Login
+        if (!localStorage.getItem('it_session')) {
             window.location.replace('login.html');
         }
     </script>
-
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=1.2">
 </head>
 <body>
-
-    <div id="loader" class="loader-overlay">
-        <div class="loader-content">
-            <div class="spinner"></div>
-            <p>กำลังประมวลผล...</p>
-        </div>
-    </div>
+    <div id="loader" class="loader-overlay"><div class="spinner"></div></div>
 
     <nav>
         <div class="nav-container">
-            <div class="brand">
-                <img src="https://img2.pic.in.th/-227e4f6f84f29f020.png" alt="LOGO" class="logo">
-                <span class="brand-text">IT MAINTENANCE</span>
-            </div>
-            <div class="user-info">
-                <span id="staffName"></span>
-                <button onclick="localStorage.clear(); window.location.replace('login.html');" class="btn-logout">Logout</button>
-            </div>
+            <span id="userNameDisplay" style="color:var(--primary-pink); font-weight:500;"></span>
+            <button onclick="logout()" class="btn-logout" style="border:1px solid var(--primary-pink); border-radius:10px; padding:5px 10px; cursor:pointer;">ออกจากระบบ</button>
         </div>
     </nav>
 
-    <div class="container">
-        <div class="card">
-            <h2>ลงทะเบียนรับงาน / สร้างใบงาน</h2>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>ประเภทงาน:</label>
-                    <select id="jobType">
-                        <option value="คอมพิวเตอร์">คอมพิวเตอร์</option>
-                        <option value="เครือข่าย">เครือข่าย</option>
-                        <option value="ซอฟต์แวร์">ซอฟต์แวร์</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>ครุภัณฑ์ (Asset ID):</label>
-                    <select id="assetID"><option value="">-- เลือกครุภัณฑ์ --</option></select>
-                </div>
-            </div>
-
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>เลขที่บันทึกข้อความ:</label>
-                    <input type="text" id="docNumber" placeholder="ระบุเลขที่บันทึก (ถ้ามี)">
-                </div>
-                <div class="form-group">
-                    <label>ผู้มอบหมาย:</label>
-                    <input type="text" id="assignBy" placeholder="ระบุชื่อผู้มอบหมาย">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>รายละเอียดงาน:</label>
-                <textarea id="detail" rows="3" placeholder="ระบุรายละเอียด..."></textarea>
-            </div>
-
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>แนบบันทึกข้อความ (PDF/รูป):</label>
-                    <input type="file" id="docFile" accept=".pdf,image/*">
-                </div>
-                <div class="form-group">
-                    <label>ถ่ายรูปงานซ่อม:</label>
-                    <input type="file" id="repairPhoto" accept="image/*" capture="camera">
-                </div>
-            </div>
-
-            <button id="btnSubmit" onclick="submitJob()" class="btn-primary">บันทึกข้อมูลและเปิดใบงาน</button>
+    <div class="login-wrapper">
+        <div class="login-card" style="border-top: 2px solid #000;">
+            <h2>ยินดีต้อนรับสู่ระบบ IT</h2>
+            <p>คุณไม่ต้อง Login ใหม่จนกว่าจะกด Logout ครับ</p>
         </div>
     </div>
 
     <script src="js/main.js"></script>
     <script>
-        // ทำงานเมื่อหน้าเว็บโหลดเสร็จสมบูรณ์
-        window.addEventListener('DOMContentLoaded', async () => {
-            const user = JSON.parse(localStorage.getItem('session'));
-            if (user) {
-                document.getElementById('staffName').innerText = "ผู้ใช้งาน: " + user.name;
-                
-                // โหลด Master Data ครั้งเดียว
-                try {
-                    const assets = await apiRequest({action: 'getAssets'}, 'GET');
-                    const select = document.getElementById('assetID');
-                    if (assets && select) {
-                        assets.forEach(a => {
-                            const opt = document.createElement('option');
-                            opt.value = a.assetID;
-                            opt.text = `${a.assetID} - ${a.name}`;
-                            select.appendChild(opt);
-                        });
-                    }
-                } catch (e) {
-                    console.log("Error loading assets");
-                }
-            }
-        });
+        // แสดงชื่อผู้ใช้จากข้อมูลที่จำไว้
+        const user = JSON.parse(localStorage.getItem('it_session'));
+        if(user) document.getElementById('userNameDisplay').innerText = "ผู้ใช้: " + user.name;
     </script>
 </body>
 </html>
