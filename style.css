@@ -1,13 +1,10 @@
-/* นำเข้า Font Kanit จาก Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap');
 
 :root {
-    --primary-pink: #ff85a2;
-    --deep-pink: #f06292;
-    --soft-pink: #fce4ec;
+    --primary-pink: #ff0080; /* ชมพูเข้มตามรูป */
+    --light-pink: #ff80bf;
+    --bg-gradient: #fce4ec;
     --white: #ffffff;
-    --text-color: #444;
-    --shadow: 0 8px 30px rgba(0,0,0,0.05);
 }
 
 * {
@@ -18,179 +15,130 @@
 body {
     margin: 0;
     padding: 0;
-    background: linear-gradient(135deg, var(--white) 0%, var(--soft-pink) 100%);
-    background-attachment: fixed;
-    color: var(--text-color);
-}
-
-/* Navigation */
-nav {
-    background: var(--white);
-    padding: 10px 0;
-    box-shadow: var(--shadow);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-}
-
-.nav-container {
-    max-width: 1200px;
-    margin: 0 auto;
+    height: 100vh;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    padding: 0 20px;
+    background-color: var(--bg-gradient);
 }
 
-.brand {
+.login-wrapper {
+    width: 100%;
+    max-width: 450px;
+    padding: 20px;
+}
+
+/* Header สีชมพูโค้งมนตามรูป */
+.login-header {
+    background: linear-gradient(to right, #800040, var(--primary-pink));
+    padding: 15px;
+    border-radius: 15px 15px 0 0;
     display: flex;
     align-items: center;
     gap: 15px;
+    color: white;
+    border: 2px solid #33001a;
 }
 
-.logo {
-    height: 50px; /* ปรับขนาดโลโก้ */
-    width: auto;
+.header-logo {
+    width: 60px;
+    height: 60px;
+    background: white;
+    border-radius: 50%;
+    padding: 5px;
 }
 
-.brand-text {
-    font-size: 1.2rem;
-    font-weight: 500;
-    color: var(--deep-pink);
-    letter-spacing: 1px;
-}
-
-/* Container & Header */
-.container {
-    max-width: 900px;
-    margin: 40px auto;
-    padding: 0 20px;
-}
-
-.header-section {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-h2 {
-    color: var(--deep-pink);
+.header-text h1 {
+    font-size: 1.1rem;
     margin: 0;
+}
+
+.header-text p {
+    font-size: 0.75rem;
+    margin: 0;
+    font-weight: 300;
+}
+
+/* Card สีขาว */
+.login-card {
+    background: var(--white);
+    padding: 30px;
+    border-radius: 0 0 15px 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    border: 2px solid #33001a;
+    border-top: none;
+    text-align: center;
+}
+
+.card-title {
+    font-size: 1.5rem;
     font-weight: 500;
-}
-
-/* Card UI */
-.card {
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 35px;
-    box-shadow: var(--shadow);
-    border: 1px solid var(--white);
-}
-
-/* Grid Layout */
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-}
-
-@media (max-width: 600px) {
-    .form-grid { grid-template-columns: 1fr; }
+    color: var(--primary-pink);
+    margin-bottom: 25px;
 }
 
 .form-group {
     margin-bottom: 20px;
 }
 
-label {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 0.95rem;
+/* Input ขอบชมพูตามรูปตัวอย่าง */
+input {
+    width: 100%;
+    padding: 12px 20px;
+    border: 2px solid #ff00ff; /* สี Neon Pink ตามรูป */
+    border-radius: 15px;
+    font-size: 1rem;
+    outline: none;
     color: #666;
 }
 
-input, select, textarea {
+/* ปุ่ม Login ชมพูเข้ม */
+.btn-login {
     width: 100%;
-    padding: 12px 15px;
-    border: 2px solid var(--soft-pink);
-    border-radius: 12px;
-    font-size: 1rem;
-    transition: all 0.3s;
-    outline: none;
-}
-
-input:focus, select:focus, textarea:focus {
-    border-color: var(--primary-pink);
-    box-shadow: 0 0 10px rgba(255, 133, 162, 0.2);
-}
-
-/* Custom File Upload */
-.file-upload-wrapper {
-    position: relative;
-    background: var(--light-gray);
-    border: 2px dashed var(--primary-pink);
-    border-radius: 12px;
-    padding: 5px;
-}
-
-/* Button */
-.btn-primary {
-    width: 100%;
-    background: linear-gradient(45deg, var(--primary-pink), var(--deep-pink));
+    background: var(--primary-pink);
     color: white;
-    border: none;
-    padding: 18px;
-    border-radius: 50px;
-    font-size: 1.1rem;
-    font-weight: 500;
+    border: 2px solid #00ff00; /* ขอบเขียวตามรูปต้นฉบับ */
+    padding: 12px;
+    border-radius: 15px;
+    font-size: 1.2rem;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(240, 98, 146, 0.3);
-    transition: all 0.3s;
+    transition: 0.3s;
+    margin-top: 10px;
+}
+
+.btn-login:hover {
+    opacity: 0.9;
+    transform: scale(1.02);
+}
+
+.card-footer {
     margin-top: 20px;
-}
-
-.btn-primary:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(240, 98, 146, 0.4);
-}
-
-.btn-primary:active { transform: translateY(0); }
-
-.btn-logout {
-    background: none;
-    border: 1px solid var(--primary-pink);
-    color: var(--deep-pink);
-    padding: 8px 15px;
-    border-radius: 20px;
-    cursor: pointer;
     font-size: 0.9rem;
+}
+
+.card-footer a {
+    color: var(--primary-pink);
+    text-decoration: none;
+    font-weight: 500;
 }
 
 /* Loader Overlay */
 .loader-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(255,255,255,0.9);
-    display: none; /* เปิดด้วย JS */
+    background: rgba(255,255,255,0.8);
+    display: none;
     justify-content: center;
     align-items: center;
-    z-index: 2000;
+    z-index: 9999;
 }
 
 .spinner {
     width: 50px; height: 50px;
-    border: 5px solid var(--soft-pink);
-    border-top: 5px solid var(--deep-pink);
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid var(--primary-pink);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
 
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-/* Print Mode: Landscape */
-@media print {
-    @page { size: landscape; }
-    nav, .btn-primary, .file-upload-wrapper { display: none !important; }
-    .card { box-shadow: none; border: 1px solid #eee; }
-}
