@@ -1,70 +1,65 @@
 <!DOCTYPE html>
-<html lang="th">
+<html>
 <head>
 <meta charset="UTF-8">
 <title>IT Login</title>
 <link rel="stylesheet" href="style.css">
-<style>
-body{
-  background:#0f172a;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-}
-.login-box{
-  background:#1e293b;
-  padding:30px;
-  border-radius:12px;
-  width:340px;
-  color:#fff;
-}
-.login-box h2{text-align:center}
-input,button{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  border-radius:8px;
-  border:none;
-}
-button{
-  background:#38bdf8;
-  font-weight:bold;
-  cursor:pointer;
-}
-.error{color:#f87171;margin-top:10px;text-align:center}
-</style>
 </head>
 <body>
 
-<div class="login-box">
-  <h2>🔐 IT Maintenance</h2>
-  <input id="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
-  <button onclick="login()">Login</button>
-  <div id="msg" class="error"></div>
+<div class="card" style="max-width:360px;margin:80px auto">
+
+<h2 id="title">🔐 เข้าสู่ระบบ</h2>
+
+<input id="user" placeholder="Username">
+<input id="pass" type="password" placeholder="Password">
+
+<button onclick="login()">Login</button>
+
+<p id="msg" style="color:red"></p>
+
+<p style="text-align:center;margin-top:10px">
+<span id="toggleText">
+ยังไม่มีบัญชี?
+<a href="#" onclick="showRegister()">ลงทะเบียน</a>
+</span>
+</p>
+
 </div>
 
 <script src="js/api.js"></script>
 <script>
-async function login(){
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
+let mode="login";
 
-  const res = await apiPost({
-    action:"loginIT",
-    email,
-    password
-  });
+function showRegister(){
+ mode="register";
+ title.innerText="📝 ลงทะเบียน";
+ toggleText.innerHTML=`มีบัญชีแล้ว?
+ <a href="#" onclick="showLogin()">เข้าสู่ระบบ</a>`;
+}
 
+function showLogin(){
+ mode="login";
+ title.innerText="🔐 เข้าสู่ระบบ";
+ toggleText.innerHTML=`ยังไม่มีบัญชี?
+ <a href="#" onclick="showRegister()">ลงทะเบียน</a>`;
+}
+
+function login(){
+ if(!user.value||!pass.value)return;
+ apiPost({
+  action: mode==="login"?"login":"register",
+  user:user.value,
+  pass:pass.value
+ }).then(res=>{
   if(res.success){
-    localStorage.setItem("it_user", JSON.stringify(res));
-    location.href = "index.html";
+   localStorage.setItem("it_token",res.token);
+   location.href="index.html";
   }else{
-    document.getElementById("msg").innerText="❌ ข้อมูลไม่ถูกต้อง";
+   msg.innerText=res.message||"ไม่สำเร็จ";
   }
+ });
 }
 </script>
-
 </body>
 </html>
