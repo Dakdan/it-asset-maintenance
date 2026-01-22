@@ -1,7 +1,7 @@
 // 1. ตั้งค่า URL (กรุณาใส่ URL ของคุณที่นี่)
-const SCRIPT_URL = "YOUR_APPS_SCRIPT_URL_HERE"; 
+const SCRIPT_URL = "1TUcThdPyAqFRwkFg1NTMtwqbFVjrkJXWqYw0AlwwriI"; 
 
-// 2. ระบบควบคุม Feedback Loader (แก้ไขให้เสถียรขึ้น)
+// 2. ระบบควบคุม Feedback Loader (ทำงานเมื่อถูกสั่งเท่านั้น)
 function toggleLoader(show) {
     const loader = document.getElementById('loader');
     if (loader) {
@@ -17,12 +17,11 @@ const toBase64 = file => new Promise((resolve, reject) => {
     reader.onerror = error => reject(error);
 });
 
-// 4. API Request หลัก
+// 4. API Request หลัก (ปรับปรุงให้รองรับ Apps Script)
 async function apiRequest(data = null, method = 'GET') {
     let url = SCRIPT_URL;
     const options = {
         method: method,
-        // ใช้โหมดที่รองรับ Apps Script ได้ดีที่สุด
         mode: 'cors' 
     };
 
@@ -42,22 +41,17 @@ async function apiRequest(data = null, method = 'GET') {
     }
 }
 
-// 5. ฟังก์ชันบันทึกงานใหม่ (สำหรับช่าง IT)
+// 5. ฟังก์ชันสำหรับบันทึกงานใหม่ (สำหรับหน้า index.html)
 async function submitJob() {
     const btn = document.getElementById('btnSubmit');
     const docFile = document.getElementById('docFile').files[0];
     const repairPhoto = document.getElementById('repairPhoto').files[0];
     const jobType = document.getElementById('jobType').value;
 
-    if (!jobType) {
-        alert("กรุณาเลือกประเภทงาน");
-        return;
-    }
+    if (!jobType) return alert("กรุณาเลือกประเภทงาน");
 
-    // เริ่มแสดงผลสถานะการทำงาน
     toggleLoader(true);
     btn.disabled = true;
-    btn.innerText = "กำลังบันทึกข้อมูล...";
 
     try {
         const payload = {
@@ -73,61 +67,37 @@ async function submitJob() {
         };
 
         const res = await apiRequest(payload, 'POST');
-
         if (res.success) {
             alert('บันทึกสำเร็จ!');
             location.reload();
-        } else {
-            alert('เกิดข้อผิดพลาด: ' + (res.error || 'ข้อมูลไม่ถูกต้อง'));
         }
     } catch (e) {
-        alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
+        alert('เกิดข้อผิดพลาดในการบันทึก');
     } finally {
         toggleLoader(false);
         btn.disabled = false;
-        btn.innerText = "บันทึกข้อมูล";
     }
 }
 
-// 6. ควบคุมการโหลดหน้าเว็บ (แก้ไขจุดบกพร่องที่ทำให้จอกระพริบ)
-window.onload = async () => {
-    const session = JSON.parse(localStorage.getItem('session'));
-    const isLoginPage = window.location.pathname.includes('login.html');
+// 6. ฟังก์ชันสำหรับ Login (สำหรับหน้า login.html)
+async function handleLogin() {
+    const u = document.getElementById('username').value;
+    const p = document.getElementById('password').value;
 
-    // ถ้าไม่มี Session และไม่ได้อยู่ที่หน้า Login ให้ไปหน้า Login
-    if (!session && !isLoginPage) {
-        window.location.replace('login.html');
-        return;
-    }
+    if(!u || !p) return alert("กรุณากรอกข้อมูลให้ครบ");
 
-    // ถ้ามี Session แล้วพยายามเข้าหน้า Login ให้ส่งไปหน้าหลัก
-    if (session && isLoginPage) {
-        window.location.replace('index.html');
-        return;
-    }
-
-    // ส่วนการทำงานเฉพาะหน้า Dashboard (index.html)
-    const staffNameElem = document.getElementById('staffName');
-    if (staffNameElem && session) {
-        staffNameElem.innerText = session.name;
-        
-        // โหลดข้อมูล Master Data (ทำเพียงครั้งเดียว)
-        toggleLoader(true);
-        try {
-            const assets = await apiRequest({action: 'getAssets'}, 'GET');
-            const select = document.getElementById('assetID');
-            if (select && assets) {
-                assets.forEach(a => {
-                    const opt = document.createElement('option');
-                    opt.value = a.assetID;
-                    opt.text = `${a.assetID} - ${a.name}`;
-                    select.appendChild(opt);
-                });
-            }
-        } catch (e) {
-            console.error("Load Assets Failed");
-        } finally {
-            toggleLoader(false); // ปิด Loader เมื่อทุกอย่างเสร็จ
+    toggleLoader(true);
+    try {
+        const res = await apiRequest({ action: 'loginIT', email: u, password: p }, 'POST');
+        if (res.success) {
+            localStorage.setItem('session', JSON.stringify(res));
+            window.location.replace('index.html'); // ใช้ replace เพื่อป้องกัน loop
+        } else {
+            alert("ข้อมูลไม่ถูกต้อง หรือไม่ได้รับสิทธิ์ (Status != true)");
         }
+    } catch (e) {
+        alert("เชื่อมต่อไม่สำเร็จ");
+    } finally {
+        toggleLoader(false);
     }
-};
+}
