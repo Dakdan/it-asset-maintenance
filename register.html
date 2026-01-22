@@ -55,38 +55,32 @@
 
     <script src="js/main.js"></script> 
     <script>
-        async function handleRegister() {
-            const data = {
-                action: 'registerIT',
-                USERID: document.getElementById('USERID').value,
-                UserMail: document.getElementById('UserMail').value,
-                UserName: document.getElementById('UserName').value,
-                UserSname: document.getElementById('UserSname').value,
-                UserTypeName: document.getElementById('UserTypeName').value
-            };
+       async function handleRegister() {
+    const data = {
+        action: 'registerIT',
+        USERID: document.getElementById('USERID').value,
+        UserMail: document.getElementById('UserMail').value,
+        UserName: document.getElementById('UserName').value,
+        UserSname: document.getElementById('UserSname').value,
+        UserTypeName: document.getElementById('UserTypeName').value
+    };
 
-            if(!data.USERID || !data.UserMail || !data.UserName) {
-                alert("⚠️ กรุณากรอกข้อมูลให้ครบทุกช่อง");
-                return;
-            }
+    const SCRIPT_URL = "URL_DEPLOY_ของมึง"; 
 
-            document.getElementById('loader').style.display = 'flex';
-            document.getElementById('submitBtn').disabled = true;
-
-            try {
-                // เรียกใช้ฟังก์ชันจาก main.js
-                const res = await apiRequest(data); 
-                if(res.success) {
-                    alert("✅ ลงทะเบียนสำเร็จ! รหัสผ่านถูกส่งไปที่เมลของคุณแล้ว");
-                    window.location.replace('login.html');
-                }
-            } catch (e) {
-                alert("❌ การเชื่อมต่อล้มเหลว: ตรวจสอบ URL ใน main.js หรือสิทธิ์ใน Google Script");
-            } finally {
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('submitBtn').disabled = false;
-            }
+    try {
+        const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+        const res = await response.json();
+        if(res.success) {
+            alert("✅ สำเร็จ! ข้อมูลลงตาราง ITUser แล้ว");
+            window.location.replace('login.html');
         }
+    } catch (error) {
+        alert("❌ เชื่อมต่อล้มเหลว: ตรวจสอบ URL หรือต้อง Deploy เป็น Anyone เท่านั้น");
+    }
+}
     </script>
 </body>
 </html>
