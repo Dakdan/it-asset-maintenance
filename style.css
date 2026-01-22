@@ -1,119 +1,195 @@
+/* นำเข้า Font Kanit จาก Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap');
+
+:root {
+    --primary-pink: #ff85a2;
+    --soft-pink: #fce4ec;
+    --deep-pink: #f06292;
+    --white: #ffffff;
+    --light-gray: #f8f9fa;
+    --shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    --border-radius: 15px;
+}
+
 * {
-  box-sizing: border-box;
-  font-family: "Segoe UI", sans-serif;
+    box-sizing: border-box;
+    font-family: 'Kanit', sans-serif;
 }
 
 body {
-  margin: 0;
-  background: #fce4ec;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, var(--white) 0%, var(--soft-pink) 100%);
+    background-attachment: fixed;
+    color: #444;
 }
 
-header {
-  background: linear-gradient(90deg, #ff5fa2, #ff8ac6);
-  color: #fff;
-  padding: 15px;
-  display: flex;
-  align-items: center;
-  gap: 15px;
+/* Navigation Bar */
+nav {
+    background: var(--white);
+    padding: 15px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
-header img {
-  height: 50px;
-  background: #fff;
-  border-radius: 8px;
-  padding: 5px;
+.nav-brand {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--deep-pink);
 }
 
-main {
-  padding: 15px;
+/* Container */
+.container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 0 20px;
 }
 
+h2 {
+    color: var(--deep-pink);
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: 500;
+}
+
+/* Card-based UI */
 .card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 15px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    background: var(--white);
+    border-radius: var(--border-radius);
+    padding: 30px;
+    box-shadow: var(--shadow);
+    margin-bottom: 25px;
+    border: 1px solid rgba(255, 133, 162, 0.1);
 }
 
-.job {
-  border-left: 5px solid #ff5fa2;
-  padding: 10px;
-  margin-bottom: 12px;
-  background: #fff;
-  border-radius: 8px;
+/* Form Styling */
+.form-group {
+    margin-bottom: 20px;
 }
 
-.job b {
-  font-size: 16px;
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 400;
+    color: #666;
 }
 
-.job .status {
-  font-weight: bold;
+input[type="text"],
+input[type="email"],
+input[type="password"],
+select,
+textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid var(--soft-pink);
+    border-radius: 12px;
+    background-color: var(--light-gray);
+    transition: all 0.3s ease;
+    outline: none;
 }
 
-button {
-  border: none;
-  border-radius: 6px;
-  padding: 6px 12px;
-  cursor: pointer;
-  margin-right: 5px;
+input:focus, select:focus {
+    border-color: var(--primary-pink);
+    background-color: var(--white);
+    box-shadow: 0 0 8px rgba(255, 133, 162, 0.2);
 }
 
-.btn-start {
-  background: #4caf50;
-  color: #fff;
+/* Upload Styling */
+input[type="file"] {
+    background: var(--white);
+    padding: 10px;
+    border: 1px dashed var(--primary-pink);
+    border-radius: 12px;
+    width: 100%;
+    cursor: pointer;
 }
 
-.btn-close {
-  background: #f44336;
-  color: #fff;
+/* Button Styling */
+.btn-primary {
+    width: 100%;
+    background: linear-gradient(45deg, var(--primary-pink), var(--deep-pink));
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 30px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(240, 98, 146, 0.3);
+    transition: transform 0.2s, opacity 0.2s;
+    margin-top: 10px;
 }
 
-.loading {
-  color: #888;
+.btn-primary:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
 }
 
-footer {
-  text-align: center;
-  font-size: 12px;
-  color: #666;
-  padding: 10px;
-}
-.app-header {
-  background: linear-gradient(135deg, #ff5fa2, #ffc1d9);
-  color: white;
-  padding: 12px 15px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.btn-primary:active {
+    transform: translateY(0);
 }
 
-.app-title {
-  font-size: 20px;
-  font-weight: bold;
+.btn-primary:disabled {
+    background: #ccc;
+    box-shadow: none;
+    cursor: not-allowed;
 }
 
-.app-subtitle {
-  font-size: 14px;
-  opacity: 0.9;
-}
-.loading-btn {
-  opacity: 0.7;
-  pointer-events: none;
-}
-
-.spinner {
-  width:18px;
-  height:18px;
-  border:3px solid #fff;
-  border-top:3px solid transparent;
-  border-radius:50%;
-  display:inline-block;
-  animation: spin 1s linear infinite;
-  vertical-align:middle;
+/* Status Badges */
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 400;
 }
 
-@keyframes spin {
-  0% {transform: rotate(0deg);}
-  100% {transform: rotate(360deg);}
+.status-pending { background: #fff3cd; color: #856404; }
+.status-active { background: #d1ecf1; color: #0c5460; }
+.status-complete { background: #d4edda; color: #155724; }
+
+/* Responsive */
+@media (max-width: 600px) {
+    .container { margin: 15px auto; }
+    .card { padding: 20px; }
+    .nav-brand { font-size: 1rem; }
+}
+
+/* ================= PRINT PREVIEW (LANDSCAPE) ================= */
+@media print {
+    @page {
+        size: landscape;
+        margin: 1cm;
+    }
+    body {
+        background: white;
+        font-size: 10pt;
+    }
+    nav, .btn-primary, input[type="file"] {
+        display: none !important; /* ซ่อนสิ่งที่ไม่จำเป็นตอนพิมพ์ */
+    }
+    .card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+        margin: 0;
+        padding: 15px;
+    }
+    h2 { margin-top: 0; }
+}
+
+/* Loading Overlay */
+#loader {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(255,255,255,0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    font-weight: 500;
+    color: var(--deep-pink);
 }
