@@ -1,12 +1,11 @@
-/* นำเข้า Font Kanit */
 @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap');
 
 :root {
-    --primary-pink: #ff0080;      /* ชมพูหลัก */
-    --neon-pink: #ff00ff;         /* ชมพูสะท้อนแสง ขอบ Input */
-    --neon-green: #00ff00;        /* เขียวสะท้อนแสง ขอบปุ่ม */
-    --bg-pink: #fce4ec;           /* สีพื้นหลังชมพูอ่อน (ตัวนี้ต้องเห็นชัด) */
-    --dark-pink: #800040;         /* ชมพูเข้มเลือดหมู */
+    --primary-pink: #ff0080;
+    --neon-pink: #ff00ff;
+    --neon-green: #00ff00;
+    --bg-pink: #fce4ec; /* สีชมพูพื้นหลัง */
+    --dark-pink: #800040;
     --white: #ffffff;
 }
 
@@ -15,30 +14,29 @@
     font-family: 'Kanit', sans-serif;
 }
 
-/* แก้ไขสีพื้นหลังให้ครอบคลุมทั้งหน้าจอ */
+/* แก้ไขจุดนี้: บังคับสีพื้นหลังให้เต็มหน้าจอ */
 html, body {
     margin: 0;
     padding: 0;
     width: 100%;
     min-height: 100vh;
-    background-color: var(--bg-pink) !important; /* บังคับให้สีพื้นหลังขึ้น */
+    background-color: var(--bg-pink) !important; /* บังคับสีพื้นหลัง */
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-/* Container หลักสำหรับจัดกึ่งกลาง */
+/* Wrapper คุมทุกอย่างให้อยู่กลางจอ */
 .login-wrapper {
-    width: 100%;
+    width: 95%;
     max-width: 450px;
-    padding: 20px;
-    display: block;
+    margin: 20px auto;
 }
 
-/* หัว Header สีชมพูเข้ม */
+/* ส่วนหัว Header สีชมพูเข้ม */
 .login-header {
     background: linear-gradient(to bottom, var(--dark-pink), var(--primary-pink));
-    padding: 15px;
+    padding: 20px;
     border-radius: 20px 20px 0 0;
     display: flex;
     align-items: center;
@@ -48,20 +46,21 @@ html, body {
 }
 
 .header-logo {
-    width: 60px;
-    height: 60px;
+    width: 65px;
+    height: 65px;
     background: white;
     border-radius: 50%;
     padding: 5px;
     object-fit: contain;
+    flex-shrink: 0;
 }
 
-.header-text h1 { font-size: 1.1rem; margin: 0; }
-.header-text p { font-size: 0.75rem; margin: 0; font-weight: 300; }
+.header-text h1 { font-size: 1.2rem; margin: 0; }
+.header-text p { font-size: 0.8rem; margin: 0; font-weight: 300; }
 
-/* กล่องสีขาว (Card) */
+/* กล่อง Card สีขาว */
 .login-card {
-    background-color: var(--white) !important; /* บังคับให้เป็นพื้นขาว */
+    background-color: var(--white) !important;
     padding: 30px;
     border-radius: 0 0 20px 20px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
@@ -75,23 +74,26 @@ html, body {
     text-align: left;
 }
 
-/* ขอบ Input สีชมพูสะท้อนแสง */
-input, select, textarea {
+label { display: block; margin-bottom: 5px; color: #555; }
+
+/* Input และ Select ขอบชมพูสะท้อนแสง */
+input, select {
     width: 100%;
     padding: 12px 15px;
     border: 2px solid var(--neon-pink);
     border-radius: 15px;
-    outline: none;
     font-size: 1rem;
+    outline: none;
+    background: white;
 }
 
-/* ปุ่มหลัก สีชมพูขอบเขียว */
-.btn-login, .btn-primary {
+/* ปุ่มหลัก ชมพูขอบเขียว */
+.btn-login {
     width: 100%;
     background-color: var(--primary-pink);
     color: white;
     border: 2px solid var(--neon-green);
-    padding: 12px;
+    padding: 14px;
     border-radius: 15px;
     font-size: 1.2rem;
     font-weight: 500;
@@ -101,7 +103,7 @@ input, select, textarea {
 
 .btn-login:hover { filter: brightness(1.1); }
 
-/* ปุ่มลิงก์กลับหน้าหลัก */
+/* ปุ่มกลับหน้าหลัก */
 .btn-back {
     background: none;
     border: none;
@@ -109,27 +111,18 @@ input, select, textarea {
     text-decoration: underline;
     cursor: pointer;
     margin-top: 15px;
-    font-size: 0.9rem;
+    font-size: 1rem;
 }
 
 /* Loader */
 .loader-overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(255, 255, 255, 0.8);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(255, 255, 255, 0.8); display: none;
+    justify-content: center; align-items: center; z-index: 9999;
 }
-
 .spinner {
-    width: 40px; height: 40px;
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid var(--primary-pink);
-    border-radius: 50%;
+    width: 50px; height: 50px; border: 5px solid #f3f3f3;
+    border-top: 5px solid var(--primary-pink); border-radius: 50%;
     animation: spin 1s linear infinite;
 }
-
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
