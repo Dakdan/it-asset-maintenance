@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IT Service Management - สำหรับเจ้าหน้าที่ IT</title>
+    <title>เข้าสู่ระบบ - IT Maintenance</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
 </head>
@@ -12,91 +12,71 @@
     <div id="loader" class="loader-overlay">
         <div class="loader-content">
             <div class="spinner"></div>
-            <p>กำลังประมวลผล...</p>
+            <p>กำลังตรวจสอบสิทธิ์...</p>
         </div>
     </div>
 
-    <nav>
-        <div class="nav-container">
-            <div class="brand">
-                <img src="https://img2.pic.in.th/-227e4f6f84f29f020.png" alt="LOGO" class="logo">
-                <span class="brand-text">IT MAINTENANCE</span>
-            </div>
-            <div class="user-info">
-                <span id="staffName">กำลังโหลด...</span>
-                <button onclick="logout()" class="btn-logout">ออกจากระบบ</button>
+    <div class="login-wrapper">
+        <div class="login-header">
+            <img src="https://img2.pic.in.th/-227e4f6f84f29f020.png" alt="Logo" class="header-logo">
+            <div class="header-text">
+                <h1>โรงพยาบาลอุดรธานี</h1>
+                <p>ระบบบริหารจัดการครุภัณฑ์คอมพิวเตอร์และบริการ</p>
             </div>
         </div>
-    </nav>
 
-    <div class="container">
-        <div class="header-section">
-            <h2>สร้างใบงานซ่อมบำรุง / มอบหมายงาน</h2>
-            <p>บันทึกรายละเอียดงานจากทุกช่องทาง (โทรศัพท์, บันทึกข้อความ, ระบบอื่นๆ)</p>
-        </div>
-
-        <div class="card">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>ประเภทงาน (Master):</label>
-                    <select id="jobType">
-                        <option value="">-- เลือกประเภทงาน --</option>
-                        <option value="คอมพิวเตอร์">คอมพิวเตอร์</option>
-                        <option value="เครือข่าย">เครือข่าย</option>
-                        <option value="ซอฟต์แวร์">ซอฟต์แวร์</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>ครุภัณฑ์ (Asset ID):</label>
-                    <select id="assetID">
-                        <option value="">-- เลือกจากฐานข้อมูล BackupData --</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>เลขที่บันทึกข้อความ:</label>
-                    <input type="text" id="docNumber" placeholder="เช่น บันทึกเลขที่ 123/2567">
-                </div>
-
-                <div class="form-group">
-                    <label>ผู้มอบหมาย / สั่งการ:</label>
-                    <input type="text" id="assignBy" placeholder="ระบุชื่อผู้มอบหมายงาน">
-                </div>
+        <div class="login-card">
+            <div class="card-title">
+                <span class="icon">🔒</span> เข้าสู่ระบบ
             </div>
-
+            
             <div class="form-group">
-                <label>รายละเอียดปัญหา/ความต้องการ:</label>
-                <textarea id="detail" rows="3" placeholder="ระบุรายละเอียดเพิ่มเติม..."></textarea>
+                <input type="text" id="username" placeholder="Username" required>
+            </div>
+            
+            <div class="form-group">
+                <input type="password" id="password" placeholder="Password" required>
             </div>
 
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>แนบไฟล์เอกสารบันทึก (PDF/Image):</label>
-                    <div class="file-upload-wrapper">
-                        <input type="file" id="docFile" accept=".pdf,image/*">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>รูปภาพหน้างาน / งานซ่อม:</label>
-                    <div class="file-upload-wrapper">
-                        <input type="file" id="repairPhoto" accept="image/*" capture="camera">
-                    </div>
-                </div>
-            </div>
-
-            <button id="btnSubmit" onclick="submitJob()" class="btn-primary">
-                บันทึกข้อมูลและเปิดใบงาน
+            <button id="btnLogin" onclick="handleLogin()" class="btn-login">
+                🛡️ Login
             </button>
+
+            <div class="card-footer">
+                ยังไม่มีบัญชี? <a href="register.html">ลงทะเบียน</a>
+            </div>
         </div>
     </div>
 
     <script src="js/main.js"></script>
     <script>
-        function logout() {
-            localStorage.clear();
-            window.location.href = 'login.html';
+        // ฟังก์ชัน Login เฉพาะหน้า (เชื่อมกับ logic ใน main.js)
+        async function handleLogin() {
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+
+            if(!u || !p) return alert("กรุณากรอกข้อมูลให้ครบ");
+
+            toggleLoader(true); // แสดง Spinner (จาก main.js)
+            
+            try {
+                const res = await apiRequest({
+                    action: 'loginIT',
+                    email: u,
+                    password: p
+                }, 'POST');
+
+                if (res.success) {
+                    localStorage.setItem('session', JSON.stringify(res));
+                    window.location.href = 'index.html';
+                } else {
+                    alert("ไม่สามารถเข้าสู่ระบบได้: ข้อมูลไม่ถูกต้อง หรือยังไม่ได้รับอนุมัติสิทธิ์ (คอลัมน์ 5)");
+                }
+            } catch (e) {
+                alert("การเชื่อมต่อขัดข้อง");
+            } finally {
+                toggleLoader(false);
+            }
         }
     </script>
 </body>
