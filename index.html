@@ -1,58 +1,47 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
-<meta charset="UTF-8">
-<title>IT Dashboard</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>IT Maintenance System - สำหรับช่าง</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <nav>
+        <span>ผู้ใช้งาน: <b id="staffName"></b></span>
+        <button onclick="localStorage.clear(); location.href='login.html';">Logout</button>
+    </nav>
 
-<header class="app-header">
- <div>
-  <div class="app-title">ระบบ IT Maintenance</div>
-  <div class="app-subtitle" id="userInfo"></div>
- </div>
- <button onclick="logout()">ออกจากระบบ</button>
-</header>
+    <div class="container">
+        <h2>สร้างใบงานซ่อมบำรุง (IT Only)</h2>
+        
+        <div class="card">
+            <label>ประเภทงาน (Standard):</label>
+            <select id="jobType">
+                <option value="คอมพิวเตอร์">คอมพิวเตอร์</option>
+                <option value="เครือข่าย">เครือข่าย</option>
+            </select>
 
-<main>
+            <label>ครุภัณฑ์ (จาก BackupData):</label>
+            <select id="assetID">
+                <option value="">-- เลือกครุภัณฑ์ --</option>
+            </select>
 
-<!-- งานที่กำลังดำเนินการ -->
-<div class="card">
-<h3>🛠 งานที่กำลังดำเนินการ</h3>
-<table id="jobTable">
-<thead>
-<tr>
-<th>ID</th><th>ประเภท</th><th>สถานะ</th><th>จัดการ</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
-</div>
+            <label>เลขที่บันทึกข้อความ:</label>
+            <input type="text" id="docNumber" placeholder="ระบุเลขที่บันทึก (ถ้ามี)">
 
-</main>
+            <label>ผู้มอบหมาย:</label>
+            <input type="text" id="assignBy" placeholder="ระบุชื่อผู้สั่งการ">
 
-<script src="js/api.js"></script>
-<script src="js/main.js"></script>
+            <label>แนบไฟล์บันทึกข้อความ (PDF/รูป):</label>
+            <input type="file" id="docFile" accept=".pdf,image/*">
 
-<script>
-const token=localStorage.getItem("it_token");
-if(!token) location.href="login.html";
+            <label>ถ่ายรูปงานซ่อม/หน้างาน:</label>
+            <input type="file" id="repairPhoto" accept="image/*" capture="camera">
 
-apiPost({action:"checkToken",token}).then(r=>{
- if(!r.valid){
-  localStorage.removeItem("it_token");
-  location.href="login.html";
- }else{
-  userInfo.innerText="ผู้ใช้งาน: "+r.user;
- }
-});
+            <button id="btnSubmit" onclick="submitJob()" class="btn-primary">บันทึกข้อมูล</button>
+        </div>
+    </div>
 
-function logout(){
- localStorage.removeItem("it_token");
- location.href="login.html";
-}
-</script>
-
+    <script src="js/main.js"></script>
 </body>
 </html>
