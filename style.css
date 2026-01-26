@@ -163,6 +163,48 @@ select {
     font-size: 15px;
     cursor: pointer;
 }
+/* ================= POPUP (เพิ่มอย่างเดียว ห้ามลบของเดิม) ================= */
+.popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.popup-box {
+    background: #fff;
+    padding: 20px 25px;
+    border-radius: 15px;
+    width: 320px;
+    text-align: center;
+    box-shadow: 0 15px 40px rgba(0,0,0,.3);
+    animation: pop .25s ease;
+}
+
+.popup-box h3 {
+    color: #ff0080;
+    margin-bottom: 10px;
+}
+
+.popup-box button {
+    margin-top: 15px;
+    padding: 8px 25px;
+    border: none;
+    border-radius: 10px;
+    background: #ff0080;
+    color: white;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+@keyframes pop {
+    from { transform: scale(.85); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
 
 @keyframes pop {
     from { transform: scale(.85); opacity: 0; }
