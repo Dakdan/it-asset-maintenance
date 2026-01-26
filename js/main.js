@@ -8,6 +8,11 @@ async function apiRequest(data) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
     });
+
+    if (!res.ok) {
+        throw new Error("HTTP ERROR " + res.status);
+    }
+
     return await res.json();
 }
 
@@ -31,11 +36,11 @@ function closePopup() {
 async function handleRegister() {
     const data = {
         action: 'registerIT',
-        USERID: USERID.value,
-        UserTypeName: UserTypeName.value,
-        UserName: UserName.value,
-        UserSname: UserSname.value,
-        UserMail: UserMail.value
+        USERID: document.getElementById('USERID')?.value.trim(),
+        UserTypeName: document.getElementById('UserTypeName')?.value.trim(),
+        UserName: document.getElementById('UserName')?.value.trim(),
+        UserSname: document.getElementById('UserSname')?.value.trim(),
+        UserMail: document.getElementById('UserMail')?.value.trim()
     };
 
     if (!data.USERID || !data.UserMail || !data.UserName) {
@@ -47,14 +52,17 @@ async function handleRegister() {
 
     try {
         const res = await apiRequest(data);
+
         if (res.success) {
             showPopup("ลงทะเบียนสำเร็จ\nกรุณาตรวจสอบ Email", "สำเร็จ");
             setTimeout(() => location.href = "login.html", 1000);
         } else {
             showPopup(res.message || "ลงทะเบียนไม่สำเร็จ");
         }
-    } catch {
-        showPopup("การเชื่อมต่อล้มเหลว");
+
+    } catch (err) {
+        console.error(err);
+        showPopup("ไม่สามารถเชื่อมต่อระบบได้", "ข้อผิดพลาด");
     } finally {
         toggleLoader(false);
     }
