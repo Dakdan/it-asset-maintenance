@@ -1,102 +1,140 @@
-// ================= CONFIG =================
-const SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbzNSgpYNigJX7W-RUPq8SLN4e687pE55p72KsbM-nWFcPefKDhjzYAflsm78i42IW7qrw/exec";
+/* =========================
+   CONFIG
+========================= */
+const SESSION_KEY = "it_session";
 
-// ================= API =================
-async function apiRequest(data) {
-  const res = await fetch(SCRIPT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-  });
-  return res.json();
-}
-
-// ================= UI : LOADER =================
-function toggleLoader(show) {
+/* =========================
+   UI HELPER
+========================= */
+function showLoader() {
   const el = document.getElementById("loader");
-  if (el) el.style.display = show ? "flex" : "none";
+  if (el) el.style.display = "flex";
 }
 
-// ================= UI : POPUP =================
-function showPopup(msg, title = "แจ้งเตือน") {
-  const popup = document.getElementById("popup");
-  if (!popup) {
-    alert(msg);
-    return;
-  }
+function hideLoader() {
+  const el = document.getElementById("loader");
+  if (el) el.style.display = "none";
+}
+
+function showPopup(title, message) {
   document.getElementById("popup-title").innerText = title;
-  document.getElementById("popup-message").innerText = msg;
-  popup.style.display = "flex";
+  document.getElementById("popup-message").innerText = message;
+  document.getElementById("popup").style.display = "flex";
 }
 
 function closePopup() {
-  const popup = document.getElementById("popup");
-  if (popup) popup.style.display = "none";
+  document.getElementById("popup").style.display = "none";
 }
 
-// ================= LOGIN =================
+/* =========================
+   SESSION
+========================= */
+function saveSession(user) {
+  localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+}
+
+function getSession() {
+  const s = localStorage.getItem(SESSION_KEY);
+  return s ? JSON.parse(s) : null;
+}
+
+function clearSession() {
+  localStorage.removeItem(SESSION_KEY);
+}
+
+/* =========================
+   LOGIN
+========================= */
 async function handleLogin() {
-  const username = document.getElementById("username")?.value.trim();
-  const password = document.getElementById("password")?.value.trim();
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value;
 
   if (!username || !password) {
-    showPopup("กรุณากรอก Username และ Password");
+    showPopup("แจ้งเตือน", "กรุณากรอกข้อมูลให้ครบ");
     return;
   }
 
-  toggleLoader(true);
+  showLoader();
 
   try {
-    const res = await apiRequest({
-      action: "login",
-      username: username,   // ✅ ตรงกับ code.gs
-      password: password   // ✅ ตรงกับ code.gs
-    });
+    const res = await api.login(username, password);
 
-    if (res.success) {
-      localStorage.setItem("it_session", JSON.stringify(res.data));
-      location.href = "index.html";
-    } else {
-      showPopup(res.message || "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
+    if (!res.success) {
+      hideLoader();
+      showPopup("เข้าสู่ระบบไม่สำเร็จ", res.message || "ข้อมูลไม่ถูกต้อง");
+      return;
     }
+
+    // 🔐 login สำเร็จ
+    saveSession(res.user);
+
+    hideLoader();
+    location.href = "./index.html";
+
   } catch (err) {
-    showPopup("ไม่สามารถเชื่อมต่อระบบได้");
-  } finally {
-    toggleLoader(false);
+    hideLoader();
+    showPopup("ผิดพลาด", err.message);
   }
 }
 
-// ================= REGISTER =================
+/* =========================
+   REGISTER
+========================= */
 async function handleRegister() {
   const data = {
-    action: "registerIT",
-    USERID: document.getElementById("USERID")?.value.trim(),
-    UserTypeName: document.getElementById("UserTypeName")?.value || "IT",
-    UserName: document.getElementById("UserName")?.value.trim(),
-    UserSname: document.getElementById("UserSname")?.value.trim(),
-    UserMail: document.getElementById("UserMail")?.value.trim()
+    USERID: document.getElementById("USERID").value.trim(),
+    UserName: document.getElementById("UserName").value.trim(),
+    UserSname: document.getElementById("UserSname").value.trim(),
+    UserMail: document.getElementById("UserMail").value.trim(),
+    UserTypeName: document.getElementById("UserTypeName").value
   };
 
-  if (!data.USERID || !data.UserName || !data.UserMail) {
-    showPopup("กรุณากรอกข้อมูลให้ครบ");
+  if (!data.USERID || !data.UserName || !data.UserSname || !data.UserMail) {
+    showPopup("แจ้งเตือน", "กรุณากรอกข้อมูลให้ครบ");
     return;
   }
 
-  toggleLoader(true);
+  showLoader();
 
   try {
-    const res = await apiRequest(data);
+    const res = await api.register(data);
 
-    if (res.success) {
-      showPopup("สมัครสมาชิกสำเร็จ", "สำเร็จ");
-      setTimeout(() => location.href = "login.html", 1200);
-    } else {
-      showPopup(res.message || "ลงทะเบียนไม่สำเร็จ");
+    hideLoader();
+
+    if (!res.success) {
+      showPopup("สมัครไม่สำเร็จ", res.message || "เกิดข้อผิดพลาด");
+      return;
     }
+
+    showPopup(
+      "สมัครสำเร็จ",
+      "ระบบได้ส่งรหัสผ่านเริ่มต้นไปที่ Email แล้ว"
+    );
+
+    setTimeout(() => {
+      location.href = "./login.html";
+    }, 1500);
+
   } catch (err) {
-    showPopup("ไม่สามารถเชื่อมต่อระบบได้");
-  } finally {
-    toggleLoader(false);
+    hideLoader();
+    showPopup("ผิดพลาด", err.message);
   }
+}
+
+/* =========================
+   AUTO LOGIN (INDEX)
+========================= */
+function checkLogin() {
+  const session = getSession();
+  if (!session) {
+    location.href = "./login.html";
+  }
+}
+
+/* =========================
+   LOGOUT
+========================= */
+function logout() {
+  clearSession();
+  location.href = "./login.html";
 }
