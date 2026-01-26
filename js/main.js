@@ -1,6 +1,8 @@
 /* =========================
    CONFIG
 ========================= */
+const api = 'https://script.google.com/macros/s/AKfycbzNSgpYNigJX7W-RUPq8SLN4e687pE55p72KsbM-nWFcPefKDhjzYAflsm78i42IW7qrw/exec';
+
 const SESSION_KEY = "it_session";
 
 /* =========================
