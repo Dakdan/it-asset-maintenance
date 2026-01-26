@@ -30,11 +30,11 @@ function closePopup() {
 
 // ================= LOGIN =================
 async function handleLogin() {
-  const email = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value.trim();
+  const username = document.getElementById("username")?.value.trim();
+  const password = document.getElementById("password")?.value.trim();
 
-  if (!email || !password) {
-    showPopup("กรุณากรอก Email และ Password");
+  if (!username || !password) {
+    showPopup("กรุณากรอก Username และ Password");
     return;
   }
 
@@ -42,18 +42,18 @@ async function handleLogin() {
 
   try {
     const res = await apiRequest({
-      action: "loginIT",
-      email,
-      password
+      action: "login",        // ✅ ตรงกับ Code.gs
+      USERID: username,       // ✅ ตรง column
+      UserPW: password        // ✅ ตรง column
     });
 
     if (res.success) {
-      localStorage.setItem("it_session", JSON.stringify(res));
+      localStorage.setItem("it_session", JSON.stringify(res.data));
       location.href = "index.html";
     } else {
-      showPopup("Email หรือ Password ไม่ถูกต้อง");
+      showPopup(res.message || "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
     }
-  } catch {
+  } catch (e) {
     showPopup("ไม่สามารถเชื่อมต่อระบบได้");
   } finally {
     toggleLoader(false);
@@ -62,23 +62,30 @@ async function handleLogin() {
 
 // ================= REGISTER =================
 async function handleRegister() {
+  const data = {
+    action: "registerIT",
+    USERID: USERID.value.trim(),
+    UserTypeName: UserTypeName.value,
+    UserName: UserName.value.trim(),
+    UserSname: UserSname.value.trim(),
+    UserMail: UserMail.value.trim()
+  };
+
+  if (!data.USERID || !data.UserName || !data.UserMail) {
+    showPopup("กรุณากรอกข้อมูลให้ครบ");
+    return;
+  }
+
   toggleLoader(true);
 
   try {
-    const res = await apiRequest({
-      action: "registerIT",
-      USERID: USERID.value.trim(),
-      UserTypeName: UserTypeName.value,
-      UserName: UserName.value.trim(),
-      UserSname: UserSname.value.trim(),
-      UserMail: UserMail.value.trim()
-    });
+    const res = await apiRequest(data);
 
     if (res.success) {
       showPopup("สมัครสมาชิกสำเร็จ กรุณาตรวจสอบ Email", "สำเร็จ");
       setTimeout(() => location.href = "login.html", 1200);
     } else {
-      showPopup("ลงทะเบียนไม่สำเร็จ");
+      showPopup(res.message || "ลงทะเบียนไม่สำเร็จ");
     }
   } catch {
     showPopup("เชื่อมต่อระบบไม่ได้");
