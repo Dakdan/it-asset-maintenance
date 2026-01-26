@@ -28,4 +28,36 @@ async function handleLogin() {
   } finally {
     toggleLoader(false);
   }
+  // ================= LOGIN =================
+async function handleLogin() {
+  const username = document.getElementById("username")?.value.trim();
+  const password = document.getElementById("password")?.value.trim();
+
+  if (!username || !password) {
+    alert("กรุณากรอก Username และ Password");
+    return;
+  }
+
+  toggleLoader(true);
+
+  try {
+    const res = await apiRequest({
+      action: "login",
+      username,
+      password
+    });
+
+    if (res.success) {
+      localStorage.setItem("it_session", JSON.stringify(res.data));
+      location.href = "index.html";
+    } else {
+      alert(res.message || "เข้าสู่ระบบไม่สำเร็จ");
+    }
+  } catch (e) {
+    alert("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
+  } finally {
+    toggleLoader(false);
+  }
+}
+
 }
