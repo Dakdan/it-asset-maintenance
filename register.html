@@ -1,179 +1,56 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<title>ลงทะเบียนผู้ใช้</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<style>
-  body{
-    margin:0;
-    height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:#9a8c8f;
-    font-family: Arial, sans-serif;
-  }
-
-  .card{
-    width:360px;
-    background:#9e9e9e;
-    border-radius:20px;
-    overflow:hidden;
-    box-shadow:0 8px 20px rgba(0,0,0,.3);
-    position:relative;
-  }
-
-  .header{
-    background:#7b003b;
-    color:#fff;
-    text-align:center;
-    padding:20px;
-    font-size:22px;
-    font-weight:bold;
-  }
-
-  .content{
-    padding:20px;
-  }
-
-  .input{
-    width:100%;
-    padding:12px;
-    margin-bottom:12px;
-    border-radius:12px;
-    border:2px solid #b000b5;
-    outline:none;
-    font-size:15px;
-    box-sizing:border-box;
-  }
-
-  .btn{
-    width:100%;
-    padding:14px;
-    border:none;
-    border-radius:14px;
-    background:#7b003b;
-    color:#fff;
-    font-size:18px;
-    cursor:pointer;
-  }
-
-  /* popup */
-  .modal{
-    position:absolute;
-    inset:0;
-    background:rgba(0,0,0,.4);
-    display:none;
-    align-items:center;
-    justify-content:center;
-  }
-
-  .modal-box{
-    width:260px;
-    background:#fff;
-    border-radius:18px;
-    padding:20px;
-    text-align:center;
-  }
-
-  .modal-box h3{
-    color:#ff0066;
-    margin:0 0 10px;
-  }
-
-  .modal-box button{
-    margin-top:15px;
-    width:100%;
-    padding:12px;
-    background:#ff0066;
-    color:#fff;
-    border:none;
-    border-radius:12px;
-    font-size:16px;
-    cursor:pointer;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>ลงทะเบียน</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
 
-<div class="card">
-  <div class="header">ลงทะเบียนผู้ใช้</div>
+<div id="loader" class="loader-overlay">
+  <div class="spinner"></div>
+</div>
 
-  <div class="content">
-    <input id="UserName" class="input" placeholder="ชื่อ">
-    <input id="UserSname" class="input" placeholder="สกุล">
-    <input id="USERID" class="input" placeholder="ชื่อผู้ใช้">
-    <input id="UserMail" class="input" placeholder="อีเมล">
-
-    <button class="btn" onclick="handleRegister()">สมัครสมาชิก</button>
-  </div>
-
-  <!-- modal -->
-  <div class="modal" id="modal">
-    <div class="modal-box">
-      <h3>แจ้งเตือน</h3>
-      <div id="modalText"></div>
-      <button onclick="closeModal()">ตกลง</button>
-    </div>
+<div id="popup" class="popup-overlay">
+  <div class="popup-box">
+    <h3 id="popup-title">แจ้งเตือน</h3>
+    <p id="popup-message"></p>
+    <button onclick="closePopup()" class="btn-login">ตกลง</button>
   </div>
 </div>
 
-<script>
-/* ===== CONFIG (ล็อกตัวเดียวทั้งระบบ) ===== */
-const SCRIPT_URL =
-"https://script.google.com/macros/s/AKfycbzNSgpYNigJX7W-RUPq8SLN4e687pE55p72KsbM-nWFcPefKDhjzYAflsm78i42IW7qrw/exec";
+<div class="login-wrapper">
 
-async function apiRequest(data){
-  const res = await fetch(SCRIPT_URL,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify(data)
-  });
-  return res.json();
-}
+  <div class="login-header">
+    <h1>ลงทะเบียนผู้ใช้</h1>
+  </div>
 
-/* ===== REGISTER ===== */
-async function handleRegister(){
-  const data = {
-    action: "registerIT",
-    USERID: USERID.value.trim(),
-    UserTypeName: "IT",
-    UserName: UserName.value.trim(),
-    UserSname: UserSname.value.trim(),
-    UserMail: UserMail.value.trim()
-  };
+  <div class="login-card">
+    <div class="form-group">
+      <input id="USERID" placeholder="User ID" autocomplete="username">
+    </div>
 
-  if(!data.USERID || !data.UserName || !data.UserMail){
-    showModal("กรุณากรอกข้อมูลให้ครบ");
-    return;
-  }
+    <div class="form-group">
+      <input id="UserName" placeholder="ชื่อ">
+    </div>
 
-  try{
-    const res = await apiRequest(data);
+    <div class="form-group">
+      <input id="UserSname" placeholder="นามสกุล">
+    </div>
 
-    if(res.success){
-      showModal("สมัครสมาชิกสำเร็จ");
-      setTimeout(()=> location.href="login.html", 1200);
-    }else{
-      showModal(res.message || "ลงทะเบียนไม่สำเร็จ");
-    }
-  }catch(e){
-    showModal("ไม่สามารถเชื่อมต่อระบบได้");
-  }
-}
+    <div class="form-group">
+      <input id="UserMail" placeholder="Email" type="email" autocomplete="email">
+    </div>
 
-/* ===== MODAL ===== */
-function showModal(text){
-  modalText.innerText = text;
-  modal.style.display = "flex";
-}
-function closeModal(){
-  modal.style.display = "none";
-}
-</script>
+    <input type="hidden" id="UserTypeName" value="เจ้าหน้าที่ IT">
 
+    <button class="btn-login" onclick="handleRegister()">สมัครสมาชิก</button>
+  </div>
+
+</div>
+
+<script src="./js/main.js"></script>
 </body>
 </html>
