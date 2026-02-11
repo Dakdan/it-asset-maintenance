@@ -63,42 +63,8 @@ button:hover{opacity:0.9;}
 </div>
 
 <script>
-function loadJobTypes(){
-  google.script.run.withSuccessHandler(data=>{
-    const sel=document.getElementById("jobType");
-    data.forEach(d=>{
-      const o=document.createElement("option");
-      o.value=d.code;
-      o.text=d.name;
-      sel.appendChild(o);
-    });
-  }).getJobTypes();
-}
 
-document.getElementById("jobType").onchange=function(){
-  const code=this.value;
-  const sub=document.getElementById("jobSubType");
-  sub.innerHTML='<option value="">เลือกงานย่อย</option>';
-  if(!code) return;
-
-  google.script.run.withSuccessHandler(data=>{
-    data.forEach(d=>{
-      const o=document.createElement("option");
-      o.value=d.code;
-      o.text=d.name;
-      sub.appendChild(o);
-    });
-  }).getJobSubTypes(code);
-};
-
-function submitJob(){
-  const form={
-    jobType:jobType.value,
-    jobSubType:jobSubType.value,
-    detail:detail.value,
-    phone:phone.value,
-    reporter:reporter.value
-  };
+;
 
   google.script.run.withSuccessHandler(id=>{
     alert("บันทึกสำเร็จ เลขที่งาน: "+id);
