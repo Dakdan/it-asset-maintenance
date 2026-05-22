@@ -319,17 +319,16 @@
         return;
       }
 
-      const assetData = data.data || [];
-      assets = assetData.map(r => ({
-        asset_id: r.Asset_ID,
-        noid: r.NOID,
-        serial_number: r.Serial_Number,
-        name: `${r.Asset_DB_Col8 || "Unknown"} (SN: ${r.Serial_Number})`,
-        department: r.Dept_Name,
-        dept_id: r.DEPT_ID,
-        type: r.Asset_DB_Col13 || "Computer",
-        status: "พร้อมตรวจ"
-      }));
+     assets = assetData.map(r => ({
+  asset_id: r?.Asset_ID || "-",
+  noid: r?.NOID || "-",
+  serial_number: r?.Serial_Number || "-",
+  name: `${r?.Asset_DB_Col8 || "Unknown"} (SN: ${r?.Serial_Number || "-"})`,
+  department: r?.Dept_Name || "ไม่ระบุ",
+  dept_id: r?.DEPT_ID || "-",
+  type: r?.Asset_DB_Col13 || "Computer",
+  status: "พร้อมตรวจ"
+}));
 
       const topicsData = await callGAS("getPMTopics", { assetType: "Computer" });
       if (topicsData && topicsData.success) {
