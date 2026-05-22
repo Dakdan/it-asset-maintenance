@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบตรวจสอบครุภัณฑ์คอมพิวเตอร์ | โรงพยาบาลอุดรธานี</title>
+    
+    <!-- Font Kanit: โหลดผ่าน jsDelivr (GitHub/npm CDN) ป้องกันการถูกบล็อกโดเมน Google -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/kanit@4.5.0/300.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/kanit@4.5.0/400.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/kanit@4.5.0/500.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/kanit@4.5.0/600.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/kanit@4.5.0/700.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Phosphor Icons (Load via CDN securely) -->
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/style.css">
+    
+    <!-- Custom Config & CSS -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Kanit', 'sans-serif'] },
+                    colors: {
+                        hospital: {
+                            50: '#fdf2f8',
+                            100: '#fce7f3',
+                            200: '#fbcfe8',
+                            300: '#f9a8d4',
+                            400: '#f472b6',
+                            500: '#ec4899', // Primary Pink
+                            600: '#db2777',
+                            700: '#be185d',
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(236, 72, 153, 0.1)',
+                        'card': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%);
+            min-height: 100vh;
+            color: #374151;
+        }
+
+        /* Watermark */
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 8rem;
+            font-weight: 800;
+            color: rgba(236, 72, 153, 0.03); /* Soft pink watermark */
+            pointer-events: none;
+            z-index: 0;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #fbcfe8; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #f472b6; }
+
+        /* Form Inputs */
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(244, 114, 182, 0.2);
+            border-color: #f472b6;
+        }
+
+        /* Modal Animation */
+        .modal-enter { opacity: 0; transform: scale(0.95); }
+        .modal-enter-active { opacity: 1; transform: scale(1); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .modal-leave { opacity: 1; transform: scale(1); }
+        .modal-leave-active { opacity: 0; transform: scale(0.95); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        /* Print Styles */
+        @media print {
+            @page { size: A4 landscape; margin: 10mm; }
+            body { background: white !important; }
+            .no-print { display: none !important; }
+            .watermark { opacity: 0.1; color: #000; }
+            .shadow-card, .shadow-soft { box-shadow: none !important; border: 1px solid #eee; }
+        }
+
+        /* Input type file custom styling */
+        input[type="file"]::file-selector-button {
+            border: none;
+            background: #fdf2f8;
+            color: #ec4899;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-right: 12px;
+            font-family: 'Kanit', sans-serif;
+            font-weight: 500;
+        }
+        input[type="file"]::file-selector-button:hover { background: #fce7f3; }
+    </style>
+</head>
+<body class="relative overflow-x-hidden">
+
+    <div class="watermark">IT UDON HOSP</div>
+
+    <!-- 1. OVERLAY SYSTEM -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] hidden flex-col items-center justify-center transition-opacity duration-300 opacity-0">
+        <div class="relative">
+            <div class="w-16 h-16 border-4 border-hospital-100 border-t-hospital-500 rounded-full animate-spin"></div>
+            <i class="ph ph-stethoscope absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-hospital-500 text-xl"></i>
+        </div>
+        <p id="overlayText" class="mt-4 text-hospital-600 font-medium text-lg tracking-wide animate-pulse">กำลังประมวลผล...</p>
+    </div>
+
+    <!-- 2. MODAL NOTIFICATION SYSTEM -->
+    <div id="alertModal" class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-[90] hidden items-center justify-center p-4 transition-opacity duration-300 opacity-0">
+        <div id="alertModalBox" class="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full text-center transform scale-95 transition-transform duration-300">
+            <div id="modalIcon" class="w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4">
+                <!-- Icon injected via JS -->
+            </div>
+            <h3 id="modalTitle" class="text-2xl font-bold text-gray-800 mb-2">Title</h3>
+            <p id="modalMessage" class="text-gray-500 mb-8 leading-relaxed whitespace-pre-line">Message description goes here.</p>
+            <button onclick="closeModal()" class="w-full bg-hospital-500 hover:bg-hospital-600 text-white rounded-full py-3 px-6 font-medium transition-colors shadow-lg shadow-hospital-500/30">
+                ตกลง
+            </button>
+        </div>
+    </div>
+
+    <div class="relative z-10 flex flex-col min-h-screen">
+        <!-- HEADER -->
+        <header class="bg-white/90 backdrop-blur-md border-b border-hospital-100 shadow-sm sticky top-0 z-40 transition-all">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-hospital-100 to-hospital-200 rounded-2xl flex items-center justify-center text-hospital-600 shadow-inner">
+                        <i class="ph ph-desktop text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg sm:text-xl font-bold text-gray-800 leading-none">ระบบตรวจสอบครุภัณฑ์คอมพิวเตอร์</h1>
+                        <p class="text-xs sm:text-sm text-hospital-500 font-medium mt-1"><i class="ph ph-hospital mr-1"></i>กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์ โรงพยาบาลอุดรธานี</p>
+                    </div>
+                </div>
+                <div class="hidden sm:flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
+                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span id="userDisplay" class="text-xs text-gray-500 font-medium font-sans">ผู้ใช้งาน: Admin</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-grow max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+            
+            <!-- 3. SEARCH + QR CODE SYSTEM -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-card border border-white mb-8 no-print relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-hospital-50 rounded-bl-full -z-10 opacity-50"></div>
+                
+                <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <i class="ph ph-magnifying-glass text-hospital-500 text-2xl"></i>
+                    ค้นหาข้อมูลครุภัณฑ์
+                </h2>
+                
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <div class="relative flex-grow">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="ph ph-barcode text-gray-400 text-xl"></i>
+                        </div>
+                        <input type="text" id="searchInput" 
+                            class="block w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-gray-800 placeholder-gray-400 transition-all text-lg"
+                            placeholder="แสกน QR Code, พิมพ์ Asset ID หรือ Serial Number..."
+                            autocomplete="off">
+                    </div>
+                    <button id="scanBtn" onclick="triggerSimulatedScan()" class="flex-shrink-0 bg-hospital-100 hover:bg-hospital-200 text-hospital-600 rounded-2xl px-6 py-4 font-medium transition-colors flex items-center justify-center gap-2 group">
+                        <i class="ph ph-qr-code text-2xl group-hover:scale-110 transition-transform"></i>
+                        <span class="sm:hidden">สแกน QR</span>
+                    </button>
+                    <button onclick="executeSearch()" class="flex-shrink-0 bg-hospital-500 hover:bg-hospital-600 text-white rounded-2xl px-8 py-4 font-medium transition-all shadow-md shadow-hospital-500/20 flex items-center justify-center gap-2">
+                        ค้นหา
+                    </button>
+                </div>
+                <div class="mt-3 text-sm text-gray-400 flex items-center gap-1">
+                    <i class="ph ph-info"></i> รองรับ: IT-001, SN1234, หรือ URL QR Code
+                </div>
+            </div>
+
+            <!-- ASSET DATA VIEW (Hidden by default) -->
+            <div id="assetContainer" class="hidden space-y-8">
+                
+                <!-- Asset Info Card -->
+                <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-card border border-white relative overflow-hidden">
+                    <div class="absolute top-0 right-0 bg-green-500 text-white text-xs font-bold px-4 py-1 rounded-bl-xl shadow-sm">พบข้อมูล</div>
+                    
+                    <div class="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
+                        <div class="w-20 h-20 rounded-2xl bg-gray-50 flex items-center justify-center border border-gray-100 flex-shrink-0">
+                            <i id="assetIcon" class="ph ph-desktop text-4xl text-gray-400"></i>
+                        </div>
+                        <div class="flex-grow">
+                            <h2 class="text-2xl font-bold text-gray-800 mb-1" id="dispAssetId">IT-XXXX</h2>
+                            <p class="text-gray-500 flex items-center gap-2">
+                                <i class="ph ph-barcode"></i> SN: <span id="dispSerial" class="font-medium text-gray-700">XXXXXXX</span>
+                            </p>
+                        </div>
+                        <div class="bg-hospital-50 px-5 py-3 rounded-2xl border border-hospital-100 w-full sm:w-auto text-center sm:text-left">
+                            <p class="text-xs text-hospital-500 font-medium mb-1">หน่วยงานที่รับผิดชอบ</p>
+                            <p class="text-gray-800 font-semibold" id="dispDept">ระบุไม่ได้</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PM CHECKLIST FORM -->
+                <div class="bg-white rounded-3xl shadow-card border border-white overflow-hidden">
+                    <div class="bg-gray-50 border-b border-gray-100 px-6 py-4 flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                            <i class="ph ph-clipboard text-hospital-500"></i>
+                            แบบบันทึกการบำรุงรักษา (PM Checklist)
+                        </h3>
+                        <span class="text-xs bg-white px-3 py-1 rounded-full border border-gray-200 text-gray-500 shadow-sm font-sans" id="dateDisplay"></span>
+                    </div>
+                    
+                    <div class="p-6 sm:p-8">
+                        <form id="pmForm" onsubmit="event.preventDefault(); submitPM();">
+                            <input type="hidden" id="formAssetId">
+                            
+                            <!-- Dynamic Checklist Area -->
+                            <div id="checklistArea" class="space-y-4 mb-8">
+                                <!-- JS will populate items here based on asset type -->
+                            </div>
+
+                            <!-- Overall Result -->
+                            <div class="bg-gray-50 rounded-2xl p-5 border border-gray-200 mb-8">
+                                <label class="block text-sm font-bold text-gray-700 mb-3">สรุปผลการตรวจสอบภาพรวม</label>
+                                <select id="overallResult" required class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-800 focus:border-hospital-400 focus:ring-2 focus:ring-hospital-100 transition-all cursor-pointer">
+                                    <option value="">-- กรุณาเลือกผลการประเมิน --</option>
+                                    <option value="Normal">✔️ ปกติ (ใช้งานได้ดี)</option>
+                                    <option value="NeedRepair">⚠️ ผิดปกติ (ต้องซ่อมแซม)</option>
+                                    <option value="Broken">❌ ชำรุด (ใช้งานไม่ได้)</option>
+                                </select>
+                            </div>
+
+                            <!-- Image Upload (Optional) -->
+                            <div class="border-2 border-dashed border-gray-200 rounded-2xl p-6 mb-8 text-center bg-gray-50/50 hover:bg-gray-50 transition-colors group">
+                                <i class="ph ph-camera text-3xl text-gray-400 mb-2 group-hover:text-hospital-500 transition-colors"></i>
+                                <label class="block text-sm font-bold text-gray-700 mb-1">แนบรูปภาพประกอบ (ถ้ามี)</label>
+                                <p class="text-xs text-gray-500 mb-4">รองรับ JPG, PNG ขนาดไม่เกิน 5MB</p>
+                                <input type="file" id="imageUpload" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-hospital-50 file:text-hospital-600 hover:file:bg-hospital-100 cursor-pointer">
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="flex gap-4">
+                                <button type="button" onclick="resetForm()" class="px-6 py-4 rounded-2xl font-medium text-gray-500 hover:bg-gray-100 transition-colors">ยกเลิก</button>
+                                <button type="submit" class="flex-grow bg-hospital-500 hover:bg-hospital-600 text-white rounded-2xl px-8 py-4 font-bold text-lg transition-all shadow-soft flex items-center justify-center gap-2 group">
+                                    <i class="ph ph-floppy-disk text-xl group-hover:scale-110 transition-transform"></i>
+                                    บันทึกข้อมูล PM
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="text-center py-20">
+                <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100">
+                    <i class="ph ph-magnifying-glass text-4xl text-gray-300"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-500">กรุณาค้นหาครุภัณฑ์เพื่อเริ่มดำเนินการ</h3>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // กำหนด URL Web App จริงของ Google Apps Script
+        const BACKEND_URL = "https://script.google.com/macros/s/AKfycbx5p9OYDIdPyan9UmU_ByyrzzKJvuek8QcwfoyYMNL9ES5OgpCQ1_oX7_tPD_exjBqmIg/exec";
+
+        /**
+         * ฟังก์ชันหลักในการยิง API ไปหา Google Apps Script แบบ CORS Safe 
+         */
+        async function callBackend(action, payload) {
+            try {
+                // ยิง POST แบบ CORS ด้วย 'text/plain' เพื่อเลี่ยง Preflight (OPTIONS)
+                const response = await fetch(BACKEND_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'text/plain'
+                    },
+                    body: JSON.stringify({
+                        action: action,
+                        payload: payload
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP Error! Status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                if (result.status) {
+                    return result.data;
+                } else {
+                    throw new Error(result.message || "เกิดข้อผิดพลาดภายในระบบ Backend");
+                }
+            } catch (error) {
+                console.error("API Call Error: ", error);
+                throw new Error("ไม่สามารถเชื่อมต่อระบบหลังบ้านได้: " + error.message);
+            }
+        }
+
+        // --- 2. OVERLAY & MODAL SYSTEM ---
+        function showLoading(text = "กำลังประมวลผล...") {
+            const overlay = document.getElementById('loadingOverlay');
+            document.getElementById('overlayText').innerText = text;
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+        }
+
+        function hideLoading() {
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.classList.add('opacity-0');
+            setTimeout(() => overlay.classList.add('hidden'), 300);
+        }
+
+        function showModal(type, title, message) {
+            const modal = document.getElementById('alertModal');
+            const box = document.getElementById('alertModalBox');
+            const iconDiv = document.getElementById('modalIcon');
+            
+            let iconHtml, iconBg, iconColor;
+            switch(type) {
+                case 'success':
+                    iconHtml = '<i class="ph ph-check-circle text-5xl"></i>';
+                    iconBg = 'bg-green-100'; iconColor = 'text-green-600';
+                    break;
+                case 'error':
+                    iconHtml = '<i class="ph ph-x-circle text-5xl"></i>';
+                    iconBg = 'bg-red-100'; iconColor = 'text-red-600';
+                    break;
+                case 'warning':
+                    iconHtml = '<i class="ph ph-warning text-5xl"></i>';
+                    iconBg = 'bg-yellow-100'; iconColor = 'text-yellow-600';
+                    break;
+                default: 
+                    iconHtml = '<i class="ph ph-info text-5xl"></i>';
+                    iconBg = 'bg-blue-100'; iconColor = 'text-blue-600';
+            }
+
+            iconDiv.className = `w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4 ${iconBg} ${iconColor}`;
+            iconDiv.innerHTML = iconHtml;
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalMessage').innerText = message;
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                box.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('alertModal');
+            const box = document.getElementById('alertModalBox');
+            modal.classList.add('opacity-0');
+            box.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        // --- 3. SEARCH & UI LOGIC ---
+        let searchTimeout;
+
+        // Auto search with debounce
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            clearTimeout(searchTimeout);
+            const val = e.target.value.trim();
+            if(val.length >= 3) {
+                searchTimeout = setTimeout(() => executeSearch(val), 600);
+            }
+        });
+
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                executeSearch();
+            }
+        });
+
+        async function executeSearch(query = null) {
+            let q = query || document.getElementById('searchInput').value.trim();
+            if(!q) return;
+
+            // Parsing QR Code Logic
+            if(q.includes("asset=")) q = q.split("asset=")[1];
+            if(q.includes(":")) q = q.split(":")[1];
+            if(q.includes("|")) q = q.split("|")[0];
+
+            document.getElementById('searchInput').value = q; // อัปเดต text box ด้วย ID ที่กรองแล้ว
+
+            showLoading("กำลังค้นหาข้อมูลครุภัณฑ์...");
+            
+            try {
+                // ส่งประวัติการค้นหาไปบันทึก Log 
+                callBackend('logAction', { action: 'SEARCH', user: 'Admin' });
+
+                // ยิงค้นหาข้อมูลผ่าน HTTP API
+                const results = await callBackend('searchAsset', q);
+                
+                if(results && results.length > 0) {
+                    renderAssetData(results[0]); 
+                } else {
+                    showModal('warning', 'ไม่พบข้อมูล', `ไม่พบครุภัณฑ์รหัส หรือ Serial: ${q} ในระบบ`);
+                    resetView();
+                }
+            } catch (error) {
+                showModal('error', 'เกิดข้อผิดพลาด', error.message || "ไม่สามารถเชื่อมต่อฐานข้อมูลได้");
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function triggerSimulatedScan() {
+            // จำลองสแกนรหัสครุภัณฑ์เข้าสู่ Searchbox
+            document.getElementById('searchInput').value = "ASSET:IT-001|LOCATION";
+            executeSearch();
+        }
+
+        function renderAssetData(asset) {
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('assetContainer').classList.remove('hidden');
+
+            // อัปเดตการ์ดข้อมูล
+            document.getElementById('dispAssetId').innerText = asset.id;
+            document.getElementById('dispSerial').innerText = asset.serial || "-";
+            document.getElementById('dispDept').innerText = asset.dept || "-";
+            document.getElementById('formAssetId').value = asset.id;
+
+            // เลือกไอคอนตามประเภท
+            const iconEl = document.getElementById('assetIcon');
+            iconEl.className = "ph text-4xl text-hospital-500 ";
+            if(asset.type.toUpperCase().includes('PC')) iconEl.className += "ph-desktop";
+            else if(asset.type.toUpperCase().includes('PRINT')) iconEl.className += "ph-printer";
+            else iconEl.className += "ph-hard-drives";
+
+            // สรรสร้าง Checklist อิงตามประเภทครุภัณฑ์
+            const checklistArea = document.getElementById('checklistArea');
+            checklistArea.innerHTML = ''; 
+            
+            let topics = [];
+            if(asset.type.toUpperCase().includes('PC')) {
+                topics = ['ทำความสะอาดภายนอก/ภายใน', 'ตรวจสอบการทำงานระบบปฏิบัติการ', 'อัพเดทโปรแกรมแอนตี้ไวรัส', 'ตรวจสอบระบบเครือข่าย (LAN/WIFI)'];
+            } else if (asset.type.toUpperCase().includes('PRINT')) {
+                topics = ['ทำความสะอาดลูกกลิ้ง/หัวพิมพ์', 'ตรวจสอบระดับหมึก', 'ทดสอบการพิมพ์ (Test Print)'];
+            } else {
+                topics = ['ตรวจสอบสภาพภายนอกทั่วไป', 'ทดสอบการจ่ายไฟ', 'ตรวจสอบจุดเชื่อมต่อสัญญาณ'];
+            }
+
+            topics.forEach((topic, index) => {
+                const id = `chk_${index}`;
+                const html = `
+                    <div class="flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-white hover:border-hospital-200 hover:shadow-sm transition-all group">
+                        <span class="text-gray-700 font-medium group-hover:text-hospital-600 transition-colors">${topic}</span>
+                        <div class="flex gap-2">
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="${id}" value="Pass" required class="w-5 h-5 text-hospital-500 bg-gray-100 border-gray-300 focus:ring-hospital-500 focus:ring-2">
+                                <span class="ml-2 text-sm text-gray-600 font-sans">ผ่าน</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer ml-4">
+                                <input type="radio" name="${id}" value="Fail" class="w-5 h-5 text-red-500 bg-gray-100 border-gray-300 focus:ring-red-500 focus:ring-2">
+                                <span class="ml-2 text-sm text-gray-600 font-sans">ไม่ผ่าน</span>
+                            </label>
+                        </div>
+                    </div>
+                `;
+                checklistArea.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        function resetView() {
+            document.getElementById('assetContainer').classList.add('hidden');
+            document.getElementById('emptyState').classList.remove('hidden');
+            document.getElementById('pmForm').reset();
+        }
+
+        function resetForm() {
+            document.getElementById('pmForm').reset();
+            document.getElementById('searchInput').value = '';
+            resetView();
+        }
+
+        // --- 4. FORM SUBMISSION ---
+        async function submitPM() {
+            const assetId = document.getElementById('formAssetId').value;
+            const overall = document.getElementById('overallResult').value;
+            
+            // รวบรวมคำตอบจากวิทยุ (Radio buttons)
+            const details = [];
+            const checklistItems = document.getElementById('checklistArea').querySelectorAll('div.flex.items-center.justify-between');
+            
+            checklistItems.forEach((item, index) => {
+                const topicText = item.querySelector('span.text-gray-700').innerText;
+                const selectedRadio = item.querySelector(`input[name="chk_${index}"]:checked`);
+                if(selectedRadio) {
+                    details.push({ topic: topicText, status: selectedRadio.value });
+                }
+            });
+
+            const currentUser = document.getElementById('userDisplay').innerText.replace('ผู้ใช้งาน: ', '').trim();
+
+            const payload = {
+                asset: assetId,
+                user: currentUser, 
+                result: overall,
+                details: details
+            };
+
+            showLoading("กำลังบันทึกข้อมูล...");
+
+            try {
+                // 1. ส่งบันทึกข้อมูลหลัก
+                const pmResultId = await callBackend('savePM', payload);
+
+                // 2. ตรวจสอบการอัปโหลดไฟล์ภาพ
+                const fileInput = document.getElementById('imageUpload');
+                if(fileInput.files.length > 0) {
+                    document.getElementById('overlayText').innerText = "กำลังอัพโหลดรูปภาพประกอบ...";
+                    const file = fileInput.files[0];
+                    const base64Data = await fileToBase64(file);
+                    const rawBase64 = base64Data.split(',')[1];
+                    
+                    await callBackend('uploadImage', {
+                        pmId: pmResultId,
+                        topic: 'General',
+                        name: `${assetId}_${Date.now()}.${file.name.split('.').pop()}`,
+                        type: file.type,
+                        base64: rawBase64
+                    });
+                }
+
+                // 3. บันทึกประวัติการแก้ไขลง Audit Log
+                await callBackend('logAction', { action: 'SAVE_PM', user: currentUser });
+
+                showModal('success', 'บันทึกสำเร็จ', `รหัสอ้างอิง: ${pmResultId}\nเก็บข้อมูลตรวจสอบและภาพถ่ายลงระบบแล้วครับ`);
+                resetForm();
+
+            } catch(error) {
+                showModal('error', 'บันทึกไม่สำเร็จ', error.message || "เกิดข้อผิดพลาดที่ไม่คาดคิด");
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        // ตั้งค่าวันที่ปัจจุบันบนหัวฟอร์ม
+        const now = new Date();
+        document.getElementById('dateDisplay').innerText = now.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+
+    </script>
+</body>
+</html>
