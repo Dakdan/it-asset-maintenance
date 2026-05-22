@@ -289,31 +289,24 @@
 
     const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzcgxVWPQ5w7YonfYWfAUs1fABezDzadx_i06xSvd05Xo2US4Lj3jYKtQXx2MIQKzycOw/exec";
 
-   async function callGAS(action, params = {}) {
-      try {
-        const payload = { action, ...params };
-        const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
-          method: "POST",
-          mode: "cors", // ต้องเป็น cors เพื่อให้เบราว์เซอร์ส่ง OPTIONS ไปเช็ค
-          headers: { 
-            "Content-Type": "application/json" 
-          },
-          body: JSON.stringify(payload)
-        });
+  async function callGAS(action, params = {}) {
+  try {
+    const payload = { action, ...params };
     
-        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-        
-        const result = await response.json();
-        return { 
-          success: result.status, 
-          data: result.data, 
-          message: result.message 
-        };
-      } catch (error) {
-        console.error("GAS Error:", error);
-        return { success: false, error: error.message };
-      }
-    }
+    // ลบ headers ออกทั้งหมดครับ อย่าใส่ Content-Type
+    const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+      method: "POST",
+      mode: "cors", 
+      body: JSON.stringify(payload)
+    });
+    
+    const result = await response.json();
+    return { success: result.status, data: result.data, message: result.message };
+  } catch (error) {
+    console.error("GAS Error:", error);
+    return { success: false, error: error.message };
+  }
+}
 
     async function loadAssets() {
       showOverlay("กำลังโหลดข้อมูล", "ดึง ASSET_LOGS จาก Google Sheet...");
