@@ -389,7 +389,7 @@ async function callGAS(action, params = {}) {
 
     function cacheEls() {
       [
-        "appWrapper", "appTitle", "hospitalName", "departmentName", "searchInput", "assetList",
+        "appWrapper", "appTitle", "hospitalName", "departmentName", "assetQuery", "assetList",
         "resultCount", "emptyPanel", "pmPanel", "assetName", "assetIdBadge", "deptBadge",
         "typeBadge", "workStatus", "progressBar", "progressText", "checklistWrap",
         "pmForm", "searchForm", "overlay", "overlayTitle", "overlayText", "modal",
@@ -461,15 +461,16 @@ function highlightText(fullText, query) {
 const html5QrCode = new Html5Qrcode("reader"); // ใช้ ID ให้ตรงกับ <div id="reader"> ใน HTML
 
 function startScanner() {
-    html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: 250 },
-        (decodedText) => {
-            document.getElementById('assetQuery').value = normalizeInput(decodedText);
-            searchAsset(); 
-            html5QrCode.stop().catch(err => console.log("Stop Error:", err));
-        }
-    ).catch(err => console.log("กล้องเปิดไม่ได้:", err));
+  const html5QrCode = new Html5Qrcode("reader"); // ต้องตรงกับ id ใน HTML
+  html5QrCode.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 250 },
+    (decodedText) => {
+      els.assetQuery.value = decodedText; // ใส่ค่าที่สแกนได้ลงในช่องค้นหา
+      searchAsset(); // หรือเรียกฟังก์ชันค้นหาของคุณ
+      html5QrCode.stop();
+    }
+  ).catch(err => console.log(err));
 }
 
 // 5. จุดเชื่อมต่อเหตุการณ์ (Initialization)
