@@ -126,8 +126,9 @@
   </style>
   <style>body { box-sizing: border-box; }</style>
   <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
- <script src="https://unpkg.com/html5-qrcode"></script>
+
  </head>
+  <script src="https://unpkg.com/html5-qrcode"></script>
 <body class="h-full w-full">
   <main id="appWrapper" class="soft-bg h-full w-full overflow-auto text-pink-950">
     <div class="watermark" aria-hidden="true"><span>IT UDON HOSP</span></div>
@@ -258,6 +259,7 @@
         <p id="overlayText" class="mt-1 text-pink-700">โปรดรอสักครู่ ระบบกำลังประมวลผล</p>
       </div>
     </div>
+   
     <div id="modal" class="hidden fixed inset-0 z-50 bg-pink-950/35 backdrop-blur-sm items-center justify-center p-4">
       <div class="rounded-[2rem] bg-white p-6 soft-shadow max-w-md w-full fade-in">
         <div id="modalIcon" class="h-14 w-14 rounded-2xl bg-green-100 text-green-600 grid place-items-center mb-4">
@@ -268,6 +270,12 @@
       </div>
     </div>
   </main>
+ <div class="glass-card rounded-[2rem] p-5">
+  <div class="mt-4">
+    <input id="assetQuery" ...>
+  </div>
+  
+
 
   <script>
     const defaultConfig = {
@@ -843,5 +851,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     boot();
   </script>
+
  </body>
 </html>
