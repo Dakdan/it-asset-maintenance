@@ -289,28 +289,25 @@
 
     const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzcgxVWPQ5w7YonfYWfAUs1fABezDzadx_i06xSvd05Xo2US4Lj3jYKtQXx2MIQKzycOw/exec";
 
- async function callGAS(action, params = {}) {
-  // สร้าง FormData เพื่อส่งแบบเดียวกับ Form ปกติที่ GAS คุ้นเคย
-  const formData = new FormData();
-  formData.append('action', action);
-  
-  // แปลง params object เป็น entries สำหรับ FormData
-  Object.keys(params).forEach(key => {
-    formData.append(key, params[key]);
-  });
+async function callGAS(action, params = {}) {
+  // สร้าง URL พร้อมพารามิเตอร์ (ส่งเป็น GET แทน POST)
+  // เพราะ GET ไม่มีการทำ Preflight (OPTIONS) จึงไม่ติด CORS
+  const url = new URL(GOOGLE_APPS_SCRIPT_URL);
+  url.searchParams.append("action", action);
+  Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
 
-  // ใช้ fetch แบบไม่ระบุ Header Content-Type
-  // เบราว์เซอร์จะจัดการส่งเป็น 'multipart/form-data' ซึ่งเลี่ยงการทำ Preflight
-  const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
-    method: "POST",
-    mode: "cors",
-    body: formData 
-  });
-
-  const result = await response.json();
-  return { success: result.status, data: result.data, message: result.message };
+  try {
+    const response = await fetch(url.toString(), {
+      method: "GET", // ใช้ GET แทน POST
+      mode: "cors"
+    });
+    
+    return await response.json();
+  } catch (error) {
+    console.error("GAS Error:", error);
+    return { success: false, message: "Connection Failed" };
+  }
 }
-
     async function loadAssets() {
       showOverlay("กำลังโหลดข้อมูล", "ดึง ASSET_LOGS จาก Google Sheet...");
       const data = await callGAS("getAssets");
