@@ -377,31 +377,12 @@ function highlightText(fullText, query) {
 const html5QrCode = new Html5Qrcode("reader"); // ใช้ ID ให้ตรงกับ <div id="reader"> ใน HTML
 
 function startScanner() {
-  const html5QrCode = new Html5Qrcode("reader"); // ต้องตรงกับ id ใน HTML
-  html5QrCode.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: 250 },
-    (decodedText) => {
-      els.assetQuery.value = decodedText; // ใส่ค่าที่สแกนได้ลงในช่องค้นหา
-      searchAsset(); // หรือเรียกฟังก์ชันค้นหาของคุณ
-      html5QrCode.stop();
+      const html5QrCode = new Html5Qrcode("reader");
+      html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (decodedText) => {
+        els.assetQuery.value = decodedText;
+        html5QrCode.stop();
+      }).catch(err => alert("ไม่สามารถเข้าถึงกล้องได้"));
     }
-  ).catch(err => console.log(err));
-}
-
-// 5. จุดเชื่อมต่อเหตุการณ์ (Initialization)
-document.addEventListener('DOMContentLoaded', () => {
-    const input = document.getElementById('assetQuery');
-    
-    // ค้นหาเมื่อพิมพ์
-    input.addEventListener('input', () => {
-        clearTimeout(window.sTimeout);
-        window.sTimeout = setTimeout(searchAsset, 300);
-    });
-
-    // เริ่มกล้อง
-    startScanner();
-});
 
     function renderAssets(list) {
       els.assetList.innerHTML = "";
