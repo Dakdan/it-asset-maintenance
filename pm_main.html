@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IT Preventive Maintenance System</title>
+  <title>ระบบตรวจสอบครุภัณฑ์คอมพิวเตอร์</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
@@ -123,74 +123,144 @@
         margin: 10mm;
       }
     }
-</style>
+  </style>
   <style>body { box-sizing: border-box; }</style>
   <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
-  <script src="https://unpkg.com/html5-qrcode"></script>
+
  </head>
-<body class="h-full w-full">
+ <body class="h-full w-full">
   <main id="appWrapper" class="soft-bg h-full w-full overflow-auto text-pink-950">
-    <div class="watermark" aria-hidden="true"><span>IT UDON HOSP</span></div>
-    <div class="relative z-10 w-full px-4 py-5 sm:px-6 lg:px-8">
-      <section class="mx-auto max-w-7xl">
-        <header class="glass-card rounded-[2rem] p-5 sm:p-6 mb-5 print-area">
-          <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div class="flex items-center gap-4">
-              <div class="h-16 w-16 shrink-0 rounded-3xl bg-gradient-to-br from-pink-400 to-rose-500 text-white grid place-items-center soft-shadow">
-                <svg viewBox="0 0 64 64" class="h-11 w-11" aria-label="โลโก้ IT UDON HOSP" role="img">
-                  <circle cx="32" cy="32" r="25" fill="rgba(255,255,255,.22)"></circle> <path d="M30 14h6v15h14v6H36v15h-6V35H16v-6h14V14z" fill="white"></path> <path d="M18 48c8-6 20-6 28 0" stroke="white" stroke-width="4" fill="none" stroke-linecap="round"></path>
-                </svg>
-              </div>
-              <div>
-                <p class="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1 text-xs font-semibold text-pink-700 border border-pink-100"><i data-lucide="shield-check" class="h-4 w-4"></i> PM Production Flow</p>
-                <h1 id="appTitle" class="mt-2 text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">ระบบตรวจสอบครุภัณฑ์คอมพิวเตอร์</h1>
-                <p id="hospitalName" class="mt-1 text-base sm:text-lg font-medium text-pink-800">โรงพัพยาบาลอุดรธานี</p>
-                <p id="departmentName" class="text-sm sm:text-base text-pink-700">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
-              </div>
-            </div>
-            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-3 min-w-full lg:min-w-[360px]">
-              <div class="rounded-3xl bg-white/70 p-4 border border-pink-100"><p class="text-xs text-pink-600">Session</p><p class="font-bold text-green-600">Online</p></div>
-              <div class="rounded-3xl bg-white/70 p-4 border border-pink-100"><p class="text-xs text-pink-600">Cache</p><p class="font-bold text-pink-700" id="cacheState">Ready</p></div>
-              <div class="rounded-3xl bg-white/70 p-4 border border-pink-100"><p class="text-xs text-pink-600">วันนี้ตรวจแล้ว</p><p class="font-bold text-pink-900"><span id="pmCount">0</span> รายการ</p></div>
-              <button id="printBtn" class="no-print rounded-3xl bg-pink-600 hover:bg-pink-700 text-white font-semibold p-4 transition focus:outline-none focus:ring-4 focus:ring-pink-200"> พิมพ์รายงาน </button>
-            </div>
+   <div class="watermark" aria-hidden="true"><span>IT UDON HOSP</span></div>
+   <div class="relative z-10 w-full px-4 py-5 sm:px-6 lg:px-8">
+    <section class="mx-auto max-w-7xl">
+     <header class="glass-card rounded-[2rem] p-5 sm:p-6 mb-5 print-area">
+      <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+       <div class="flex items-center gap-4">
+        <div class="h-16 w-16 shrink-0 rounded-3xl bg-gradient-to-br from-pink-400 to-rose-500 text-white grid place-items-center soft-shadow">
+         <svg viewbox="0 0 64 64" class="h-11 w-11" aria-label="โลโก้ IT UDON HOSP" role="img">
+          <circle cx="32" cy="32" r="25" fill="rgba(255,255,255,.22)"></circle> <path d="M30 14h6v15h14v6H36v15h-6V35H16v-6h14V14z" fill="white"></path> <path d="M18 48c8-6 20-6 28 0" stroke="white" stroke-width="4" fill="none" stroke-linecap="round"></path>
+         </svg>
+        </div>
+        <div>
+         <p class="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1 text-xs font-semibold text-pink-700 border border-pink-100"><i data-lucide="shield-check" class="h-4 w-4"></i> PM Production Flow</p>
+         <h1 id="appTitle" class="mt-2 text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">ระบบตรวจสอบครุภัณฑ์คอมพิวเตอร์</h1>
+         <p id="hospitalName" class="mt-1 text-base sm:text-lg font-medium text-pink-800">โรงพยาบาลอุดรธานี</p>
+         <p id="departmentName" class="text-sm sm:text-base text-pink-700">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
+        </div>
+       </div>
+       <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-3 min-w-full lg:min-w-[360px]">
+        <div class="rounded-3xl bg-white/70 p-4 border border-pink-100">
+         <p class="text-xs text-pink-600">Session</p>
+         <p class="font-bold text-green-600">Online</p>
+        </div>
+        <div class="rounded-3xl bg-white/70 p-4 border border-pink-100">
+         <p class="text-xs text-pink-600">Cache</p>
+         <p class="font-bold text-pink-700" id="cacheState">Ready</p>
+        </div>
+        <div class="rounded-3xl bg-white/70 p-4 border border-pink-100">
+         <p class="text-xs text-pink-600">วันนี้ตรวจแล้ว</p>
+         <p class="font-bold text-pink-900"><span id="pmCount">0</span> รายการ</p>
+        </div><button id="printBtn" class="no-print rounded-3xl bg-pink-600 hover:bg-pink-700 text-white font-semibold p-4 transition focus:outline-none focus:ring-4 focus:ring-pink-200"> พิมพ์รายงาน </button>
+       </div>
+      </div>
+     </header>
+     <section class="grid grid-cols-1 xl:grid-cols-[420px_1fr] gap-5">
+      <aside class="space-y-5 no-print">
+       <div class="glass-card rounded-[2rem] p-5">
+        <div class="flex items-center justify-between gap-3">
+         <div>
+          <h2 class="text-xl font-bold">ค้นหา / QR Scan</h2>
+          <p class="text-sm text-pink-700">รองรับ URL QR, RAW CODE และรูปแบบผสม</p>
+         </div>
+         <div class="rounded-2xl bg-pink-100 p-3 text-pink-700">
+          <i data-lucide="scan-line" class="h-6 w-6"></i>
+         </div>
+        </div>
+        <form id="searchForm" class="mt-4 space-y-3">
+         <label for="searchInput" class="block text-sm font-semibold text-pink-800">รหัสครุภัณฑ์ / QR</label>
+         <div class="flex gap-2">
+          <input id="searchInput" type="text" autocomplete="off" class="w-full rounded-2xl border border-pink-200 bg-white/85 px-4 py-3 outline-none focus:ring-4 focus:ring-pink-100 focus:border-pink-400" placeholder="พิมพ์รหัส / สแกน QR / วาง URL"> <button type="submit" class="rounded-2xl bg-pink-600 hover:bg-pink-700 text-white px-4 font-semibold transition focus:outline-none focus:ring-4 focus:ring-pink-200"> ค้นหา </button>
+         </div>
+         <p class="text-xs text-pink-600">ระบบจะ normalize และค้นหาแบบ includes + reverse match อัตโนมัติ</p>
+        </form>
+       </div>
+       <div class="glass-card rounded-[2rem] p-5">
+        <div class="flex items-center justify-between mb-4">
+         <h2 class="text-xl font-bold">รายการครุภัณฑ์</h2><span id="resultCount" class="pill rounded-full px-3 py-1 text-sm font-semibold text-pink-700">0 รายการ</span>
+        </div>
+        <div id="assetList" class="space-y-3"></div>
+       </div>
+      </aside>
+      <section class="glass-card rounded-[2rem] p-5 sm:p-6 print-area">
+       <div id="emptyPanel" class="min-h-[520px] flex flex-col items-center justify-center text-center">
+        <div class="h-24 w-24 rounded-[2rem] bg-pink-100 text-pink-600 grid place-items-center mb-5">
+         <i data-lucide="clipboard-check" class="h-12 w-12"></i>
+        </div>
+        <h2 class="text-2xl font-bold">เลือกครุภัณฑ์เพื่อเริ่ม PM</h2>
+        <p class="mt-2 max-w-xl text-pink-700">ค้นหาจากรหัสหรือสแกน QR แล้วคลิกการ์ดครุภัณฑ์ ระบบจะแสดง checklist แยกตาม Physical, Performance, Risk และ Security</p>
+       </div>
+       <div id="pmPanel" class="hidden fade-in">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between border-b border-pink-100 pb-5">
+         <div>
+          <p class="text-sm font-semibold text-pink-600">PM Panel / Checklist</p>
+          <h2 id="assetName" class="text-2xl sm:text-3xl font-bold mt-1"></h2>
+          <div class="mt-3 flex flex-wrap gap-2">
+           <span id="assetIdBadge" class="pill rounded-full px-3 py-1 text-sm font-semibold"></span> <span id="deptBadge" class="pill rounded-full px-3 py-1 text-sm font-semibold"></span> <span id="typeBadge" class="pill rounded-full px-3 py-1 text-sm font-semibold"></span>
           </div>
-        </header>
-        <section class="grid grid-cols-1 xl:grid-cols-[420px_1fr] gap-5">
-          <aside class="space-y-5 no-print">
-            <div class="glass-card rounded-[2rem] p-5">
-              <div class="flex items-center justify-between gap-3">
-                <div><h2 class="text-xl font-bold">ค้นหา / QR Scan</h2><p class="text-sm text-pink-700">สแกนหรือพิมพ์ ระบบค้นหาอัตโนมัติ</p></div>
-                <div class="rounded-2xl bg-pink-100 p-3 text-pink-700"><i data-lucide="scan-line" class="h-6 w-6"></i></div>
-              </div>
-              <div class="mt-4">
-                <div id="reader" class="w-full cursor-pointer" onclick="startScanner()"></div>
-                <input id="assetQuery" type="text" autocomplete="off" class="w-full rounded-2xl border border-pink-200 bg-white/85 px-4 py-3 outline-none focus:ring-4 focus:ring-pink-100 focus:border-pink-400" placeholder="พิมพ์รหัส / สแกน QR / วาง URL">
-              </div>
-            </div>
-            <div class="glass-card rounded-[2rem] p-5">
-              <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold">รายการครุภัณฑ์</h2><span id="resultCount" class="pill rounded-full px-3 py-1 text-sm font-semibold text-pink-700">0 รายการ</span></div>
-              <div id="resultsArea" class="space-y-3"></div>
-            </div>
-            <div class="glass-card rounded-[2rem] p-5">
-              <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold">รายการครุภัณฑ์</h2></div>
-              <div id="assetList" class="space-y-3"></div>
-            </div>
-          </aside>
-          <section class="glass-card rounded-[2rem] p-5 sm:p-6 print-area">
-            <div id="emptyPanel" class="min-h-[520px] flex flex-col items-center justify-center text-center">
-              <div class="h-24 w-24 rounded-[2rem] bg-pink-100 text-pink-600 grid place-items-center mb-5"><i data-lucide="clipboard-check" class="h-12 w-12"></i></div>
-              <h2 class="text-2xl font-bold">เลือกครุภัณฑ์เพื่อเริ่ม PM</h2>
-              <p class="mt-2 max-w-xl text-pink-700">ค้นหาจากรหัสหรือสแกน QR แล้วคลิกการ์ดครุภัณฑ์ ระบบจะแสดง checklist แยกตาม Physical, Performance, Risk และ Security</p>
-            </div>
-            <div id="pmPanel" class="hidden fade-in"></div>
-          </section>
-        </section>
-        <footer class="relative z-10 mt-5 text-center text-sm text-pink-700 pb-4"><span id="footerNote">IT UDON HOSP • Production Flow PM</span></footer>
+         </div>
+         <div class="rounded-3xl bg-white/75 border border-pink-100 p-4 min-w-[220px]">
+          <p class="text-xs text-pink-600">สถานะงาน</p>
+          <p id="workStatus" class="text-lg font-bold text-amber-600">รอตรวจสอบ</p>
+          <div class="mt-3 h-3 rounded-full bg-pink-100 overflow-hidden">
+           <div id="progressBar" class="h-full bg-gradient-to-r from-pink-400 to-rose-500 rounded-full" style="width: 0%"></div>
+          </div>
+          <p id="progressText" class="mt-2 text-xs text-pink-700">0% completed</p>
+         </div>
+        </div>
+        <form id="pmForm" class="mt-5 space-y-5">
+         <div id="checklistWrap" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
+         <div class="rounded-[1.7rem] bg-white/70 border border-pink-100 p-4">
+          <h3 class="text-lg font-bold flex items-center gap-2"><i data-lucide="camera" class="h-5 w-5 text-pink-600"></i> รูปภาพประกอบ</h3>
+          <p class="text-sm text-pink-700 mb-3">ในตัวอย่างนี้จะแสดงชื่อไฟล์และจำลองการอัปโหลดเพื่อความปลอดภัยของหน้าเว็บ</p><label for="imageUpload" class="block text-sm font-semibold text-pink-800 mb-2">Upload / ถ่ายรูป</label> <input id="imageUpload" type="file" accept="image/*" class="w-full rounded-2xl border border-pink-200 bg-white p-3">
+          <div id="imageList" class="mt-3 text-sm text-pink-700"></div>
+         </div>
+         <div class="rounded-[1.7rem] bg-white/70 border border-pink-100 p-4">
+          <label for="inspectorNote" class="block text-sm font-semibold text-pink-800">หมายเหตุเจ้าหน้าที่</label> <textarea id="inspectorNote" rows="3" class="mt-2 w-full rounded-2xl border border-pink-200 bg-white/90 px-4 py-3 outline-none focus:ring-4 focus:ring-pink-100 focus:border-pink-400" placeholder="ระบุอาการ / ข้อเสนอแนะ / งานที่ต้องติดตาม"></textarea>
+         </div>
+         <div class="flex flex-col sm:flex-row gap-3 no-print">
+          <button id="savePmBtn" type="submit" class="flex-1 rounded-2xl bg-pink-600 hover:bg-pink-700 text-white px-5 py-4 font-bold transition focus:outline-none focus:ring-4 focus:ring-pink-200"> บันทึก PM </button> <button id="confirmBtn" type="button" class="flex-1 rounded-2xl bg-white hover:bg-pink-50 text-pink-700 border border-pink-200 px-5 py-4 font-bold transition focus:outline-none focus:ring-4 focus:ring-pink-100"> Confirm ตรวจสอบ </button>
+         </div>
+        </form>
+        <div class="mt-6 rounded-[1.7rem] bg-pink-950 text-white p-4 no-print">
+         <div class="flex items-center justify-between gap-3 mb-3">
+          <h3 class="font-bold flex items-center gap-2"><i data-lucide="history" class="h-5 w-5"></i> ACTION LOG</h3><span class="text-xs text-pink-200">Audit Trail</span>
+         </div>
+         <div id="actionLog" class="space-y-2 text-sm text-pink-50 max-h-48 overflow-auto"></div>
+        </div>
+       </div>
       </section>
+     </section>
+     <footer class="relative z-10 mt-5 text-center text-sm text-pink-700 pb-4">
+      <span id="footerNote">IT UDON HOSP • Production Flow PM</span>
+     </footer>
+    </section>
+   </div>
+   <div id="overlay" class="hidden fixed inset-0 z-50 bg-pink-950/35 backdrop-blur-sm items-center justify-center p-4">
+    <div class="rounded-[2rem] bg-white p-7 text-center soft-shadow max-w-sm w-full">
+     <div class="loader mx-auto"></div>
+     <h2 id="overlayTitle" class="mt-5 text-xl font-bold text-pink-950">กำลังทำงาน</h2>
+     <p id="overlayText" class="mt-1 text-pink-700">โปรดรอสักครู่ ระบบกำลังประมวลผล</p>
     </div>
-    <div id="overlay" class="hidden fixed inset-0 z-50 bg-pink-950/35 backdrop-blur-sm items-center justify-center p-4"></div>
-    <div id="modal" class="hidden fixed inset-0 z-50 bg-pink-950/35 backdrop-blur-sm items-center justify-center p-4"></div>
+   </div>
+   <div id="modal" class="hidden fixed inset-0 z-50 bg-pink-950/35 backdrop-blur-sm items-center justify-center p-4">
+    <div class="rounded-[2rem] bg-white p-6 soft-shadow max-w-md w-full fade-in">
+     <div id="modalIcon" class="h-14 w-14 rounded-2xl bg-green-100 text-green-600 grid place-items-center mb-4">
+      <i data-lucide="check" class="h-8 w-8"></i>
+     </div>
+     <h2 id="modalTitle" class="text-2xl font-bold text-pink-950">สำเร็จ</h2>
+     <p id="modalText" class="mt-2 text-pink-700">ดำเนินการเรียบร้อย</p><button id="modalClose" class="mt-5 w-full rounded-2xl bg-pink-600 hover:bg-pink-700 text-white px-5 py-3 font-bold transition focus:outline-none focus:ring-4 focus:ring-pink-200"> ตกลง </button>
+    </div>
+   </div>
   </main>
 
   <script>
@@ -219,63 +289,78 @@
 
     const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzcgxVWPQ5w7YonfYWfAUs1fABezDzadx_i06xSvd05Xo2US4Lj3jYKtQXx2MIQKzycOw/exec";
 
-async function callGAS(action, params = {}) {
-  // สร้าง URL พร้อมพารามิเตอร์ (ส่งเป็น GET แทน POST)
-  // เพราะ GET ไม่มีการทำ Preflight (OPTIONS) จึงไม่ติด CORS
-  const url = new URL(GOOGLE_APPS_SCRIPT_URL);
-  url.searchParams.append("action", action);
-  Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
-
+  async function callGAS(action, params = {}) {
   try {
-    const response = await fetch(url.toString(), {
-      method: "GET", // ใช้ GET แทน POST
-      mode: "cors"
+    const payload = { action, ...params };
+    
+    // ลบ headers ออกทั้งหมดครับ อย่าใส่ Content-Type
+    const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+      method: "POST",
+      mode: "cors", 
+      body: JSON.stringify(payload)
     });
     
-    return await response.json();
+    const result = await response.json();
+    return { success: result.status, data: result.data, message: result.message };
   } catch (error) {
     console.error("GAS Error:", error);
-    return { success: false, message: "Connection Failed" };
+    return { success: false, error: error.message };
   }
 }
- async function loadAssets() {
-  showOverlay("กำลังโหลดข้อมูล", "ดึง ASSET_LOGS จาก Google Sheet...");
-  const response = await callGAS("getAssets");
-  hideOverlay();
 
-  // 1. เช็คให้ตรงกับ key ที่คุณส่งกลับมา (ถ้าใน Code.gs ส่งมาเป็น status ให้ใช้ response.status)
-  // แต่ถ้าส่งมาเป็น {status: true, ...} ให้ใช้ response.status === true
-  if (!response || !response.status) { 
-    logAction("ERROR", "loadAssets failed");
-    showModal("เกิดข้อผิดพลาด", `ไม่สามารถโหลดข้อมูลครุภัณฑ์ได้: ${response?.message || "Unknown error"}`, "error");
-    return;
-  }
+    async function loadAssets() {
+      showOverlay("กำลังโหลดข้อมูล", "ดึง ASSET_LOGS จาก Google Sheet...");
+      const data = await callGAS("getAssets");
+      hideOverlay();
 
-  // 2. ข้อมูลที่ถูกต้องอยู่ใน response.data ไม่ใช่ assetData
-  const assetData = response.data || [];
+      if (!data || !data.success) {
+        logAction("ERROR", "loadAssets failed");
+        showModal("เกิดข้อผิดพลาด", `ไม่สามารถโหลดข้อมูลครุภัณฑ์ได้: ${data?.message || "Unknown error"}`, "error");
+        return;
+      }
 
-  // 3. ตอนนี้ assetData มีค่าแล้ว โค้ด map ของคุณจะทำงานได้ปกติ
-  assets = assetData.map(r => ({
-    asset_id: r?.Asset_ID || "-",
-    noid: r?.NOID || "-",
-    serial_number: r?.Serial_Number || "-",
-    name: `${r?.Asset_DB_Col8 || "Unknown"} (SN: ${r?.Serial_Number || "-"})`,
-    department: r?.Dept_Name || "ไม่ระบุ",
-    dept_id: r?.DEPT_ID || "-",
-    type: r?.Asset_DB_Col13 || "Computer",
-    status: "พร้อมตรวจ"
-  }));
+     assets = assetData.map(r => ({
+  asset_id: r?.Asset_ID || "-",
+  noid: r?.NOID || "-",
+  serial_number: r?.Serial_Number || "-",
+  name: `${r?.Asset_DB_Col8 || "Unknown"} (SN: ${r?.Serial_Number || "-"})`,
+  department: r?.Dept_Name || "ไม่ระบุ",
+  dept_id: r?.DEPT_ID || "-",
+  type: r?.Asset_DB_Col13 || "Computer",
+  status: "พร้อมตรวจ"
+}));
 
-  // ... (ส่วนการโหลด topics ของคุณด้านล่างนี้เหมือนเดิม)
-  const topicsData = await callGAS("getPMTopics", { assetType: "Computer" });
-  if (topicsData && topicsData.status) { // เปลี่ยน .success เป็น .status ตามโครงสร้าง GAS ของคุณ
-    const topicsList = topicsData.data || [];
-    // ... logic เดิม ...
-  }
+      const topicsData = await callGAS("getPMTopics", { assetType: "Computer" });
+      if (topicsData && topicsData.success) {
+        const topicsList = topicsData.data || [];
+        
+        topics = {
+          Physical: [],
+          Performance: [],
+          Risk: [],
+          Security: []
+        };
+        
+        topicsList.forEach(t => {
+          const categories = Object.keys(topics);
+          const category = categories[Math.floor(Math.random() * categories.length)];
+          
+          if (topics[category]) {
+            topics[category].push({
+              id: t.topic_id,
+              name: t.topic_name,
+              required: t.required,
+              photo_required: t.photo_required,
+              critical: t.critical
+            });
+          }
+        });
+      }
 
-  logAction("LOAD_ASSETS", `${assets.length} items, topics loaded`);
-  renderAssets(assets);
-}
+      logAction("LOAD_ASSETS", `${assets.length} items, topics loaded`);
+      renderAssets(assets);
+    }
+
     async function savePMRecord(pmData) {
       const payload = {
         action: "savePM",
@@ -305,7 +390,7 @@ async function callGAS(action, params = {}) {
 
     function cacheEls() {
       [
-        "appWrapper", "appTitle", "hospitalName", "departmentName", "assetQuery", "assetList",
+        "appWrapper", "appTitle", "hospitalName", "departmentName", "searchInput", "assetList",
         "resultCount", "emptyPanel", "pmPanel", "assetName", "assetIdBadge", "deptBadge",
         "typeBadge", "workStatus", "progressBar", "progressText", "checklistWrap",
         "pmForm", "searchForm", "overlay", "overlayTitle", "overlayText", "modal",
@@ -315,73 +400,34 @@ async function callGAS(action, params = {}) {
       ].forEach(id => els[id] = document.getElementById(id));
     }
 
-// 1. ตัวล้างข้อมูล (คงเดิม)
-function normalizeInput(value) {
-    const raw = String(value || "").trim().toUpperCase();
-    if (!raw) return "";
-    if (raw.startsWith("HTTP")) {
-        try {
-            const url = new URL(raw);
-            const keys = ["ASSET_ID", "ASSET", "ID", "Q"];
-            for (const key of keys) {
-                const found = url.searchParams.get(key);
-                if (found) return found.trim().toUpperCase();
-            }
-            return url.pathname.split("/").filter(Boolean).pop().trim().toUpperCase();
-        } catch (e) { return raw; }
-    }
-    return raw.replace(/[:|]/g, " ").split(" ").filter(Boolean).pop();
-}
-
-// 2. ฟังก์ชันค้นหาหลัก
-async function searchAsset() {
-    const inputField = document.getElementById('assetQuery');
-    const q = normalizeInput(inputField.value);
-    const area = document.getElementById('resultsArea');
-    
-    if (!q) { area.innerHTML = ''; return; }
-    area.innerHTML = '<div class="p-4 text-center text-pink-600">กำลังค้นหา...</div>';
-
-    try {
-        // ตรวจสอบว่า API_URL ถูกประกาศไว้ในโค้ดส่วนอื่นแล้ว
-        const res = await fetch(`${API_URL}?action=searchAsset&query=${encodeURIComponent(q)}&searchType=ID`);
-        let data = await res.json(); 
-        area.innerHTML = '';
-        
-        if (!data || data.length === 0) {
-            area.innerHTML = '<p class="text-center p-4">ไม่พบข้อมูล</p>';
-            return;
+    function normalizeInput(value) {
+      const raw = String(value || "").trim().toUpperCase();
+      if (!raw) return "";
+      try {
+        const url = new URL(raw);
+        const keys = ["ASSET_ID", "ASSET", "ID", "Q"];
+        for (const key of keys) {
+          const found = url.searchParams.get(key);
+          if (found) return found.trim().toUpperCase();
         }
-
-        data.forEach(item => {
-            const d = document.createElement('div');
-            d.className = "p-4 bg-white border-b cursor-pointer hover:bg-pink-50 rounded-xl transition";
-            d.innerHTML = `<p class="font-bold text-pink-700">${highlightText(item.AssetID, q)}</p>
-                           <p class="text-xs text-pink-500">${item.FullDescription}</p>`;
-            d.onclick = () => { currentAsset = item; openAuditModal(); };
-            area.appendChild(d);
-        });
-    } catch (e) { 
-        area.innerHTML = '<p class="text-center text-red-500">เกิดข้อผิดพลาดในการเชื่อมต่อ</p>'; 
+        return url.pathname.split("/").filter(Boolean).pop().trim().toUpperCase();
+      } catch (e) {
+        return raw.replace(/[^A-Z0-9ก-๙\-_/]/g, "").split("/").pop();
+      }
     }
-}
 
-// 3. ฟังก์ชัน Highlight (คงเดิม)
-function highlightText(fullText, query) {
-    if (!query || !fullText) return fullText || "";
-    const regex = new RegExp(`(${query})`, 'gi');
-    return String(fullText).replace(regex, '<span class="text-green-600 font-bold">$1</span>');
-}
+    function reverseText(value) {
+      return String(value).split("").reverse().join("");
+    }
 
-// 4. การจัดการ QR Scanner
-const html5QrCode = new Html5Qrcode("reader"); // ใช้ ID ให้ตรงกับ <div id="reader"> ใน HTML
-
-function startScanner() {
-      const html5QrCode = new Html5Qrcode("reader");
-      html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (decodedText) => {
-        els.assetQuery.value = decodedText;
-        html5QrCode.stop();
-      }).catch(err => alert("ไม่สามารถเข้าถึงกล้องได้"));
+    function searchAssets(query) {
+      const keyword = normalizeInput(query);
+      if (!keyword) return assets;
+      const reversed = reverseText(keyword);
+      return assets.filter(asset => {
+        const target = `${asset.asset_id} ${asset.noid} ${asset.name} ${asset.department} ${asset.dept_id}`.toUpperCase();
+        return target.includes(keyword) || reverseText(target).includes(reversed);
+      });
     }
 
     function renderAssets(list) {
@@ -749,6 +795,5 @@ function startScanner() {
 
     boot();
   </script>
-
  </body>
 </html>
