@@ -1,3 +1,6 @@
+นี่คือโค้ดที่นำ **ส่วนที่ 1** และ **ส่วนที่ 2** มาประกอบรวมกันเป็นหน้าเดียวแบบสมบูรณ์ พร้อมใช้งานเป็น Web App เรียบร้อยครับ โดยผมได้ลบสคริปต์ของ Cloudflare ที่ติดมาตอนท้ายออกให้ เพื่อให้โค้ดสะอาดและพร้อมนำไป Deploy บน Google Apps Script หรือ Web Hosting ได้ทันทีครับ
+
+```html
 <!doctype html>
 <html lang="th" class="h-full w-full">
  <head>
@@ -7,7 +10,7 @@
   <script src="/_sdk/element_sdk.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     html, body {
       height: 100%;
@@ -130,8 +133,7 @@
  </head>
  <body class="h-full w-full">
   <main id="appWrapper" class="soft-bg h-full w-full overflow-auto text-pink-950">
-   <div class="watermark" aria-hidden="true"><span>IT UDON HOSP</span>
-   </div>
+   <div class="watermark" aria-hidden="true"><span>IT UDON HOSP</span></div>
    <div class="relative z-10 w-full px-4 py-5 sm:px-6 lg:px-8">
     <section class="mx-auto max-w-7xl">
      <header class="glass-card rounded-[2rem] p-5 sm:p-6 mb-5 print-area">
@@ -263,6 +265,7 @@
     </div>
    </div>
   </main>
+
   <script>
     const defaultConfig = {
       background_color: "#fff7fb",
@@ -301,7 +304,6 @@
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const result = await response.json();
         
-        // Backend response format: { status: bool, data: any, message: string }
         return {
           success: result.status,
           data: result.data,
@@ -325,7 +327,6 @@
         return;
       }
 
-      // Map backend response to frontend format
       const assetData = data.data || [];
       assets = assetData.map(r => ({
         asset_id: r.Asset_ID,
@@ -338,12 +339,10 @@
         status: "พร้อมตรวจ"
       }));
 
-      // Load PM topics for Computer asset type
       const topicsData = await callGAS("getPMTopics", { assetType: "Computer" });
       if (topicsData && topicsData.success) {
         const topicsList = topicsData.data || [];
         
-        // Group topics by category
         topics = {
           Physical: [],
           Performance: [],
@@ -352,8 +351,6 @@
         };
         
         topicsList.forEach(t => {
-          // Map topic_name to appropriate category based on topic structure
-          // For now, distribute evenly across categories as a fallback
           const categories = Object.keys(topics);
           const category = categories[Math.floor(Math.random() * categories.length)];
           
@@ -383,7 +380,6 @@
         details: []
       };
 
-      // Collect checklist data with proper topic_id mapping
       document.querySelectorAll(".checklist-item").forEach(item => {
         const topicId = item.id;
         const isChecked = item.checked;
@@ -796,13 +792,11 @@
 
       showOverlay("กำลังเข้าสู่ระบบ", "ตรวจ session token และโหลดข้อมูลเริ่มต้น");
       
-      // Simulate login delay
       await new Promise(resolve => setTimeout(resolve, 800));
       
       els.cacheState.textContent = "Hit";
       hideOverlay();
 
-      // Load assets from Google Apps Script
       await loadAssets();
 
       if (window.lucide) lucide.createIcons();
@@ -810,5 +804,5 @@
 
     boot();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ffd39a04c639c3b',t:'MTc3OTQ2NzYzMg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ </body>
 </html>
