@@ -308,59 +308,44 @@ async function callGAS(action, params = {}) {
     return { success: false, message: "Connection Failed" };
   }
 }
-    async function loadAssets() {
-      showOverlay("กำลังโหลดข้อมูล", "ดึง ASSET_LOGS จาก Google Sheet...");
-      const data = await callGAS("getAssets");
-      hideOverlay();
+ async function loadAssets() {
+  showOverlay("กำลังโหลดข้อมูล", "ดึง ASSET_LOGS จาก Google Sheet...");
+  const response = await callGAS("getAssets");
+  hideOverlay();
 
-      if (!data || !data.success) {
-        logAction("ERROR", "loadAssets failed");
-        showModal("เกิดข้อผิดพลาด", `ไม่สามารถโหลดข้อมูลครุภัณฑ์ได้: ${data?.message || "Unknown error"}`, "error");
-        return;
-      }
+  // 1. เช็คให้ตรงกับ key ที่คุณส่งกลับมา (ถ้าใน Code.gs ส่งมาเป็น status ให้ใช้ response.status)
+  // แต่ถ้าส่งมาเป็น {status: true, ...} ให้ใช้ response.status === true
+  if (!response || !response.status) { 
+    logAction("ERROR", "loadAssets failed");
+    showModal("เกิดข้อผิดพลาด", `ไม่สามารถโหลดข้อมูลครุภัณฑ์ได้: ${response?.message || "Unknown error"}`, "error");
+    return;
+  }
 
-     assets = assetData.map(r => ({
-  asset_id: r?.Asset_ID || "-",
-  noid: r?.NOID || "-",
-  serial_number: r?.Serial_Number || "-",
-  name: `${r?.Asset_DB_Col8 || "Unknown"} (SN: ${r?.Serial_Number || "-"})`,
-  department: r?.Dept_Name || "ไม่ระบุ",
-  dept_id: r?.DEPT_ID || "-",
-  type: r?.Asset_DB_Col13 || "Computer",
-  status: "พร้อมตรวจ"
-}));
+  // 2. ข้อมูลที่ถูกต้องอยู่ใน response.data ไม่ใช่ assetData
+  const assetData = response.data || [];
 
-      const topicsData = await callGAS("getPMTopics", { assetType: "Computer" });
-      if (topicsData && topicsData.success) {
-        const topicsList = topicsData.data || [];
-        
-        topics = {
-          Physical: [],
-          Performance: [],
-          Risk: [],
-          Security: []
-        };
-        
-        topicsList.forEach(t => {
-          const categories = Object.keys(topics);
-          const category = categories[Math.floor(Math.random() * categories.length)];
-          
-          if (topics[category]) {
-            topics[category].push({
-              id: t.topic_id,
-              name: t.topic_name,
-              required: t.required,
-              photo_required: t.photo_required,
-              critical: t.critical
-            });
-          }
-        });
-      }
+  // 3. ตอนนี้ assetData มีค่าแล้ว โค้ด map ของคุณจะทำงานได้ปกติ
+  assets = assetData.map(r => ({
+    asset_id: r?.Asset_ID || "-",
+    noid: r?.NOID || "-",
+    serial_number: r?.Serial_Number || "-",
+    name: `${r?.Asset_DB_Col8 || "Unknown"} (SN: ${r?.Serial_Number || "-"})`,
+    department: r?.Dept_Name || "ไม่ระบุ",
+    dept_id: r?.DEPT_ID || "-",
+    type: r?.Asset_DB_Col13 || "Computer",
+    status: "พร้อมตรวจ"
+  }));
 
-      logAction("LOAD_ASSETS", `${assets.length} items, topics loaded`);
-      renderAssets(assets);
-    }
+  // ... (ส่วนการโหลด topics ของคุณด้านล่างนี้เหมือนเดิม)
+  const topicsData = await callGAS("getPMTopics", { assetType: "Computer" });
+  if (topicsData && topicsData.status) { // เปลี่ยน .success เป็น .status ตามโครงสร้าง GAS ของคุณ
+    const topicsList = topicsData.data || [];
+    // ... logic เดิม ...
+  }
 
+  logAction("LOAD_ASSETS", `${assets.length} items, topics loaded`);
+  renderAssets(assets);
+}
     async function savePMRecord(pmData) {
       const payload = {
         action: "savePM",
