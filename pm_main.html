@@ -391,29 +391,7 @@ async function callGAS(action, params = {}) {
       ].forEach(id => els[id] = document.getElementById(id));
     }
 
-  const html5QrCode = new Html5Qrcode("qrScanner");
-  
-  function startScanner() {
-    html5QrCode.start(
-      { facingMode: "environment" }, // ใช้กล้องหลัง
-      { fps: 10, qrbox: 250 },
-      (decodedText) => {
-        // เมื่อสแกนเจอ ให้เอาค่าไปใส่ในช่องค้นหา
-        document.getElementById('assetQuery').value = decodedText;
-        searchAsset(); // เรียกฟังก์ชันค้นหาที่คุณเขียนไว้
-        html5QrCode.stop(); // หยุดกล้องหลังสแกนเสร็จ
-      }
-    ).catch(err => console.log("สแกนไม่ได้:", err));
-  }
-
-  // เรียกใช้ฟังก์ชัน startScanner() เมื่อหน้าเว็บพร้อม
-  window.onload = startScanner;
-
-    function reverseText(value) {
-      return String(value).split("").reverse().join("");
-    }
-// 1. ฟังก์ชันตัวล้างข้อมูล (ต้นทาง)
-// 1. ตัวล้างข้อมูล (จัดการทั้ง URL และ RAW)
+// 1. ตัวล้างข้อมูล (คงเดิม)
 function normalizeInput(value) {
     const raw = String(value || "").trim().toUpperCase();
     if (!raw) return "";
@@ -431,16 +409,17 @@ function normalizeInput(value) {
     return raw.replace(/[:|]/g, " ").split(" ").filter(Boolean).pop();
 }
 
-// 2. ฟังก์ชันค้นหาอัตโนมัติ (เชื่อมกับ HTML)
+// 2. ฟังก์ชันค้นหาหลัก
 async function searchAsset() {
-    const q = normalizeInput(document.getElementById('assetQuery').value);
+    const inputField = document.getElementById('assetQuery');
+    const q = normalizeInput(inputField.value);
     const area = document.getElementById('resultsArea');
     
     if (!q) { area.innerHTML = ''; return; }
-
-    area.innerHTML = '<div class="p-4 text-center">กำลังโหลด...</div>';
+    area.innerHTML = '<div class="p-4 text-center text-pink-600">กำลังค้นหา...</div>';
 
     try {
+        // ตรวจสอบว่า API_URL ถูกประกาศไว้ในโค้ดส่วนอื่นแล้ว
         const res = await fetch(`${API_URL}?action=searchAsset&query=${encodeURIComponent(q)}&searchType=ID`);
         let data = await res.json(); 
         area.innerHTML = '';
@@ -450,57 +429,54 @@ async function searchAsset() {
             return;
         }
 
-        // เรียงลำดับตามเลขท้าย + ไฮไลท์
-        data.sort((a, b) => { /* Logic เรียงลำดับเดิม */ return 0; });
-
         data.forEach(item => {
             const d = document.createElement('div');
-            d.className = "p-4 bg-white border-b cursor-pointer hover:bg-pink-50";
-            d.innerHTML = `<p class="font-bold text-pink-500">${item.AssetID.replace(new RegExp(`(${q})`, 'gi'), '<span class="text-green-500">$1</span>')}</p>
-                           <p class="text-xs">${item.FullDescription}</p>`;
+            d.className = "p-4 bg-white border-b cursor-pointer hover:bg-pink-50 rounded-xl transition";
+            d.innerHTML = `<p class="font-bold text-pink-700">${highlightText(item.AssetID, q)}</p>
+                           <p class="text-xs text-pink-500">${item.FullDescription}</p>`;
             d.onclick = () => { currentAsset = item; openAuditModal(); };
             area.appendChild(d);
         });
-    } catch (e) { area.innerHTML = '<p class="text-center text-red-500">Error</p>'; }
+    } catch (e) { 
+        area.innerHTML = '<p class="text-center text-red-500">เกิดข้อผิดพลาดในการเชื่อมต่อ</p>'; 
+    }
 }
 
-// 3. ผูก Event Listener ให้ค้นหาทันที
+// 3. ฟังก์ชัน Highlight (คงเดิม)
+function highlightText(fullText, query) {
+    if (!query || !fullText) return fullText || "";
+    const regex = new RegExp(`(${query})`, 'gi');
+    return String(fullText).replace(regex, '<span class="text-green-600 font-bold">$1</span>');
+}
+
+// 4. การจัดการ QR Scanner
+const html5QrCode = new Html5Qrcode("reader"); // ใช้ ID ให้ตรงกับ <div id="reader"> ใน HTML
+
+function startScanner() {
+    html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 250 },
+        (decodedText) => {
+            document.getElementById('assetQuery').value = normalizeInput(decodedText);
+            searchAsset(); 
+            html5QrCode.stop().catch(err => console.log("Stop Error:", err));
+        }
+    ).catch(err => console.log("กล้องเปิดไม่ได้:", err));
+}
+
+// 5. จุดเชื่อมต่อเหตุการณ์ (Initialization)
 document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('assetQuery');
-    // ค้นหาเมื่อพิมพ์หรือวางค่า
+    
+    // ค้นหาเมื่อพิมพ์
     input.addEventListener('input', () => {
         clearTimeout(window.sTimeout);
         window.sTimeout = setTimeout(searchAsset, 300);
     });
+
+    // เริ่มกล้อง
+    startScanner();
 });
-
-// 4. เมื่อสแกนเสร็จ (ใช้สำหรับเรียกจากกล้อง)
-function onScanSuccess(decodedText) {
-    document.getElementById('assetQuery').value = normalizeInput(decodedText);
-    searchAsset();
-}
-
-// 3. ฟังก์ชันตัวคุมจังหวะ (เชื่อม UI)
-function debouncedSearch() {
-    clearTimeout(window.sTimeout);
-    window.sTimeout = setTimeout(searchAsset, 300);
-}
-
-// 4. ผูก Event Listener (จุดรวม)
-document.addEventListener('DOMContentLoaded', () => {
-    const input = document.getElementById('assetQuery');
-    input.addEventListener('input', debouncedSearch);
-});
-
-// 5. เมื่อสแกนเสร็จให้เรียกใช้ฟังก์ชันนี้ (เรียกจาก Scan Library)
-
-
-// ฟังก์ชัน Highlight
-function highlightText(fullText, query) {
-    if (!query || !fullText) return fullText || "";
-    const regex = new RegExp(`(${query})`, 'gi');
-    return String(fullText).replace(regex, '<span class="text-green-500 font-bold">$1</span>');
-}
 
     function renderAssets(list) {
       els.assetList.innerHTML = "";
