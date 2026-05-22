@@ -126,7 +126,7 @@
   </style>
   <style>body { box-sizing: border-box; }</style>
   <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
-
+ <script src="https://unpkg.com/html5-qrcode"></script>
  </head>
  <body class="h-full w-full">
   <main id="appWrapper" class="soft-bg h-full w-full overflow-auto text-pink-950">
@@ -385,35 +385,100 @@ async function callGAS(action, params = {}) {
       ].forEach(id => els[id] = document.getElementById(id));
     }
 
-    function normalizeInput(value) {
-      const raw = String(value || "").trim().toUpperCase();
-      if (!raw) return "";
-      try {
-        const url = new URL(raw);
-        const keys = ["ASSET_ID", "ASSET", "ID", "Q"];
-        for (const key of keys) {
-          const found = url.searchParams.get(key);
-          if (found) return found.trim().toUpperCase();
-        }
-        return url.pathname.split("/").filter(Boolean).pop().trim().toUpperCase();
-      } catch (e) {
-        return raw.replace(/[^A-Z0-9ก-๙\-_/]/g, "").split("/").pop();
-      }
-    }
+  
 
     function reverseText(value) {
       return String(value).split("").reverse().join("");
     }
-
-    function searchAssets(query) {
-      const keyword = normalizeInput(query);
-      if (!keyword) return assets;
-      const reversed = reverseText(keyword);
-      return assets.filter(asset => {
-        const target = `${asset.asset_id} ${asset.noid} ${asset.name} ${asset.department} ${asset.dept_id}`.toUpperCase();
-        return target.includes(keyword) || reverseText(target).includes(reversed);
-      });
+// 1. ฟังก์ชันตัวล้างข้อมูล (ต้นทาง)
+// 1. ตัวล้างข้อมูล (จัดการทั้ง URL และ RAW)
+function normalizeInput(value) {
+    const raw = String(value || "").trim().toUpperCase();
+    if (!raw) return "";
+    if (raw.startsWith("HTTP")) {
+        try {
+            const url = new URL(raw);
+            const keys = ["ASSET_ID", "ASSET", "ID", "Q"];
+            for (const key of keys) {
+                const found = url.searchParams.get(key);
+                if (found) return found.trim().toUpperCase();
+            }
+            return url.pathname.split("/").filter(Boolean).pop().trim().toUpperCase();
+        } catch (e) { return raw; }
     }
+    return raw.replace(/[:|]/g, " ").split(" ").filter(Boolean).pop();
+}
+
+// 2. ฟังก์ชันค้นหาอัตโนมัติ (เชื่อมกับ HTML)
+async function searchAsset() {
+    const q = normalizeInput(document.getElementById('assetQuery').value);
+    const area = document.getElementById('resultsArea');
+    
+    if (!q) { area.innerHTML = ''; return; }
+
+    area.innerHTML = '<div class="p-4 text-center">กำลังโหลด...</div>';
+
+    try {
+        const res = await fetch(`${API_URL}?action=searchAsset&query=${encodeURIComponent(q)}&searchType=ID`);
+        let data = await res.json(); 
+        area.innerHTML = '';
+        
+        if (!data || data.length === 0) {
+            area.innerHTML = '<p class="text-center p-4">ไม่พบข้อมูล</p>';
+            return;
+        }
+
+        // เรียงลำดับตามเลขท้าย + ไฮไลท์
+        data.sort((a, b) => { /* Logic เรียงลำดับเดิม */ return 0; });
+
+        data.forEach(item => {
+            const d = document.createElement('div');
+            d.className = "p-4 bg-white border-b cursor-pointer hover:bg-pink-50";
+            d.innerHTML = `<p class="font-bold text-pink-500">${item.AssetID.replace(new RegExp(`(${q})`, 'gi'), '<span class="text-green-500">$1</span>')}</p>
+                           <p class="text-xs">${item.FullDescription}</p>`;
+            d.onclick = () => { currentAsset = item; openAuditModal(); };
+            area.appendChild(d);
+        });
+    } catch (e) { area.innerHTML = '<p class="text-center text-red-500">Error</p>'; }
+}
+
+// 3. ผูก Event Listener ให้ค้นหาทันที
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('assetQuery');
+    // ค้นหาเมื่อพิมพ์หรือวางค่า
+    input.addEventListener('input', () => {
+        clearTimeout(window.sTimeout);
+        window.sTimeout = setTimeout(searchAsset, 300);
+    });
+});
+
+// 4. เมื่อสแกนเสร็จ (ใช้สำหรับเรียกจากกล้อง)
+function onScanSuccess(decodedText) {
+    document.getElementById('assetQuery').value = normalizeInput(decodedText);
+    searchAsset();
+}
+
+// 3. ฟังก์ชันตัวคุมจังหวะ (เชื่อม UI)
+function debouncedSearch() {
+    clearTimeout(window.sTimeout);
+    window.sTimeout = setTimeout(searchAsset, 300);
+}
+
+// 4. ผูก Event Listener (จุดรวม)
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('assetQuery');
+    input.addEventListener('input', debouncedSearch);
+});
+
+// 5. เมื่อสแกนเสร็จให้เรียกใช้ฟังก์ชันนี้ (เรียกจาก Scan Library)
+
+
+// ฟังก์ชัน Highlight
+function highlightText(fullText, query) {
+    if (!query || !fullText) return fullText || "";
+    const regex = new RegExp(`(${query})`, 'gi');
+    return String(fullText).replace(regex, '<span class="text-green-500 font-bold">$1</span>');
+}
 
     function renderAssets(list) {
       els.assetList.innerHTML = "";
