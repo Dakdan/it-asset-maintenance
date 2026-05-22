@@ -289,23 +289,26 @@
 
     const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzcgxVWPQ5w7YonfYWfAUs1fABezDzadx_i06xSvd05Xo2US4Lj3jYKtQXx2MIQKzycOw/exec";
 
-  async function callGAS(action, params = {}) {
-  try {
-    const payload = { action, ...params };
-    
-    // ลบ headers ออกทั้งหมดครับ อย่าใส่ Content-Type
-    const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
-      method: "POST",
-      mode: "cors", 
-      body: JSON.stringify(payload)
-    });
-    
-    const result = await response.json();
-    return { success: result.status, data: result.data, message: result.message };
-  } catch (error) {
-    console.error("GAS Error:", error);
-    return { success: false, error: error.message };
-  }
+ async function callGAS(action, params = {}) {
+  // สร้าง FormData เพื่อส่งแบบเดียวกับ Form ปกติที่ GAS คุ้นเคย
+  const formData = new FormData();
+  formData.append('action', action);
+  
+  // แปลง params object เป็น entries สำหรับ FormData
+  Object.keys(params).forEach(key => {
+    formData.append(key, params[key]);
+  });
+
+  // ใช้ fetch แบบไม่ระบุ Header Content-Type
+  // เบราว์เซอร์จะจัดการส่งเป็น 'multipart/form-data' ซึ่งเลี่ยงการทำ Preflight
+  const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+    method: "POST",
+    mode: "cors",
+    body: formData 
+  });
+
+  const result = await response.json();
+  return { success: result.status, data: result.data, message: result.message };
 }
 
     async function loadAssets() {
