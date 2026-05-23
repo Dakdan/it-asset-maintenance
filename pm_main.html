@@ -1,10 +1,11 @@
 <!doctype html>
 <html lang="th">
- <head>
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IT Preventive Maintenance - Udon Thani Hospital</title>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
   <style>
     * {
       margin: 0;
@@ -28,12 +29,12 @@
       overflow: hidden;
     }
 
-    /* ==================== HEADER ==================== */
+    /* ==================== HEADER (บานเย็น-ชมพูสว่าง) ==================== */
     .header {
-      background: linear-gradient(135deg, #ff9ecb 0%, #ffb3d9 50%, #ffc9e3 100%);
+      background: linear-gradient(135deg, #ff9ecb 0%, #ff7fa0 50%, #e91e63 100%);
       padding: 24px 20px;
-      box-shadow: 0 4px 15px rgba(255, 158, 203, 0.2);
-      border-bottom: 3px solid #ff7fa0;
+      box-shadow: 0 4px 15px rgba(255, 158, 203, 0.3);
+      border-bottom: 3px solid #d81b60;
     }
 
     .header-content {
@@ -41,13 +42,20 @@
       margin: 0 auto;
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 20px;
       position: relative;
     }
 
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
     .logo-icon {
       font-size: 40px;
-      animation: pulse 2s ease-in-out infinite;
+      animation: pulse 2.5s ease-in-out infinite;
     }
 
     @keyframes pulse {
@@ -56,28 +64,44 @@
     }
 
     .header-text h1 {
-      font-size: 28px;
+      font-size: 26px;
       font-weight: 700;
       color: #fff;
       text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      margin-bottom: 4px;
-    }
-
-    .header-text p {
-      font-size: 14px;
-      color: rgba(255,255,255,0.95);
       margin-bottom: 2px;
     }
 
-    .watermark {
-      position: absolute;
-      right: 30px;
-      top: 50%;
-      transform: translateY(-50%);
+    .header-text p {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.95);
+      margin-bottom: 1px;
+    }
+
+    .connection-badge {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      padding: 6px 14px;
+      border-radius: 30px;
+      color: white;
       font-size: 12px;
-      color: rgba(255,255,255,0.6);
-      font-weight: 500;
-      letter-spacing: 2px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      background-color: #4caf50;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 8px #4caf50;
+    }
+
+    .status-indicator.offline {
+      background-color: #f44336;
+      box-shadow: 0 0 8px #f44336;
     }
 
     /* ==================== NAV TABS ==================== */
@@ -110,8 +134,8 @@
     }
 
     .tab-btn.active {
-      color: #ff7fa0;
-      border-bottom-color: #ff7fa0;
+      color: #e91e63;
+      border-bottom-color: #e91e63;
     }
 
     /* ==================== MAIN CONTENT ==================== */
@@ -141,10 +165,10 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* ==================== DASHBOARD ==================== */
+    /* ==================== DASHBOARD CARD ==================== */
     .dashboard-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 20px;
       margin-bottom: 30px;
     }
@@ -159,53 +183,14 @@
       overflow: hidden;
     }
 
-    .dashboard-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(135deg, rgba(255, 158, 203, 0.05) 0%, transparent 100%);
-      pointer-events: none;
-    }
+    .dashboard-card.warning { border-top-color: #ff9800; }
+    .dashboard-card.error { border-top-color: #f44336; }
+    .dashboard-card.success { border-top-color: #4caf50; }
 
-    .dashboard-card.warning {
-      border-top-color: #ff9800;
-    }
-
-    .dashboard-card.error {
-      border-top-color: #f44336;
-    }
-
-    .dashboard-card.success {
-      border-top-color: #4caf50;
-    }
-
-    .card-icon {
-      font-size: 32px;
-      margin-bottom: 12px;
-    }
-
-    .card-label {
-      font-size: 14px;
-      color: #999;
-      margin-bottom: 8px;
-      font-weight: 500;
-    }
-
-    .card-value {
-      font-size: 32px;
-      font-weight: 700;
-      color: #ff7fa0;
-      margin-bottom: 12px;
-    }
-
-    .card-detail {
-      font-size: 12px;
-      color: #ccc;
-      font-weight: 500;
-    }
+    .card-icon { font-size: 32px; margin-bottom: 12px; }
+    .card-label { font-size: 14px; color: #777; margin-bottom: 8px; font-weight: 500; }
+    .card-value { font-size: 32px; font-weight: 700; color: #e91e63; margin-bottom: 12px; }
+    .card-detail { font-size: 12px; color: #aaa; font-weight: 500; }
 
     .chart-container {
       background: white;
@@ -218,7 +203,7 @@
     .chart-title {
       font-size: 18px;
       font-weight: 700;
-      color: #ff7fa0;
+      color: #e91e63;
       margin-bottom: 20px;
     }
 
@@ -230,7 +215,7 @@
     }
 
     .chart-label {
-      min-width: 120px;
+      min-width: 140px;
       font-size: 14px;
       font-weight: 600;
       color: #333;
@@ -246,7 +231,7 @@
     }
 
     .chart-bar-fill {
-      background: linear-gradient(90deg, #ff9ecb 0%, #ff7fa0 100%);
+      background: linear-gradient(90deg, #ff9ecb 0%, #e91e63 100%);
       height: 100%;
       display: flex;
       align-items: center;
@@ -319,7 +304,7 @@
     }
 
     .btn-qr {
-      background: linear-gradient(135deg, #ffa6d5 0%, #ff9ecb 100%);
+      background: linear-gradient(135deg, #ffa6d5 0%, #e91e63 100%);
       color: white;
       box-shadow: 0 4px 12px rgba(255, 158, 203, 0.3);
     }
@@ -346,11 +331,9 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
-    .btn-clear:hover:not(:disabled) {
-      background: #e0e0e0;
-    }
+    .btn-clear:hover:not(:disabled) { background: #e0e0e0; }
 
-    /* ==================== ASSET LIST ==================== */
+    /* ==================== ASSET LIST & CARD ==================== */
     .assets-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -373,10 +356,7 @@
     .asset-card::before {
       content: '';
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background: linear-gradient(135deg, rgba(255, 158, 203, 0.05) 0%, transparent 100%);
       pointer-events: none;
     }
@@ -384,7 +364,7 @@
     .asset-card:hover {
       transform: translateY(-4px);
       box-shadow: 0 8px 24px rgba(255, 158, 203, 0.25);
-      border-left-color: #ff7fa0;
+      border-left-color: #e91e63;
     }
 
     .asset-card.abnormal {
@@ -401,12 +381,8 @@
       z-index: 1;
     }
 
-    .asset-id {
-      font-size: 18px;
-      font-weight: 700;
-      color: #ff7fa0;
-    }
-
+    .asset-id { font-size: 18px; font-weight: 700; color: #e91e63; }
+    
     .dept-badge {
       background: linear-gradient(135deg, #ffa6d5 0%, #ff9ecb 100%);
       color: white;
@@ -417,66 +393,30 @@
       box-shadow: 0 2px 8px rgba(255, 158, 203, 0.3);
     }
 
-    .asset-serial {
-      font-size: 13px;
-      color: #999;
-      margin-bottom: 8px;
-      position: relative;
-      z-index: 1;
-    }
+    .asset-serial { font-size: 13px; color: #999; margin-bottom: 8px; position: relative; z-index: 1; }
+    .asset-details { font-size: 14px; color: #666; line-height: 1.6; position: relative; z-index: 1; }
+    .asset-details p { margin-bottom: 6px; display: flex; gap: 8px; }
+    .detail-label { font-weight: 600; color: #e91e63; min-width: 100px; }
+    .highlight { background: #ffeb3b; padding: 2px 4px; border-radius: 3px; font-weight: 600; }
 
-    .asset-details {
-      font-size: 14px;
-      color: #666;
-      line-height: 1.6;
-      position: relative;
-      z-index: 1;
-    }
-
-    .asset-details p {
-      margin-bottom: 6px;
-      display: flex;
-      gap: 8px;
-    }
-
-    .detail-label {
-      font-weight: 600;
-      color: #ff7fa0;
-      min-width: 80px;
-    }
-
-    .highlight {
-      background: #ffeb3b;
-      padding: 2px 4px;
-      border-radius: 3px;
-      font-weight: 600;
-    }
-
-    /* ==================== MODAL ==================== */
+    /* ==================== MODAL OVERLAY & POPUP ==================== */
     .modal-overlay {
       display: none;
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0, 0, 0, 0.5);
       z-index: 1000;
       animation: fadeIn 0.3s ease;
     }
 
-    .modal-overlay.show {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+    .modal-overlay.show { display: flex; justify-content: center; align-items: center; }
 
     .modal {
       background: white;
       border-radius: 16px;
-      max-width: 500px;
+      max-width: 650px;
       width: 90%;
-      max-height: 80%;
+      max-height: 85%;
       overflow-y: auto;
       box-shadow: 0 10px 40px rgba(0,0,0,0.3);
       animation: slideUp 0.3s ease;
@@ -484,14 +424,8 @@
     }
 
     @keyframes slideUp {
-      from {
-        transform: translateY(50px);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
 
     .modal-header {
@@ -502,606 +436,338 @@
       align-items: center;
     }
 
-    .modal-title {
-      font-size: 22px;
-      font-weight: 700;
-      color: #ff7fa0;
-    }
+    .modal-title { font-size: 22px; font-weight: 700; color: #e91e63; }
+    .modal-close { background: none; border: none; font-size: 28px; color: #ccc; cursor: pointer; transition: color 0.3s; }
+    .modal-close:hover { color: #e91e63; }
+    .modal-body { padding: 24px; }
+    .modal-footer { padding: 20px 24px; border-top: 2px solid #ffe0ec; display: flex; gap: 12px; justify-content: flex-end; }
 
-    .modal-close {
-      background: none;
-      border: none;
-      font-size: 28px;
-      color: #ccc;
-      cursor: pointer;
-      transition: color 0.3s;
-    }
-
-    .modal-close:hover {
-      color: #ff7fa0;
-    }
-
-    .modal-body {
-      padding: 24px;
-    }
-
-    .modal-footer {
-      padding: 20px 24px;
-      border-top: 2px solid #ffe0ec;
-      display: flex;
-      gap: 12px;
-      justify-content: flex-end;
-    }
-
-    .btn-modal {
-      padding: 12px 24px;
-      border: none;
-      border-radius: 10px;
-      font-family: 'Kanit', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #ff9ecb 0%, #ff7fa0 100%);
-      color: white;
-      box-shadow: 0 4px 12px rgba(255, 158, 203, 0.3);
-    }
-
-    .btn-primary:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(255, 158, 203, 0.4);
-    }
-
-    .btn-primary:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .btn-secondary {
-      background: #f0f0f0;
-      color: #666;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    .btn-secondary:hover:not(:disabled) {
-      background: #e0e0e0;
-    }
-
-    .btn-danger {
-      background: linear-gradient(135deg, #f44336 0%, #e91e63 100%);
-      color: white;
-      box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
-    }
-
-    .btn-danger:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(244, 67, 54, 0.4);
-    }
+    .btn-modal { padding: 12px 24px; border: none; border-radius: 10px; font-family: 'Kanit', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
+    .btn-primary { background: linear-gradient(135deg, #ff9ecb 0%, #e91e63 100%); color: white; box-shadow: 0 4px 12px rgba(255, 158, 203, 0.3); }
+    .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(255, 158, 203, 0.4); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-secondary { background: #f0f0f0; color: #666; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .btn-secondary:hover:not(:disabled) { background: #e0e0e0; }
 
     /* ==================== FORM ELEMENTS ==================== */
-    .form-group {
-      margin-bottom: 20px;
-    }
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; font-size: 14px; font-weight: 600; color: #333; margin-bottom: 8px; }
+    .form-input, .form-select, .form-textarea { width: 100%; padding: 12px 16px; border: 2px solid #ffe0ec; border-radius: 8px; font-family: 'Kanit', sans-serif; font-size: 14px; transition: all 0.3s ease; background: #fff9fb; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: #ff9ecb; box-shadow: 0 0 0 3px rgba(255, 158, 203, 0.1); background: white; }
+    .form-textarea { resize: vertical; min-height: 80px; }
 
-    .form-label {
-      display: block;
-      font-size: 14px;
-      font-weight: 600;
-      color: #333;
-      margin-bottom: 8px;
-    }
+    /* ==================== DYNAMIC CHECKLIST GROUP ==================== */
+    .pm-category { margin-bottom: 20px; background: #fff9fb; padding: 16px; border-radius: 10px; border-left: 4px solid #e91e63; }
+    .category-name { font-size: 15px; font-weight: 700; color: #e91e63; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .checklist-item { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; padding: 12px; background: white; border-radius: 8px; border: 1px solid #ffe0ec; }
+    .checklist-row { display: flex; align-items: center; gap: 12px; justify-content: space-between; flex-wrap: wrap; }
+    .checklist-label { flex: 1; font-size: 14px; color: #333; font-weight: 500; min-width: 200px; }
+    
+    .status-options { display: flex; gap: 10px; }
+    .status-radio { display: none; }
+    .status-btn { padding: 6px 14px; border: 1px solid #ffe0ec; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; background: #fafafa; color: #888; transition: all 0.2s; }
+    .status-radio:checked + .status-btn.btn-pass { background: #e8f5e9; color: #2e7d32; border-color: #a5d6a7; }
+    .status-radio:checked + .status-btn.btn-fail { background: #ffebee; color: #c62828; border-color: #ef9a9a; }
 
-    .form-input, .form-select, .form-textarea {
-      width: 100%;
-      padding: 12px 16px;
-      border: 2px solid #ffe0ec;
-      border-radius: 8px;
-      font-family: 'Kanit', sans-serif;
-      font-size: 14px;
-      transition: all 0.3s ease;
-      background: #fff9fb;
-    }
+    /* ==================== NOTIFICATION & LOADING ==================== */
+    .notification-toast { position: fixed; top: 24px; right: 24px; background: white; padding: 16px 24px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); z-index: 2000; animation: slideInRight 0.3s ease; display: flex; gap: 12px; align-items: center; border-left: 5px solid #ff9ecb; }
+    @keyframes slideInRight { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .notification-toast.success { border-left-color: #4caf50; }
+    .notification-toast.error { border-left-color: #f44336; }
+    .notification-toast.warning { border-left-color: #ff9800; }
 
-    .form-input:focus, .form-select:focus, .form-textarea:focus {
-      outline: none;
-      border-color: #ff9ecb;
-      box-shadow: 0 0 0 3px rgba(255, 158, 203, 0.1);
-      background: white;
-    }
+    .loading-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255, 158, 203, 0.2); backdrop-filter: blur(4px); z-index: 999; justify-content: center; align-items: center; flex-direction: column; }
+    .loading-overlay.show { display: flex; }
+    .spinner { width: 50px; height: 50px; border: 4px solid rgba(255, 158, 203, 0.2); border-top-color: #e91e63; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { margin-top: 16px; font-size: 16px; color: #e91e63; font-weight: 600; }
 
-    .form-textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
+    .empty-state { text-align: center; padding: 40px 20px; color: #999; width: 100%; }
+    .empty-state-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+    .empty-state-text { font-size: 15px; font-weight: 500; }
 
-    /* ==================== NOTIFICATION ==================== */
-    .notification {
-      position: fixed;
-      top: 24px;
-      right: 24px;
-      background: white;
-      padding: 20px 24px;
-      border-radius: 12px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-      z-index: 2000;
-      animation: slideInRight 0.3s ease;
-      max-width: 400px;
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-    }
-
-    @keyframes slideInRight {
-      from {
-        transform: translateX(400px);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-
-    .notification.success {
-      border-left: 4px solid #4caf50;
-    }
-
-    .notification.error {
-      border-left: 4px solid #f44336;
-    }
-
-    .notification.warning {
-      border-left: 4px solid #ff9800;
-    }
-
-    .notification.info {
-      border-left: 4px solid #2196f3;
-    }
-
-    .notification-icon {
-      font-size: 20px;
-      flex-shrink: 0;
-    }
-
-    .notification-content h4 {
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .notification-content p {
-      font-size: 13px;
-      color: #666;
-    }
-
-    /* ==================== LOADING OVERLAY ==================== */
-    .loading-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(255, 158, 203, 0.3);
-      backdrop-filter: blur(3px);
-      z-index: 999;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .loading-overlay.show {
-      display: flex;
-    }
-
-    .spinner {
-      width: 50px;
-      height: 50px;
-      border: 4px solid rgba(255, 158, 203, 0.2);
-      border-top-color: #ff9ecb;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .loading-text {
-      position: absolute;
-      bottom: 30%;
-      font-size: 16px;
-      color: #ff7fa0;
-      font-weight: 600;
-    }
-
-    /* ==================== PM PANEL ==================== */
-    .pm-panel {
-      background: white;
-      border-radius: 14px;
-      padding: 24px;
-      box-shadow: 0 2px 12px rgba(255, 158, 203, 0.15);
-      border-top: 5px solid #ff9ecb;
-    }
-
-    .pm-header {
-      margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 2px solid #ffe0ec;
-    }
-
-    .pm-title {
-      font-size: 20px;
-      font-weight: 700;
-      color: #ff7fa0;
-      margin-bottom: 8px;
-    }
-
-    .pm-subtitle {
-      font-size: 13px;
-      color: #999;
-    }
-
-    .pm-category {
-      margin-bottom: 24px;
-      background: #fff9fb;
-      padding: 16px;
-      border-radius: 10px;
-      border-left: 3px solid #ff9ecb;
-    }
-
-    .category-name {
-      font-size: 15px;
-      font-weight: 700;
-      color: #ff7fa0;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .checklist-item {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 12px;
-      padding: 12px;
-      background: white;
-      border-radius: 8px;
-      border: 1px solid #ffe0ec;
-      transition: all 0.3s;
-    }
-
-    .checklist-item:hover {
-      border-color: #ff9ecb;
-      box-shadow: 0 2px 8px rgba(255, 158, 203, 0.1);
-    }
-
-    .checkbox-custom {
-      width: 24px;
-      height: 24px;
-      border: 2px solid #ffe0ec;
-      border-radius: 6px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: all 0.3s;
-    }
-
-    .checkbox-custom:hover {
-      border-color: #ff9ecb;
-    }
-
-    .checkbox-custom.checked {
-      background: linear-gradient(135deg, #ff9ecb 0%, #ff7fa0 100%);
-      border-color: #ff7fa0;
-      color: white;
-    }
-
-    .checklist-label {
-      flex: 1;
-      font-size: 14px;
-      color: #333;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .required-badge {
-      display: inline-block;
-      background: #ffebee;
-      color: #f44336;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: 600;
-    }
-
-    .photo-badge {
-      display: inline-block;
-      background: #e3f2fd;
-      color: #2196f3;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: 600;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: #999;
-    }
-
-    .empty-state-icon {
-      font-size: 48px;
-      margin-bottom: 16px;
-      opacity: 0.5;
-    }
-
-    .empty-state-text {
-      font-size: 16px;
-      font-weight: 500;
-    }
-
-    /* ==================== RESPONSIVE ==================== */
+    /* ==================== RESPONSIVE BREAKPOINTS ==================== */
     @media (max-width: 768px) {
-      .header-text h1 {
-        font-size: 22px;
-      }
-
-      .watermark {
-        font-size: 10px;
-        right: 16px;
-      }
-
-      .assets-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .dashboard-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .search-container {
-        flex-direction: column;
-      }
-
-      .search-buttons {
-        width: 100%;
-      }
-
-      .btn-qr, .btn-search, .btn-clear {
-        flex: 1;
-      }
-
-      .main-content {
-        padding: 12px;
-      }
-
-      .nav-tabs {
-        padding: 0 12px;
-      }
-
-      .tab-btn {
-        padding: 12px 16px;
-        font-size: 14px;
-      }
-    }
-
-    @media print {
-      body {
-        background: white;
-      }
-
-      .search-section, .loading-overlay, .modal-overlay, .notification, .nav-tabs {
-        display: none !important;
-      }
-
-      .assets-grid {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .app-wrapper {
-        height: auto;
-      }
+      .header-text h1 { font-size: 20px; }
+      .watermark { display: none; }
+      .assets-grid { grid-template-columns: 1fr; }
+      .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
+      .search-container { flex-direction: column; align-items: stretch; }
+      .search-buttons { display: flex; }
+      .btn-qr, .btn-search, .btn-clear { flex: 1; justify-content: center; }
     }
   </style>
-  <style>body { box-sizing: border-box; }</style>
- </head>
- <body>
-  <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js" type="text/javascript"></script>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+</head>
+<body>
+
   <div class="app-wrapper">
-   <!-- HEADER -->
-   <div class="header">
-    <div class="header-content">
-     <div class="logo-icon">
-      🏥
-     </div>
-     <div class="header-text">
-      <h1 id="sysTitle">IT PREVENTIVE SYSTEM</h1>
-      <p id="hospitalName">โรงพยาบาลอุดรธานี</p>
-      <p id="deptName">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
-     </div>
-     <div class="watermark">
-      IT UDON HOSP
-     </div>
-    </div>
-   </div><!-- NAV TABS -->
-   <div class="nav-tabs" id="navTabs"><button class="tab-btn active" data-tab="dashboard" onclick="switchTab('dashboard')">📊 Dashboard</button> <button class="tab-btn" data-tab="assets" onclick="switchTab('assets')">📦 Assets</button> <button class="tab-btn" data-tab="completed" onclick="switchTab('completed')">✅ Completed</button> <button class="tab-btn" data-tab="abnormal" onclick="switchTab('abnormal')">⚠️ Abnormal</button>
-   </div><!-- MAIN CONTENT -->
-   <div class="main-content">
-    <div class="container">
-     <!-- DASHBOARD VIEW -->
-     <div class="tab-panel active" id="tab-dashboard">
-      <div class="dashboard-grid" id="dashboardGrid"></div>
-      <div class="chart-container">
-       <div class="chart-title">
-        📊 Asset Distribution
-       </div>
-       <div id="chartContainer"></div>
-      </div>
-     </div><!-- ASSETS VIEW -->
-     <div class="tab-panel" id="tab-assets">
-      <!-- SEARCH SECTION -->
-      <div class="search-section">
-       <div class="search-container">
-        <div class="search-input-wrapper">
-         <input type="text" class="search-input" id="searchInput" placeholder="ค้นหา Asset ID หรือ Serial Number..." autocomplete="off">
+    <!-- HEADER -->
+    <div class="header">
+      <div class="header-content">
+        <div class="header-left">
+          <div class="logo-icon">🏥</div>
+          <div class="header-text">
+            <h1 id="sysTitle">IT PREVENTIVE SYSTEM</h1>
+            <p id="hospitalName">โรงพยาบาลอุดรธานี</p>
+            <p id="deptName">กลุ่มงานเทคโนโลยีสารสนเทศคอมพิวเตอร์ โทร 1125, 1126, 1485</p>
+          </div>
         </div>
-        <div class="search-buttons">
-         <button class="btn-qr" id="btnQR" title="สแกน QR Code"> <span>📷</span> QR Scan </button> <button class="btn-search" id="btnSearch" title="ค้นหา"> <span>🔍</span> Search </button> <button class="btn-clear" id="btnClear" title="ล้างข้อมูล"> <span>✕</span> </button>
+        <div class="connection-badge">
+          <span class="status-indicator" id="connIndicator"></span>
+          <span id="connText">เชื่อมต่อระบบหลัก</span>
         </div>
-       </div>
-      </div><!-- ASSETS GRID -->
-      <div class="assets-grid" id="assetsGrid">
-       <!-- Assets will be rendered here -->
       </div>
-     </div><!-- COMPLETED VIEW -->
-     <div class="tab-panel" id="tab-completed">
-      <div id="completedContainer"></div>
-     </div><!-- ABNORMAL VIEW -->
-     <div class="tab-panel" id="tab-abnormal">
-      <div id="abnormalContainer"></div>
-     </div>
     </div>
-   </div><!-- LOADING OVERLAY -->
-   <div class="loading-overlay" id="loadingOverlay">
-    <div>
-     <div class="spinner"></div>
-     <div class="loading-text">
-      กำลังประมวลผล...
-     </div>
+
+    <div class="nav-tabs" id="navTabs">
+      <button class="tab-btn active" data-tab="dashboard" onclick="switchTab('dashboard')">📊 Dashboard</button>
+      <button class="tab-btn" data-tab="assets" onclick="switchTab('assets')">📦 Assets & บันทึก PM</button>
+      <button class="tab-btn" data-tab="completed" onclick="switchTab('completed')">✅ Completed</button>
+      <button class="tab-btn" data-tab="abnormal" onclick="switchTab('abnormal')">⚠️ Abnormal</button>
     </div>
-   </div><!-- MODALS -->
-   <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
-    <div class="modal" id="modalContent" onclick="event.stopPropagation()">
-     <div class="modal-header">
-      <h2 class="modal-title" id="modalTitle">Modal Title</h2><button class="modal-close" onclick="closeModal()">×</button>
-     </div>
-     <div class="modal-body" id="modalBody">
-      <!-- Modal content -->
-     </div>
-     <div class="modal-footer" id="modalFooter">
-      <!-- Modal buttons -->
-     </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+      <div class="container">
+        
+        <!-- DASHBOARD VIEW -->
+        <div class="tab-panel active" id="tab-dashboard">
+          <div class="dashboard-grid" id="dashboardGrid"></div>
+          <div class="chart-container">
+            <div class="chart-title">📊 สัดส่วนตามประเภทครุภัณฑ์ (Asset Types)</div>
+            <div id="chartContainer"></div>
+          </div>
+        </div>
+
+        <!-- ASSETS VIEW -->
+        <div class="tab-panel" id="tab-assets">
+          <div class="search-section">
+            <div class="search-container">
+              <div class="search-input-wrapper">
+                <input type="text" class="search-input" id="searchInput" placeholder="พิมพ์เลขรหัสครุภัณฑ์, Serial Number หรือชื่อแผนก..." autocomplete="off">
+              </div>
+              <div class="search-buttons">
+                <button class="btn-qr" id="btnQR" title="สแกน QR Code"><span>📷</span> QR Scan</button>
+                <button class="btn-search" id="btnSearch" title="ค้นหา"><span>🔍</span> ค้นหา</button>
+                <button class="btn-clear" id="btnClear" title="ล้างการค้นหา"><span>✕</span></button>
+              </div>
+            </div>
+          </div>
+          <div class="assets-grid" id="assetsGrid"></div>
+        </div>
+
+        <!-- COMPLETED VIEW -->
+        <div class="tab-panel" id="tab-completed">
+          <div class="assets-grid" id="completedContainer"></div>
+        </div>
+
+        <!-- ABNORMAL VIEW -->
+        <div class="tab-panel" id="tab-abnormal">
+          <div class="assets-grid" id="abnormalContainer"></div>
+        </div>
+
+      </div>
     </div>
-   </div><!-- NOTIFICATION -->
-   <div id="notificationContainer"></div><!-- HIDDEN FILE INPUT FOR QR CAMERA --> <input type="file" id="qrFileInput" accept="image/*" style="display: none;" onchange="handleQRUpload(event)">
-   <script src="/_sdk/element_sdk.js"></script>
-   <script>
+  </div>
+
+  <!-- LOADING OVERLAY -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loadingText">กำลังดึงข้อมูลงานจริง...</div>
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">บันทึกผลการตรวจเช็ค PM</h2>
+        <button class="modal-close" onclick="closeModal()">×</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- ฟอร์ม Checklist โหลดแบบ Dynamic ตามประเภท Col23 ที่นี่ -->
+      </div>
+      <div class="modal-footer" id="modalFooter">
+        <button class="btn-modal btn-secondary" onclick="closeModal()">ยกเลิก</button>
+        <button class="btn-modal btn-primary" id="btnSubmitPM" onclick="submitPMForm()">บันทึกข้อมูลเข้าระบบหลัก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="notificationContainer"></div>
+
+  <!-- CAMERA QR HIDDEN INPUT -->
+  <input type="file" id="qrFileInput" accept="image/*" style="display: none;" onchange="handleQRUpload(event)">
+
+  <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzcgxVWPQ5w7YonfYWfAUs1fABezDzadx_i06xSvd05Xo2US4Lj3jYKtQXx2MIQKzycOw/exec";
+    
     let allAssets = [];
     let filteredAssets = [];
     let pmHistory = [];
     let abnormalList = [];
+    let pmTopics = [];
+    let pmCategories = [];
     let currentSearchQuery = '';
+    let selectedAsset = null;
 
-    // ==================== INITIALIZATION ====================
+    // เริ่มต้นแอปพลิเคชัน
     document.addEventListener('DOMContentLoaded', async () => {
       await initializeApp();
     });
 
     async function initializeApp() {
-      showLoading(true, 'กำลังโหลดข้อมูลระบบ...');
+      showLoading(true, 'กำลังโหลดข้อมูลจาก Google Sheets (ระบบจริง)...');
+      setConnectionStatus(true, 'กำลังโหลดข้อมูล...');
       try {
-        await loadAssets();
-        await loadPMHistory();
-        await loadAbnormalList();
+        await Promise.all([
+          loadAssets(), 
+          loadPMHistory(), 
+          loadAbnormalList(),
+          loadPMTopics(),
+          loadPMCategories()
+        ]);
         setupEventListeners();
         renderDashboard();
-        showNotification('success', 'สำเร็จ', 'โหลดข้อมูลระบบเรียบร้อย');
+        setConnectionStatus(true, 'ระบบเชื่อมต่อสำเร็จ');
+        showNotification('success', 'เชื่อมต่อระบบฐานข้อมูลจริงเรียบร้อยแล้ว');
       } catch (err) {
-        showNotification('error', 'ข้อผิดพลาด', err.message);
+        setConnectionStatus(false, 'การเชื่อมต่อขัดข้อง');
+        showNotification('error', 'เชื่อมต่อล้มเหลว: ' + err.message);
+        renderConnectionError(err.message);
       } finally {
         showLoading(false);
       }
     }
 
-    // ==================== ASSET LOADING ====================
     async function loadAssets() {
-      try {
-        const response = await fetch(SCRIPT_URL + '?action=getAssets');
-        const result = await response.json();
-        if (result.status) {
-          allAssets = result.data || [];
-          filteredAssets = [...allAssets];
-        } else {
-          throw new Error(result.message || 'ไม่สามารถโหลดข้อมูล Asset');
-        }
-      } catch (err) {
-        console.error('Load Assets Error:', err);
-        throw err;
+      const response = await fetch(`${SCRIPT_URL}?action=getAssets`);
+      if (!response.ok) throw new Error('HTTP status ' + response.status);
+      const result = await response.json();
+      if (result.status) {
+        allAssets = result.data || [];
+        filteredAssets = [...allAssets];
+      } else {
+        throw new Error(result.message || 'โครงสร้างข้อมูลสเปรดชีตไม่ถูกต้อง');
       }
     }
 
     async function loadPMHistory() {
-      try {
-        const response = await fetch(SCRIPT_URL + '?action=getPMHistory');
-        const result = await response.json();
-        pmHistory = result.status ? (result.data || []) : [];
-      } catch (err) {
-        console.error('Load PM History Error:', err);
-        pmHistory = [];
-      }
+      const response = await fetch(`${SCRIPT_URL}?action=getPMHistory`);
+      if (!response.ok) throw new Error('HTTP status ' + response.status);
+      const result = await response.json();
+      pmHistory = result.status ? (result.data || []) : [];
     }
 
     async function loadAbnormalList() {
+      const response = await fetch(`${SCRIPT_URL}?action=getAbnormalPM`);
+      if (!response.ok) throw new Error('HTTP status ' + response.status);
+      const result = await response.json();
+      abnormalList = result.status ? (result.data || []) : [];
+    }
+
+    async function loadPMTopics() {
       try {
-        const response = await fetch(SCRIPT_URL + '?action=getAbnormalPM');
+        const response = await fetch(`${SCRIPT_URL}?action=getPMTopics`);
+        if (!response.ok) throw new Error('HTTP status ' + response.status);
         const result = await response.json();
-        abnormalList = result.status ? (result.data || []) : [];
+        pmTopics = result.status ? (result.data || []) : [];
       } catch (err) {
-        console.error('Load Abnormal Error:', err);
-        abnormalList = [];
+        console.warn('โหลด getPMTopics ไม่สำเร็จ ลองเรียกผ่าน getPMTopic...');
+        try {
+          const response = await fetch(`${SCRIPT_URL}?action=getPMTopic`);
+          const result = await response.json();
+          pmTopics = result.status ? (result.data || []) : [];
+        } catch (subErr) {
+          console.error('ไม่สามารถดึงข้อมูลตาราง PM_TOPIC จริงได้:', subErr);
+          pmTopics = [];
+        }
       }
     }
 
-    // ==================== DASHBOARD ====================
+    async function loadPMCategories() {
+      try {
+        const response = await fetch(`${SCRIPT_URL}?action=getPMCategories`);
+        if (!response.ok) throw new Error('HTTP status ' + response.status);
+        const result = await response.json();
+        pmCategories = result.status ? (result.data || []) : [];
+      } catch (err) {
+        console.warn('โหลด getPMCategories ไม่สำเร็จ ลองเรียกผ่าน getPMCategory...');
+        try {
+          const response = await fetch(`${SCRIPT_URL}?action=getPMCategory`);
+          const result = await response.json();
+          pmCategories = result.status ? (result.data || []) : [];
+        } catch (subErr) {
+          console.error('ไม่สามารถดึงข้อมูลตาราง PM_CATEGORY จริงได้:', subErr);
+          pmCategories = [];
+        }
+      }
+    }
+
+    function setupEventListeners() {
+      const searchInput = document.getElementById('searchInput');
+      
+      searchInput.addEventListener('input', (e) => {
+        performSearch(e.target.value);
+      });
+
+      document.getElementById('btnSearch').addEventListener('click', () => {
+        performSearch(searchInput.value);
+      });
+
+      document.getElementById('btnQR').addEventListener('click', () => {
+        document.getElementById('qrFileInput').click();
+      });
+
+      document.getElementById('btnClear').addEventListener('click', () => {
+        searchInput.value = '';
+        currentSearchQuery = '';
+        filteredAssets = [...allAssets];
+        renderAssets();
+      });
+    }
+
+    function performSearch(query) {
+      currentSearchQuery = query.trim().toUpperCase();
+      if (!currentSearchQuery) {
+        filteredAssets = [...allAssets];
+      } else {
+        filteredAssets = allAssets.filter(asset => {
+          const id = (asset.Asset_ID || '').toString().toUpperCase();
+          const sn = (asset.Serial_Number || '').toString().toUpperCase();
+          const dept = (asset.Dept_Name || '').toString().toUpperCase();
+          return id.includes(currentSearchQuery) || sn.includes(currentSearchQuery) || dept.includes(currentSearchQuery);
+        });
+      }
+      renderAssets();
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-panel').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      
+      document.getElementById('tab-' + tabName).classList.add('active');
+      const clickedBtn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+      if (clickedBtn) clickedBtn.classList.add('active');
+
+      if (tabName === 'assets') renderAssets();
+      if (tabName === 'completed') renderCompletedList();
+      if (tabName === 'abnormal') renderAbnormalListPanel();
+    }
+
     function renderDashboard() {
       const grid = document.getElementById('dashboardGrid');
       grid.innerHTML = '';
 
-      const totalAssets = allAssets.length;
-      const completedCount = pmHistory.length;
-      const abnormalCount = abnormalList.length;
-      const waitingCount = totalAssets - completedCount;
+      const total = allAssets.length;
+      const done = pmHistory.length;
+      const fail = abnormalList.length;
+      const wait = Math.max(0, total - done);
 
       const cards = [
-        {
-          icon: '📦',
-          label: 'Total Assets',
-          value: totalAssets,
-          detail: 'All Equipment',
-          color: 'success'
-        },
-        {
-          icon: '✅',
-          label: 'Completed PM',
-          value: completedCount,
-          detail: 'Finished',
-          color: 'success'
-        },
-        {
-          icon: '⚠️',
-          label: 'Abnormal PM',
-          value: abnormalCount,
-          detail: 'Need Attention',
-          color: 'error'
-        },
-        {
-          icon: '⏳',
-          label: 'Waiting PM',
-          value: waitingCount,
-          detail: 'Not Started',
-          color: 'warning'
-        }
+        { icon: '📦', label: 'จำนวนครุภัณฑ์ทั้งหมดในฐานข้อมูล', value: total, detail: 'จากระบบหลักโรงพยาบาลอุดรฯ', color: 'success' },
+        { icon: '✅', label: 'ทำ PM ผ่านการตรวจสอบ', value: done, detail: 'เป่าฝุ่นและเช็คสภาวะปกติ', color: 'success' },
+        { icon: '⚠️', label: 'ตรวจพบชำรุดเสียหาย', value: fail, detail: 'รอส่งรายการเสนอซ่อมบำรุง', color: 'error' },
+        { icon: '⏳', label: 'รายการที่ยังคงค้าง PM', value: wait, detail: 'เป้าหมายที่ต้องเช็คต่อในรอบสัปดาห์', color: 'warning' }
       ];
 
       cards.forEach(card => {
@@ -1120,112 +786,45 @@
     }
 
     function renderAssetChart() {
-      const chartContainer = document.getElementById('chartContainer');
-      const assetTypes = {};
-
-      allAssets.forEach(asset => {
-        const type = asset.Asset_Type || 'Other';
-        assetTypes[type] = (assetTypes[type] || 0) + 1;
+      const container = document.getElementById('chartContainer');
+      const types = {};
+      allAssets.forEach(a => {
+        const t = a.col23 || a.Asset_Type || 'ไม่ระบุประเภท';
+        types[t] = (types[t] || 0) + 1;
       });
 
+      const max = Math.max(...Object.values(types), 1);
       let html = '';
-      const maxCount = Math.max(...Object.values(assetTypes));
-
-      Object.keys(assetTypes).forEach(type => {
-        const count = assetTypes[type];
-        const percentage = (count / maxCount) * 100;
+      Object.keys(types).forEach(t => {
+        const count = types[t];
+        const pct = (count / max) * 100;
         html += `
           <div class="chart-bar">
-            <div class="chart-label">${escapeHtml(type)}</div>
+            <div class="chart-label">${escapeHtml(t)}</div>
             <div class="chart-bar-container">
-              <div class="chart-bar-fill" style="width: ${percentage}%">${count}</div>
+              <div class="chart-bar-fill" style="width: ${pct}%">${count} เครื่อง</div>
             </div>
           </div>
         `;
       });
-
-      chartContainer.innerHTML = html;
+      container.innerHTML = html || '<p class="text-gray-400 text-center text-sm py-4">ไม่พบโครงสร้างกลุ่มประเภทครุภัณฑ์</p>';
     }
 
-    function switchTab(tabName) {
-      document.querySelectorAll('.tab-panel').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-      
-      document.getElementById('tab-' + tabName).classList.add('active');
-      event.target.classList.add('active');
-
-      if (tabName === 'assets') {
-        renderAssets();
-      } else if (tabName === 'completed') {
-        renderCompletedList();
-      } else if (tabName === 'abnormal') {
-        renderAbnormalList();
-      }
-    }
-
-    // ==================== SEARCH LOGIC ====================
-    function setupEventListeners() {
-      const searchInput = document.getElementById('searchInput');
-      const btnSearch = document.getElementById('btnSearch');
-      const btnQR = document.getElementById('btnQR');
-      const btnClear = document.getElementById('btnClear');
-
-      searchInput.addEventListener('input', (e) => {
-        performSearch(e.target.value);
-      });
-
-      btnSearch.addEventListener('click', () => {
-        performSearch(searchInput.value);
-      });
-
-      btnQR.addEventListener('click', () => {
-        document.getElementById('qrFileInput').click();
-      });
-
-      btnClear.addEventListener('click', () => {
-        searchInput.value = '';
-        currentSearchQuery = '';
-        filteredAssets = [...allAssets];
-        renderAssets();
-      });
-    }
-
-    function performSearch(query) {
-      currentSearchQuery = query.trim().toUpperCase();
-      if (!currentSearchQuery) {
-        filteredAssets = [...allAssets];
-      } else {
-        filteredAssets = allAssets.filter(asset => {
-          const assetId = (asset.Asset_ID || '').toString().toUpperCase();
-          const serialNum = (asset.Serial_Number || '').toString().toUpperCase();
-          return assetId.includes(currentSearchQuery) || serialNum.includes(currentSearchQuery);
-        });
-      }
-      renderAssets();
-    }
-
-    function highlightText(text, query) {
-      if (!query) return escapeHtml(text);
-      const regex = new RegExp(`(${query})`, 'gi');
-      return escapeHtml(text).replace(regex, '<span class="highlight">$1</span>');
-    }
-
-    function handleQRUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      showNotification('info', 'QR Scan', 'โปรดกรอก Asset ID ด้วยตนเอง');
-    }
-
-    // ==================== RENDERING ====================
     function renderAssets() {
       const grid = document.getElementById('assetsGrid');
       if (!currentSearchQuery) {
-        grid.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><div class="empty-state-icon">🔍</div><div class="empty-state-text">ค้นหา Asset เพื่อดูรายละเอียด</div></div>';
+        grid.innerHTML = `<div class="empty-state" style="grid-column: 1/-1;">
+          <div class="empty-state-icon">🔍</div>
+          <div class="empty-state-text">กรุณากรอกรหัสครุภัณฑ์หรือแผนกที่ติดตั้งในช่องด้านบน เพื่อเปิดหน้าบันทึก PM</div>
+        </div>`;
         return;
       }
 
       if (filteredAssets.length === 0) {
-        grid.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><div class="empty-state-icon">📦</div><div class="empty-state-text">ไม่พบข้อมูล Asset</div></div>';
+        grid.innerHTML = `<div class="empty-state" style="grid-column: 1/-1;">
+          <div class="empty-state-icon">📦</div>
+          <div class="empty-state-text">ไม่พบข้อมูลรหัสครุภัณฑ์ไอทีนี้ในฐานข้อมูล Google Sheets ปัจจุบัน</div>
+        </div>`;
         return;
       }
 
@@ -1235,22 +834,16 @@
         card.className = 'asset-card';
         card.innerHTML = `
           <div class="asset-header">
-            <div class="asset-id">${highlightText(asset.Asset_ID || 'N/A', currentSearchQuery)}</div>
-            <div class="dept-badge">${escapeHtml(asset.Dept_Name || 'N/A')}</div>
+            <div class="asset-id">${highlightText(asset.Asset_ID || '', currentSearchQuery)}</div>
+            <div class="dept-badge">${escapeHtml(asset.Dept_Name || 'ไม่พบคลังหน่วยงาน')}</div>
           </div>
           <div class="asset-serial">SN: ${highlightText(asset.Serial_Number || 'N/A', currentSearchQuery)}</div>
           <div class="asset-details">
-            <p>
-              <span class="detail-label">NOID:</span>
-              <span>${escapeHtml(asset.NOID || 'N/A')}</span>
-            </p>
-            <p>
-              <span class="detail-label">Status:</span>
-              <span style="color: #4caf50; font-weight: 600;">✓ Active</span>
-            </p>
+            <p><span class="detail-label">ชื่อพาร์ทครุภัณฑ์:</span><span>${escapeHtml(asset.Asset_Name || 'N/A')}</span></p>
+            <p><span class="detail-label">ประเภทอุปกรณ์ (Col23):</span><span>${escapeHtml(asset.col23 || asset.Asset_Type || 'N/A')}</span></p>
           </div>
         `;
-        card.addEventListener('click', () => openPMPanel(asset));
+        card.onclick = () => openPMPanel(asset);
         grid.appendChild(card);
       });
     }
@@ -1258,253 +851,327 @@
     function renderCompletedList() {
       const container = document.getElementById('completedContainer');
       if (pmHistory.length === 0) {
-        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✅</div><div class="empty-state-text">ยังไม่มี PM ที่เสร็จแล้ว</div></div>';
+        container.innerHTML = `<div class="empty-state" style="grid-column: 1/-1;">
+          <div class="empty-state-icon">✅</div>
+          <div class="empty-state-text">ยังไม่พบบันทึกประวัติที่ตรวจเช็คผ่านการทดสอบ PM ในฐานข้อมูลสัปดาห์นี้</div>
+        </div>`;
         return;
       }
-
-      let html = '';
-      pmHistory.forEach((pm, idx) => {
-        html += `
-          <div class="asset-card" style="margin-bottom: 16px;">
-            <div class="asset-header">
-              <div class="asset-id">${escapeHtml(pm.Asset_ID || 'N/A')}</div>
-              <button class="btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="editPM(${idx})">แก้ไข</button>
-            </div>
-            <div class="asset-details">
-              <p><span class="detail-label">วันที่:</span><span>${escapeHtml(pm.Date || 'N/A')}</span></p>
-              <p><span class="detail-label">ผู้ทำ:</span><span>${escapeHtml(pm.User || 'N/A')}</span></p>
-              <p><span class="detail-label">ผลลัพธ์:</span><span style="color: #4caf50;">✓ ${escapeHtml(pm.Result || 'PASS')}</span></p>
-              <p><span class="detail-label">หมายเหตุ:</span><span>${escapeHtml(pm.Note || 'ไม่มี')}</span></p>
-            </div>
+      container.innerHTML = pmHistory.map(pm => `
+        <div class="asset-card">
+          <div class="asset-header">
+            <div class="asset-id">${escapeHtml(pm.Asset_ID)}</div>
+            <div class="dept-badge" style="background:#4caf50;">ผ่านเกณฑ์ปกติ</div>
           </div>
-        `;
-      });
-      container.innerHTML = html;
+          <div class="asset-details">
+            <p><span class="detail-label">ผู้รับผิดชอบ:</span><span>${escapeHtml(pm.Checker_Name || 'เจ้าหน้าที่ไอที')}</span></p>
+            <p><span class="detail-label">วันที่ตรวจสภาพ:</span><span>${escapeHtml(pm.Check_Date || 'N/A')}</span></p>
+            <p><span class="detail-label">รายละเอียด:</span><span>${escapeHtml(pm.Note || '-')}</span></p>
+          </div>
+        </div>
+      `).join('');
     }
 
-    function renderAbnormalList() {
+    function renderAbnormalListPanel() {
       const container = document.getElementById('abnormalContainer');
       if (abnormalList.length === 0) {
-        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-text">ไม่มี PM ที่ผิดปกติ</div></div>';
+        container.innerHTML = `<div class="empty-state" style="grid-column: 1/-1;">
+          <div class="empty-state-icon">🛡️</div>
+          <div class="empty-state-text">ยินดีด้วย! ไม่พบรายการอุปกรณ์ที่ตรวจสภาพเป็นล้มเหลว/ชำรุดในขณะนี้</div>
+        </div>`;
         return;
       }
+      container.innerHTML = abnormalList.map(ab => `
+        <div class="asset-card abnormal">
+          <div class="asset-header">
+            <div class="asset-id">${escapeHtml(ab.Asset_ID)}</div>
+            <div class="dept-badge" style="background:#ff9800;">ตรวจพบชำรุด</div>
+          </div>
+          <div class="asset-details">
+            <p><span class="detail-label">รายละเอียดขัดข้อง:</span><span class="text-red-600 font-bold">${escapeHtml(ab.Issue_Details || 'N/A')}</span></p>
+            <p><span class="detail-label">ติดตั้งที่แผนก:</span><span>${escapeHtml(ab.Dept_Name || 'N/A')}</span></p>
+            <p><span class="detail-label">ผู้รายงานปัญหา:</span><span>${escapeHtml(ab.Checker_Name || 'N/A')}</span></p>
+          </div>
+        </div>
+      `).join('');
+    }
 
-      let html = '';
-      abnormalList.forEach((pm, idx) => {
-        html += `
-          <div class="asset-card abnormal" style="margin-bottom: 16px;">
-            <div class="asset-header">
-              <div class="asset-id">${escapeHtml(pm.Asset_ID || 'N/A')}</div>
-              <button class="btn-danger" style="padding: 6px 12px; font-size: 12px;" onclick="editAbnormalPM(${idx})">แก้ไข</button>
-            </div>
-            <div class="asset-details">
-              <p><span class="detail-label">วันที่:</span><span>${escapeHtml(pm.Date || 'N/A')}</span></p>
-              <p><span class="detail-label">ผู้ทำ:</span><span>${escapeHtml(pm.User || 'N/A')}</span></p>
-              <p><span class="detail-label">ผลลัพธ์:</span><span style="color: #ff9800;">⚠️ ${escapeHtml(pm.Result || 'FAIL')}</span></p>
-              <p><span class="detail-label">ปัญหา:</span><span>${escapeHtml(pm.Issue || 'ไม่ระบุ')}</span></p>
+    function openPMPanel(asset) {
+      selectedAsset = asset;
+      const modal = document.getElementById('modalOverlay');
+      document.getElementById('modalTitle').innerText = `ระบบบันทึกงาน PM: ${asset.Asset_ID}`;
+      
+      // ดึงค่า Asset_DB_Col23 ของอุปกรณ์ที่ถูกคลิกเพื่อใช้เปรียบเทียบกับ ASSET_TYPE ใน PM_TOPIC
+      const col23Value = (asset.col23 || asset.Asset_Type || "").toString().trim().toUpperCase();
+
+      // นำมากรองเทียบกับ ASSET_TYPE ที่อยู่ใน pmTopics (PM_TOPIC)
+      const matchedTopics = pmTopics.filter(topic => {
+        const topicAssetType = (topic.ASSET_TYPE || topic.Asset_Type || "").toString().trim().toUpperCase();
+        return topicAssetType === col23Value;
+      });
+
+      // จัดกลุ่มเช็คลิสต์ตรวจงานตาม PM_CATEGORY_ID ของจริง
+      const groupedTopics = {};
+      matchedTopics.forEach(topic => {
+        const catId = (topic.PM_CATEGORY_ID || topic.pm_category_id || "UNCATEGORIZED").toString().trim();
+        if (!groupedTopics[catId]) {
+          groupedTopics[catId] = [];
+        }
+        groupedTopics[catId].push(topic);
+      });
+
+      // เริ่มสร้างโครงร่าง HTML ฟอร์มภายในหน้าต่าง Modal แบบไดนามิกส์ 100%
+      let bodyHtml = `
+        <div class="mb-4 text-sm bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <p class="mb-1"><strong>พิกัดแผนกติดตั้ง:</strong> ${escapeHtml(asset.Dept_Name || 'N/A')}</p>
+          <p class="mb-1"><strong>หมายเลขซีเรียล:</strong> ${escapeHtml(asset.Serial_Number || 'N/A')}</p>
+          <p class="mb-1"><strong>ชื่อพาร์ทครุภัณฑ์:</strong> ${escapeHtml(asset.Asset_Name || 'N/A')}</p>
+          <p><strong>ประเภทอุปกรณ์ (Col23):</strong> ${escapeHtml(asset.col23 || asset.Asset_Type || 'N/A')}</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ระบุชื่อ-สกุล ช่างเทคนิคผู้ปฏิบัติงานตรวจสภาพ (ห้ามเว้นว่าง)*</label>
+          <input type="text" id="pmChecker" class="form-input" placeholder="ตัวอย่าง: นายสมเจตน์ ไอทีแอดมิน" required>
+        </div>
+      `;
+
+      let checklistHtml = '';
+      // หากตารางจับคู่แล้วไม่มีประเภทตรงกันเลย ให้ดึงคำถามทั่วไปของอุปกรณ์ขึ้นมาเป็นค่าเริ่มต้น โดยไม่จำลองข้อมูลหลอก
+      if (Object.keys(groupedTopics).length === 0) {
+        checklistHtml += `
+          <div class="pm-category">
+            <div class="category-name">📋 รายการตรวจสอบโครงสร้างทั่วไป</div>
+            <div class="checklist-item">
+              <div class="checklist-row">
+                <span class="checklist-label">ตรวจสอบสภาพโครงสร้างกายภาพและการทำงานหลักภายนอกอุปกรณ์</span>
+                <div class="status-options">
+                  <label>
+                    <input type="radio" name="chk_default" value="PASS" class="status-radio" checked data-topic-name="ตรวจสอบสภาพโครงสร้างกายภาพภายนอก">
+                    <span class="status-btn btn-pass">ปกติ</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="chk_default" value="FAIL" class="status-radio" data-topic-name="ตรวจสอบสภาพโครงสร้างกายภาพภายนอก">
+                    <span class="status-btn btn-fail">ชำรุด</span>
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
         `;
-      });
-      container.innerHTML = html;
-    }
+      } else {
+        Object.keys(groupedTopics).forEach(catId => {
+          // ค้นหา Category Object เพื่อดึงชื่อจริงจากชีท
+          const categoryObj = pmCategories.find(cat => {
+            const currentCatId = (cat.PM_CATEGORY_ID || cat.pm_category_id || "").toString().trim();
+            return currentCatId === catId;
+          });
+          const categoryTitle = categoryObj ? (categoryObj.TOPIC_NAME || categoryObj.topic_name || "หมวดหมู่อื่นๆ") : `หมวดหมู่รหัส ${catId}`;
 
-    function editPM(idx) {
-      const pm = pmHistory[idx];
-      const modal = document.getElementById('modalOverlay');
-      const title = document.getElementById('modalTitle');
-      const body = document.getElementById('modalBody');
-      const footer = document.getElementById('modalFooter');
+          checklistHtml += `
+            <div class="pm-category">
+              <div class="category-name">📋 ${escapeHtml(categoryTitle)}</div>
+              <div id="categoryGroup_${escapeHtml(catId)}">
+          `;
 
-      title.textContent = 'แก้ไข PM - ' + pm.Asset_ID;
-      body.innerHTML = `
-        <div class="form-group">
-          <label class="form-label">Asset ID</label>
-          <input type="text" class="form-input" value="${escapeHtml(pm.Asset_ID)}" disabled>
-        </div>
-        <div class="form-group">
-          <label class="form-label">หมายเหตุ</label>
-          <textarea class="form-textarea" id="editNote">${escapeHtml(pm.Note || '')}</textarea>
-        </div>
-        <div class="form-group">
-          <label class="form-label">ผลลัพธ์</label>
-          <select class="form-select" id="editResult">
-            <option value="PASS" ${pm.Result === 'PASS' ? 'selected' : ''}>ผ่าน</option>
-            <option value="FAIL" ${pm.Result === 'FAIL' ? 'selected' : ''}>ไม่ผ่าน</option>
-          </select>
-        </div>
-      `;
+          // นำรายการข้อคำถามย่อย (PM_TOPIC) ภายใต้หมวดหมู่นี้มาระเบิดสไตล์สร้างฟิลด์ PASS/FAIL
+          groupedTopics[catId].forEach((topic, idx) => {
+            const topicName = topic.TOPIC_NAME || topic.topic_name || "ไม่มีชื่อหัวข้อ";
+            const topicId = topic.TOPIC_ID || topic.topic_id || `topic_${catId}_${idx}`;
 
-      footer.innerHTML = `
-        <button class="btn-secondary" onclick="closeModal()">ยกเลิก</button>
-        <button class="btn-primary" onclick="savePMEdit(${idx})">บันทึก</button>
-      `;
+            checklistHtml += `
+              <div class="checklist-item">
+                <div class="checklist-row">
+                  <span class="checklist-label" data-label-text="${escapeHtml(topicName)}">${escapeHtml(topicName)}</span>
+                  <div class="status-options">
+                    <label>
+                      <input type="radio" name="chk_${escapeHtml(topicId)}" value="PASS" class="status-radio" checked data-topic-name="${escapeHtml(topicName)}">
+                      <span class="status-btn btn-pass">ปกติ</span>
+                    </label>
+                    <label>
+                      <input type="radio" name="chk_${escapeHtml(topicId)}" value="FAIL" class="status-radio" data-topic-name="${escapeHtml(topicName)}">
+                      <span class="status-btn btn-fail">ชำรุด</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
 
-      modal.classList.add('show');
-    }
-
-    function editAbnormalPM(idx) {
-      editPM(idx);
-    }
-
-    function savePMEdit(idx) {
-      const note = document.getElementById('editNote').value;
-      const result = document.getElementById('editResult').value;
-      pmHistory[idx].Note = note;
-      pmHistory[idx].Result = result;
-      showNotification('success', 'บันทึกสำเร็จ', 'อัปเดตข้อมูล PM เรียบร้อย');
-      closeModal();
-      renderCompletedList();
-    }
-
-    // ==================== PM PANEL ====================
-    async function openPMPanel(asset) {
-      showLoading(true, 'กำลังโหลดข้อมูล PM...');
-      try {
-        const payload = { action: 'getPMTopics', assetType: 'GENERAL' };
-        const response = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-        const result = await response.json();
-        if (result.status) {
-          showPMModal(asset, result.data);
-        } else {
-          throw new Error(result.message || 'ไม่สามารถโหลด PM Topics');
-        }
-      } catch (err) {
-        showNotification('error', 'ข้อผิดพลาด', err.message);
-      } finally {
-        showLoading(false);
-      }
-    }
-
-    function showPMModal(asset, topics) {
-      const modal = document.getElementById('modalOverlay');
-      const title = document.getElementById('modalTitle');
-      const body = document.getElementById('modalBody');
-      const footer = document.getElementById('modalFooter');
-
-      title.textContent = 'PM Checklist - ' + asset.Asset_ID;
-
-      let categoryGroups = {};
-      topics.forEach(t => {
-        const cat = t.asset_type || 'อื่น ๆ';
-        if (!categoryGroups[cat]) categoryGroups[cat] = [];
-        categoryGroups[cat].push(t);
-      });
-
-      let bodyHTML = '';
-      Object.keys(categoryGroups).forEach(cat => {
-        bodyHTML += `<div class="pm-category"><div class="category-name">📋 ${escapeHtml(cat)}</div><div class="checklist-items">`;
-        categoryGroups[cat].forEach(t => {
-          const required = t.required ? '<span class="required-badge">บังคับ</span>' : '';
-          const photo = t.photo_required ? '<span class="photo-badge">ต้องถ่ายรูป</span>' : '';
-          bodyHTML += `
-            <div class="checklist-item">
-              <div class="checkbox-custom" data-topic="${t.topic_id}" onclick="toggleCheckbox(this)"></div>
-              <label class="checklist-label">
-                <span>${escapeHtml(t.topic_name || 'N/A')}</span>
-                <span style="font-size: 12px; color: #999;">${required} ${photo}</span>
-              </label>
+          checklistHtml += `
+              </div>
             </div>
           `;
         });
-        bodyHTML += '</div></div>';
-      });
+      }
 
-      body.innerHTML = bodyHTML;
-      footer.innerHTML = `
-        <button class="btn-secondary" onclick="closeModal()">ยกเลิก</button>
-        <button class="btn-primary" onclick="savePM('${asset.Asset_ID}')">บันทึก PM</button>
+      bodyHtml += `
+        <div id="checklistItems">
+          ${checklistHtml}
+        </div>
+        <div class="form-group mt-4">
+          <label class="form-label">คำอธิบายอาการชำรุด / แนวทางเสนอแนะจัดซื้อชิ้นส่วนทดแทน</label>
+          <textarea id="pmNote" class="form-textarea" placeholder="ระบุรายละเอียดทางเทคนิค เช่น ชิ้นส่วนที่ชำรุด อุปกรณ์เสริมขาด หรือแนวทางการแก้ไขเบื้องต้น..."></textarea>
+        </div>
       `;
 
+      document.getElementById('modalBody').innerHTML = bodyHtml;
       modal.classList.add('show');
     }
 
-    function toggleCheckbox(el) {
-      el.classList.toggle('checked');
-      el.innerHTML = el.classList.contains('checked') ? '✓' : '';
-    }
+    async function submitPMForm() {
+      const checker = document.getElementById('pmChecker').value.trim();
+      if (!checker) {
+        showNotification('warning', 'กรุณาระบุชื่อผู้ตรวจสอบผู้รับงาน');
+        return;
+      }
 
-    async function savePM(assetId) {
-      showLoading(true, 'กำลังบันทึก PM...');
-      try {
-        const checked = document.querySelectorAll('.checkbox-custom.checked');
-        const details = Array.from(checked).map(el => ({ topic_id: el.getAttribute('data-topic'), status: 'PASS', score: 100, remark: '' }));
-        const payload = { action: 'savePM', asset_code: assetId, user: 'USER', result: 'PASS', note: '', details: details };
-        const response = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-        const result = await response.json();
-        if (result.status) {
-          showNotification('success', 'บันทึกสำเร็จ', 'บันทึก PM เรียบร้อยแล้ว');
-          pmHistory.push({ Asset_ID: assetId, Date: new Date().toLocaleDateString('th-TH'), User: 'USER', Result: 'PASS', Note: '' });
-          closeModal();
-        } else {
-          throw new Error(result.message || 'ไม่สามารถบันทึก PM');
+      const note = document.getElementById('pmNote').value.trim();
+      
+      // สรุปสถานะความผิดปกติของเช็คลิสต์ทุกลำดับ
+      const checklistResults = [];
+      let overallStatus = "PASS";
+
+      const radioElements = document.querySelectorAll('#checklistItems input[type="radio"]:checked');
+      radioElements.forEach(radio => {
+        const statusVal = radio.value;
+        const topicName = radio.getAttribute('data-topic-name') || radio.name;
+        
+        if (statusVal === "FAIL") {
+          overallStatus = "FAIL";
         }
+        checklistResults.push(`${topicName}: ${statusVal === 'PASS' ? 'ปกติ' : 'ชำรุด'}`);
+      });
+
+      // รวบรวมข้อความหมายเหตุสรุปสภาพอุปกรณ์
+      let finalNote = note;
+      if (checklistResults.length > 0) {
+        finalNote = `[รายการเช็คลิสต์ตรวจจริง]\n${checklistResults.join('\n')}\n\n[คำอธิบายเพิ่มเติม]\n${note}`;
+      }
+
+      showLoading(true, 'กำลังส่งผลการเช็คและอัปเดตสเปรดชีตสตรีมจริง...');
+      closeModal();
+
+      try {
+        const payload = {
+          action: 'savePM',
+          Asset_ID: selectedAsset.Asset_ID,
+          Checker_Name: checker,
+          Status: overallStatus,
+          Note: finalNote,
+          Dept_Name: selectedAsset.Dept_Name
+        };
+
+        // ยิง Fetch API ส่งข้อมูลแบบ Post ตรงหา Google Apps Script
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        showNotification('success', 'บันทึกข้อมูลเรียบร้อยแล้ว! กำลังปรับปรุงแดชบอร์ด...');
+        
+        // รอรับสัญญาณอัปเดตข้อมูลบน Google Sheets ประมาณ 1.5 วินาทีก่อนโหลดสถานะล่าสุด
+        setTimeout(async () => {
+          try {
+            await Promise.all([loadPMHistory(), loadAbnormalList()]);
+            renderDashboard();
+            switchTab('dashboard');
+            showNotification('success', 'ปรับปรุงฐานข้อมูลชีทแบบสดเรียบร้อย');
+          } catch (fetchErr) {
+            showNotification('warning', 'บันทึกสำเร็จแล้วแต่ดึงหน้าแดชบอร์ดขัดข้อง: ' + fetchErr.message);
+          } finally {
+            showLoading(false);
+          }
+        }, 1500);
+
       } catch (err) {
-        showNotification('error', 'ข้อผิดพลาด', err.message);
-      } finally {
         showLoading(false);
+        showNotification('error', 'บันทึกล้มเหลว: ' + err.message);
       }
     }
 
-    // ==================== MODAL HELPERS ====================
-    function closeModal(event) {
-      if (event && event.target !== event.currentTarget) return;
+    function closeModal() {
       document.getElementById('modalOverlay').classList.remove('show');
     }
 
-    // ==================== NOTIFICATION ====================
-    function showNotification(type, title, message) {
-      const container = document.getElementById('notificationContainer');
-      const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
-      const notif = document.createElement('div');
-      notif.className = 'notification ' + type;
-      notif.innerHTML = `
-        <div class="notification-icon">${icons[type]}</div>
-        <div class="notification-content">
-          <h4>${escapeHtml(title)}</h4>
-          <p>${escapeHtml(message)}</p>
-        </div>
-      `;
-      container.appendChild(notif);
-      setTimeout(() => notif.remove(), 3000);
+    function handleQRUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      showNotification('success', 'รับภาพถ่ายแล้ว กรุณาพิมพ์หมายเลขครุภัณฑ์ในช่องค้นหาเพื่อค้นหาอย่างรวดเร็ว');
     }
 
-    // ==================== LOADING ====================
-    function showLoading(show, text = 'กำลังประมวลผล...') {
-      const overlay = document.getElementById('loadingOverlay');
-      if (show) {
-        overlay.querySelector('.loading-text').textContent = text;
-        overlay.classList.add('show');
+    function setConnectionStatus(isOnline, text) {
+      const indicator = document.getElementById('connIndicator');
+      const textEl = document.getElementById('connText');
+      
+      if (isOnline) {
+        indicator.className = 'status-indicator';
+        textEl.innerText = text || 'เชื่อมต่อระบบหลัก';
       } else {
-        overlay.classList.remove('show');
+        indicator.className = 'status-indicator offline';
+        textEl.innerText = text || 'การเชื่อมต่อขาดหาย';
       }
     }
 
-    // ==================== UTILITIES ====================
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
+    function renderConnectionError(errMsg) {
+      const grid = document.getElementById('dashboardGrid');
+      grid.innerHTML = `
+        <div class="empty-state" style="grid-column: 1/-1; background: #fff5f5; border: 2px solid #ef9a9a; border-radius: 12px; padding: 40px;">
+          <div class="empty-state-icon" style="opacity: 1; color: #f44336;">🚨</div>
+          <div class="empty-state-text" style="color: #c62828; font-weight: 600; font-size: 18px; margin-bottom: 8px;">การเชื่อมต่อ Google Apps Script Web App ขัดข้อง</div>
+          <p style="font-size: 13px; color: #555; max-width: 600px; margin: 0 auto 16px auto; line-height: 1.6;">
+            ระบบนี้เชื่อมต่อตรงผ่าน LIVE API สตรีมเรียลไทม์เท่านั้น และไม่มีการจำลองข้อมูลไว้ภายนอก 
+            กรุณาตรวจสอบการตั้งค่า Deploy ใน Apps Script ของคุณว่าเป็น "Anyone" หรืออาจติดขัดด้านนโยบาย CORS จากภายนอก
+          </p>
+          <p style="font-size: 12px; font-family: monospace; color: #888; margin-bottom: 20px;">ข้อผิดพลาด: ${escapeHtml(errMsg)}</p>
+          <button onclick="initializeApp()" class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition" style="box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);">🔄 ลองเชื่อมต่อใหม่อีกครั้ง</button>
+        </div>
+      `;
     }
 
-    // Initialize Element SDK if available
-    if (window.elementSdk) {
-      window.elementSdk.init({
-        defaultConfig: {
-          system_title: 'IT PREVENTIVE SYSTEM',
-          hospital_name: 'โรงพยาบาลอุดรธานี',
-          department_name: 'กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์'
-        },
-        onConfigChange: async (config) => {
-          document.getElementById('sysTitle').textContent = config.system_title;
-          document.getElementById('hospitalName').textContent = config.hospital_name;
-          document.getElementById('deptName').textContent = config.department_name;
-        },
-        mapToCapabilities: () => ({ recolorables: [], borderables: [], fontEditable: undefined, fontSizeable: undefined }),
-        mapToEditPanelValues: (config) => new Map([['system_title', config.system_title], ['hospital_name', config.hospital_name], ['department_name', config.department_name]])
-      });
+    function showLoading(show, text = 'กำลังดำเนินการ...') {
+      const overlay = document.getElementById('loadingOverlay');
+      document.getElementById('loadingText').innerText = text;
+      if (show) overlay.classList.add('show');
+      else overlay.classList.remove('show');
+    }
+
+    function showNotification(type, message) {
+      const container = document.getElementById('notificationContainer');
+      const toast = document.createElement('div');
+      toast.className = `notification-toast ${type}`;
+      
+      let icon = 'ℹ️';
+      if (type === 'success') icon = '✅';
+      if (type === 'error') icon = '❌';
+      if (type === 'warning') icon = '⚠️';
+
+      toast.innerHTML = `
+        <span style="font-size: 18px;">${icon}</span>
+        <div style="font-size: 13px; font-weight: 600;">${escapeHtml(message)}</div>
+      `;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.animation = "slideInRight 0.3s ease reverse";
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    function highlightText(text, query) {
+      if (!query) return escapeHtml(text);
+      const regex = new RegExp(`(${query})`, 'gi');
+      return escapeHtml(text).replace(regex, '<span class="highlight">$1</span>');
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
     }
   </script>
-  </div>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9fffd8c38d57f8c8',t:'MTc3OTQ5NTEyMg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
