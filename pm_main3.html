@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT PM System | Udon Thani Hospital</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Kanit', sans-serif; background-color: #fffafb; }
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div id="loading-overlay" class="overlay flex-col">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-rose-500 mb-4"></div>
+        <p class="text-rose-600 font-bold" id="loading-text">กำลังประมวลผล...</p>
+    </div>
+
+    <div id="msg-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center">
+            <h3 id="modal-title" class="text-xl font-bold mb-2"></h3>
+            <p id="modal-desc" class="text-gray-600 mb-6"></p>
+            <button onclick="closeModal()" class="w-full py-3 bg-rose-500 text-white rounded-xl font-bold hover:bg-rose-600">ตกลง</button>
+        </div>
+    </div>
+
+    <header class="bg-white/90 backdrop-blur shadow-sm sticky top-0 z-40 border-b border-rose-100">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+            <h1 class="font-bold text-rose-700">IT PREVENTIVE SYSTEM</h1>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <div class="mb-6">
+            <input type="text" id="searchInput" placeholder="พิมพ์เพื่อค้นหา Asset ID หรือ Serial..." 
+                   oninput="handleSearch(this.value)"
+                   class="w-full p-4 rounded-xl border-2 border-rose-200 shadow-sm focus:border-rose-500 outline-none">
+        </div>
+        
+        <div id="asset-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </main>
+
+    <div id="pm-panel" class="fixed inset-0 bg-white hidden z-50 overflow-y-auto">
+        <div class="container mx-auto px-4 py-8">
+            <button onclick="hidePMPanel()" class="mb-6 flex items-center text-rose-600 font-bold px-4 py-2 bg-rose-50 rounded-lg hover:bg-rose-100">
+                ← ปิดหน้า PM
+            </button>
+            <div id="pm-content"></div>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzcgxVWPQ5w7YonfYWfAUs1fABezDzadx_i06xSvd05Xo2US4Lj3jYKtQXx2MIQKzycOw/exec";
+        let cachedAssets = [];
+        
+        function toggleLoading(show) {
+            document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none';
+        }
+
+        async function safeFetch(url, options = {}) {
+            toggleLoading(true);
+            try {
+                const response = await fetch(url, options);
+                return await response.json();
+            } catch (e) {
+                showModal('ข้อผิดพลาด', e.toString());
+                throw e;
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        async function loadAssets() {
+            const result = await safeFetch(SCRIPT_URL + "?action=getAssets");
+            if(result.status) {
+                cachedAssets = result.data;
+                renderAssets(cachedAssets);
+            }
+        }
+
+        function renderAssets(assets) {
+            const grid = document.getElementById('asset-grid');
+            grid.innerHTML = assets.map(a => `
+                <div class="bg-white p-5 rounded-xl border border-rose-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer" 
+                     onclick="openPM('${a.Asset_ID}')">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-rose-800 text-lg">${a.Asset_ID}</h3>
+                        <span class="text-[10px] bg-rose-50 text-rose-600 px-2 py-1 rounded-full uppercase">${a.Asset_Group_Name}</span>
+                    </div>
+                    <div class="text-sm text-gray-600 space-y-1">
+                        <p><span class="font-semibold">Serial:</span> ${a.Serial_Number || '-'}</p>
+                        <p><span class="font-semibold">หน่วยงาน:</span> ${a.Dept_Name || '-'}</p>
+                        <p><span class="font-semibold">รายละเอียด:</span> ${a.Asset_DB_Col8 || '-'}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function openPM(assetId) {
+            const asset = cachedAssets.find(a => a.Asset_ID === assetId);
+            const result = await safeFetch(SCRIPT_URL + "?action=getPMTopics&assetType=" + asset.Asset_Type_ID);
+            if(result.status) {
+                document.getElementById('pm-panel').classList.remove('hidden');
+                renderPMForm(asset, result.data);
+            }
+        }
+
+        function renderPMForm(asset, topics) {
+            const container = document.getElementById('pm-content');
+            let grouped = {};
+            topics.forEach(t => {
+                if (!grouped[t.category_id]) grouped[t.category_id] = { name: t.category_name, items: [] };
+                grouped[t.category_id].items.push(t);
+            });
+
+            container.innerHTML = `
+                <div class="bg-rose-50 p-4 rounded-xl mb-6 border border-rose-100">
+                    <h2 class="text-xl font-bold text-rose-800 mb-2">ข้อมูลครุภัณฑ์: ${asset.Asset_ID}</h2>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <p><strong>Serial:</strong> ${asset.Serial_Number || '-'}</p>
+                        <p><strong>ประเภท:</strong> ${asset.Asset_Group_Name || '-'}</p>
+                        <p><strong>หน่วยงาน:</strong> ${asset.Dept_Name || '-'}</p>
+                        <p><strong>รายละเอียด:</strong> ${asset.Asset_DB_Col8 || '-'}</p>
+                    </div>
+                </div>
+                ${Object.keys(grouped).map(catId => `
+                    <div class="mb-6 border-b pb-4">
+                        <h3 class="font-bold text-rose-700 bg-rose-50 p-3 rounded-lg mb-4">${grouped[catId].name}</h3>
+                        ${grouped[catId].items.map(t => renderTopicInput(t)).join('')}
+                    </div>
+                `).join('')}
+                <button onclick="hidePMPanel()" class="w-full bg-rose-600 text-white py-4 rounded-xl font-bold">บันทึกข้อมูล</button>
+            `;
+        }
+
+        function renderTopicInput(t) {
+
+    const required =
+        String(t.required).toUpperCase() === 'TRUE';
+
+    const critical =
+        String(t.critical).toUpperCase() === 'TRUE';
+
+    const photoRequired =
+        String(t.photo_required).toUpperCase() === 'TRUE';
+
+    const min =
+        t.min_score || 0;
+
+    const max =
+        t.max_score || 0;
+
+    const requiredBadge =
+        required
+        ? `<span class="text-red-500 ml-1">*</span>`
+        : '';
+
+    const criticalBadge =
+        critical
+        ? `<span class="ml-2 text-[10px] bg-red-100 text-red-600 px-2 py-1 rounded-full">CRITICAL</span>`
+        : '';
+
+    let inputHTML = '';
+
+    /* =========================
+       CHECKBOX
+    ========================= */
+
+    if (t.input_type === 'checkbox') {
+
+        inputHTML = `
+        <select
+            class="pm-input pm-field"
+            data-topic-id="${t.topic_id}"
+            data-required="${t.required}"
+            data-critical="${t.critical}"
+            onchange="handleCritical(this)"
+        >
+            <option value="">เลือกผลตรวจ</option>
+            <option value="PASS">✔ ผ่าน</option>
+            <option value="FAIL">✘ ไม่ผ่าน</option>
+        </select>
+        `;
+    }
+
+    /* =========================
+       SCORE
+    ========================= */
+
+    else if (t.input_type === 'score') {
+
+        inputHTML = `
+        <div>
+
+            <input
+                type="range"
+                min="${min}"
+                max="${max}"
+                value="${min}"
+                class="w-full accent-rose-500"
+                oninput="
+                    this.nextElementSibling.innerText=this.value
+                "
+            >
+
+            <div class="text-center text-sm text-rose-600 font-bold mt-2">
+                ${min}
+            </div>
+
+            <input
+                type="hidden"
+                value="${min}"
+                class="pm-field"
+                data-topic-id="${t.topic_id}"
+                data-required="${t.required}"
+                data-critical="${t.critical}"
+            >
+
+        </div>
+        `;
+    }
+
+    /* =========================
+       NUMBER
+    ========================= */
+
+    else if (t.input_type === 'number') {
+
+        inputHTML = `
+        <input
+            type="number"
+            min="${min}"
+            max="${max}"
+            placeholder="กรอกค่า (${min}-${max})"
+            class="pm-input pm-field"
+            data-topic-id="${t.topic_id}"
+            data-required="${t.required}"
+            data-critical="${t.critical}"
+        >
+        `;
+    }
+
+    /* =========================
+       SELECT
+    ========================= */
+
+    else if (t.input_type === 'select') {
+
+        let options =
+            String(t.max_score || '')
+            .split(',');
+
+        inputHTML = `
+        <select
+            class="pm-input pm-field"
+            data-topic-id="${t.topic_id}"
+            data-required="${t.required}"
+            data-critical="${t.critical}"
+        >
+
+            <option value="">เลือกข้อมูล</option>
+
+            ${options.map(o => `
+                <option value="${o.trim()}">
+                    ${o.trim()}
+                </option>
+            `).join('')}
+
+        </select>
+        `;
+    }
+
+    /* =========================
+       TEXTAREA
+    ========================= */
+
+    else if (t.input_type === 'textarea') {
+
+        inputHTML = `
+        <textarea
+            rows="4"
+            placeholder="กรอกรายละเอียด"
+            class="pm-input pm-field"
+            data-topic-id="${t.topic_id}"
+            data-required="${t.required}"
+            data-critical="${t.critical}"
+        ></textarea>
+        `;
+    }
+
+    /* =========================
+       DEFAULT TEXT
+    ========================= */
+
+    else {
+
+        inputHTML = `
+        <input
+            type="text"
+            placeholder="กรอกข้อมูล"
+            class="pm-input pm-field"
+            data-topic-id="${t.topic_id}"
+            data-required="${t.required}"
+            data-critical="${t.critical}"
+        >
+        `;
+    }
+
+    /* =========================
+       PHOTO REQUIRED
+    ========================= */
+
+    let photoHTML = '';
+
+    if (photoRequired) {
+
+        photoHTML = `
+        <div class="mt-4">
+
+            <label class="text-sm font-semibold text-rose-700 block mb-2">
+                แนบรูปภาพ
+            </label>
+
+            <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                class="pm-photo w-full"
+                data-topic-id="${t.topic_id}"
+            >
+
+        </div>
+        `;
+    }
+
+    return `
+
+    <div class="
+        bg-white
+        border
+        border-rose-100
+        rounded-2xl
+        p-5
+        mb-4
+        shadow-sm
+        topic-card
+    ">
+
+        <div class="flex items-start justify-between gap-3 mb-4">
+
+            <div class="font-semibold text-gray-700">
+
+                ${t.topic_name}
+
+                ${requiredBadge}
+
+                ${criticalBadge}
+
+            </div>
+
+            <div class="text-xs text-gray-400">
+                ${t.input_type}
+            </div>
+
+        </div>
+
+        ${inputHTML}
+
+        ${photoHTML}
+
+    </div>
+    `;
+}
+
+        function handleSearch(keyword) {
+            const q = keyword.toLowerCase();
+            renderAssets(cachedAssets.filter(a => String(a.Asset_ID).toLowerCase().includes(q) || String(a.Serial_Number).toLowerCase().includes(q)));
+        }
+
+        const hidePMPanel = () => document.getElementById('pm-panel').classList.add('hidden');
+        const showModal = (title, msg) => {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-desc').innerText = msg;
+            document.getElementById('msg-modal').classList.remove('hidden');
+        };
+        const closeModal = () => document.getElementById('msg-modal').classList.add('hidden');
+
+        window.onload = loadAssets;
+    </script>
+</body>
+</html>
