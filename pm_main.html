@@ -6,6 +6,7 @@
   <title>IT Preventive Maintenance - Udon Thani Hospital</title>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
+  
   <style>
     * {
       margin: 0;
@@ -896,200 +897,68 @@
       `).join('');
     }
 
-    function openPMPanel(asset) {
-      selectedAsset = asset;
-      const modal = document.getElementById('modalOverlay');
-      document.getElementById('modalTitle').innerText = `ระบบบันทึกงาน PM: ${asset.Asset_ID}`;
-      
-      // ดึงค่า Asset_DB_Col23 ของอุปกรณ์ที่ถูกคลิกเพื่อใช้เปรียบเทียบกับ ASSET_TYPE ใน PM_TOPIC
-      const col23Value = (asset.col23 || asset.Asset_Type || "").toString().trim().toUpperCase();
+async function openPMPanel(asset) {
+  selectedAsset = asset;
+  const modal = document.getElementById('modalOverlay');
+  const modalBody = document.getElementById('modalBody');
+  const modalTitle = document.getElementById('modalTitle');
+  
+  modalTitle.innerText = `ระบบบันทึกงาน PM: ${asset.Asset_ID}`;
+  modalBody.innerHTML = '<p>กำลังโหลดรายการเช็คลิสต์...</p>';
+  modal.classList.add('show');
 
-      // นำมากรองเทียบกับ ASSET_TYPE ที่อยู่ใน pmTopics (PM_TOPIC)
-      const matchedTopics = pmTopics.filter(topic => {
-        const topicAssetType = (topic.ASSET_TYPE || topic.Asset_Type || "").toString().trim().toUpperCase();
-        return topicAssetType === col23Value;
-      });
+  const typeToSearch = asset.Asset_Type_ID;
+  
+  try {
+    const response = await fetch(`${SCRIPT_URL}?action=getPMTopics&assetType=${encodeURIComponent(typeToSearch)}`);
+    const res = await response.json();
 
-      // จัดกลุ่มเช็คลิสต์ตรวจงานตาม PM_CATEGORY_ID ของจริง
-      const groupedTopics = {};
-      matchedTopics.forEach(topic => {
-        const catId = (topic.PM_CATEGORY_ID || topic.pm_category_id || "UNCATEGORIZED").toString().trim();
-        if (!groupedTopics[catId]) {
-          groupedTopics[catId] = [];
+    if (res.status && res.data && res.data.length > 0) {
+      let html = "";
+      let lastCategory = ""; 
+
+      res.data.forEach(topic => {
+        // 1. ตรวจสอบและแยกกลุ่มหมวดหมู่
+        if (topic.category_name !== lastCategory) {
+          if (lastCategory !== "") html += `</div>`; 
+          html += `<div class="pm-category"><div class="category-name">📁 ${topic.category_name}</div>`;
+          lastCategory = topic.category_name;
         }
-        groupedTopics[catId].push(topic);
-      });
 
-      // เริ่มสร้างโครงร่าง HTML ฟอร์มภายในหน้าต่าง Modal แบบไดนามิกส์ 100%
-      let bodyHtml = `
-        <div class="mb-4 text-sm bg-gray-50 p-4 rounded-lg border border-gray-200">
-          <p class="mb-1"><strong>พิกัดแผนกติดตั้ง:</strong> ${escapeHtml(asset.Dept_Name || 'N/A')}</p>
-          <p class="mb-1"><strong>หมายเลขซีเรียล:</strong> ${escapeHtml(asset.Serial_Number || 'N/A')}</p>
-          <p class="mb-1"><strong>ชื่อพาร์ทครุภัณฑ์:</strong> ${escapeHtml(asset.Asset_Name || 'N/A')}</p>
-          <p><strong>ประเภทอุปกรณ์ (Col23):</strong> ${escapeHtml(asset.col23 || asset.Asset_Type || 'N/A')}</p>
-        </div>
-        <div class="form-group">
-          <label class="form-label">ระบุชื่อ-สกุล ช่างเทคนิคผู้ปฏิบัติงานตรวจสภาพ (ห้ามเว้นว่าง)*</label>
-          <input type="text" id="pmChecker" class="form-input" placeholder="ตัวอย่าง: นายสมเจตน์ ไอทีแอดมิน" required>
-        </div>
-      `;
+        // 2. สร้าง Input ตาม INPUT_TYPE (จัดการตัวแปรครั้งเดียว)
+        let inputHtml = "";
+        let type = String(topic.input_type || "").toLowerCase().trim();
 
-      let checklistHtml = '';
-      // หากตารางจับคู่แล้วไม่มีประเภทตรงกันเลย ให้ดึงคำถามทั่วไปของอุปกรณ์ขึ้นมาเป็นค่าเริ่มต้น โดยไม่จำลองข้อมูลหลอก
-      if (Object.keys(groupedTopics).length === 0) {
-        checklistHtml += `
-          <div class="pm-category">
-            <div class="category-name">📋 รายการตรวจสอบโครงสร้างทั่วไป</div>
-            <div class="checklist-item">
-              <div class="checklist-row">
-                <span class="checklist-label">ตรวจสอบสภาพโครงสร้างกายภาพและการทำงานหลักภายนอกอุปกรณ์</span>
-                <div class="status-options">
-                  <label>
-                    <input type="radio" name="chk_default" value="PASS" class="status-radio" checked data-topic-name="ตรวจสอบสภาพโครงสร้างกายภาพภายนอก">
-                    <span class="status-btn btn-pass">ปกติ</span>
-                  </label>
-                  <label>
-                    <input type="radio" name="chk_default" value="FAIL" class="status-radio" data-topic-name="ตรวจสอบสภาพโครงสร้างกายภาพภายนอก">
-                    <span class="status-btn btn-fail">ชำรุด</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-      } else {
-        Object.keys(groupedTopics).forEach(catId => {
-          // ค้นหา Category Object เพื่อดึงชื่อจริงจากชีท
-          const categoryObj = pmCategories.find(cat => {
-            const currentCatId = (cat.PM_CATEGORY_ID || cat.pm_category_id || "").toString().trim();
-            return currentCatId === catId;
-          });
-          const categoryTitle = categoryObj ? (categoryObj.TOPIC_NAME || categoryObj.topic_name || "หมวดหมู่อื่นๆ") : `หมวดหมู่รหัส ${catId}`;
-
-          checklistHtml += `
-            <div class="pm-category">
-              <div class="category-name">📋 ${escapeHtml(categoryTitle)}</div>
-              <div id="categoryGroup_${escapeHtml(catId)}">
-          `;
-
-          // นำรายการข้อคำถามย่อย (PM_TOPIC) ภายใต้หมวดหมู่นี้มาระเบิดสไตล์สร้างฟิลด์ PASS/FAIL
-          groupedTopics[catId].forEach((topic, idx) => {
-            const topicName = topic.TOPIC_NAME || topic.topic_name || "ไม่มีชื่อหัวข้อ";
-            const topicId = topic.TOPIC_ID || topic.topic_id || `topic_${catId}_${idx}`;
-
-            checklistHtml += `
-              <div class="checklist-item">
-                <div class="checklist-row">
-                  <span class="checklist-label" data-label-text="${escapeHtml(topicName)}">${escapeHtml(topicName)}</span>
-                  <div class="status-options">
-                    <label>
-                      <input type="radio" name="chk_${escapeHtml(topicId)}" value="PASS" class="status-radio" checked data-topic-name="${escapeHtml(topicName)}">
-                      <span class="status-btn btn-pass">ปกติ</span>
-                    </label>
-                    <label>
-                      <input type="radio" name="chk_${escapeHtml(topicId)}" value="FAIL" class="status-radio" data-topic-name="${escapeHtml(topicName)}">
-                      <span class="status-btn btn-fail">ชำรุด</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            `;
-          });
-
-          checklistHtml += `
-              </div>
-            </div>
-          `;
-        });
-      }
-
-      bodyHtml += `
-        <div id="checklistItems">
-          ${checklistHtml}
-        </div>
-        <div class="form-group mt-4">
-          <label class="form-label">คำอธิบายอาการชำรุด / แนวทางเสนอแนะจัดซื้อชิ้นส่วนทดแทน</label>
-          <textarea id="pmNote" class="form-textarea" placeholder="ระบุรายละเอียดทางเทคนิค เช่น ชิ้นส่วนที่ชำรุด อุปกรณ์เสริมขาด หรือแนวทางการแก้ไขเบื้องต้น..."></textarea>
-        </div>
-      `;
-
-      document.getElementById('modalBody').innerHTML = bodyHtml;
-      modal.classList.add('show');
-    }
-
-    async function submitPMForm() {
-      const checker = document.getElementById('pmChecker').value.trim();
-      if (!checker) {
-        showNotification('warning', 'กรุณาระบุชื่อผู้ตรวจสอบผู้รับงาน');
-        return;
-      }
-
-      const note = document.getElementById('pmNote').value.trim();
-      
-      // สรุปสถานะความผิดปกติของเช็คลิสต์ทุกลำดับ
-      const checklistResults = [];
-      let overallStatus = "PASS";
-
-      const radioElements = document.querySelectorAll('#checklistItems input[type="radio"]:checked');
-      radioElements.forEach(radio => {
-        const statusVal = radio.value;
-        const topicName = radio.getAttribute('data-topic-name') || radio.name;
-        
-        if (statusVal === "FAIL") {
-          overallStatus = "FAIL";
+        if (type === 'checkbox') {
+            inputHtml = `<input type="checkbox" class="form-check">`;
+        } else if (type === 'number' || type === 'score') {
+            inputHtml = `<input type="number" min="${topic.min_score}" max="${topic.max_score}" class="form-input" placeholder="คะแนน">`;
+        } else if (type === 'text') {
+            inputHtml = `<input type="text" class="form-input" placeholder="ระบุรายละเอียด">`;
+        } else {
+            inputHtml = `<input type="text" value="${type}" class="form-input" placeholder="ระบุข้อมูล">`; 
         }
-        checklistResults.push(`${topicName}: ${statusVal === 'PASS' ? 'ปกติ' : 'ชำรุด'}`);
+
+        // 3. รวมโครงสร้าง HTML
+        html += `
+          <div class="checklist-item">
+            <label>${topic.topic_name} ${topic.critical == 'TRUE' ? '<span style="color:red; font-size:10px;">(สำคัญ)</span>' : ''}</label>
+            <div class="checklist-control">
+              ${inputHtml}
+              ${topic.photo_req == 'TRUE' ? '<input type="file" accept="image/*">' : ''}
+            </div>
+          </div>`;
       });
-
-      // รวบรวมข้อความหมายเหตุสรุปสภาพอุปกรณ์
-      let finalNote = note;
-      if (checklistResults.length > 0) {
-        finalNote = `[รายการเช็คลิสต์ตรวจจริง]\n${checklistResults.join('\n')}\n\n[คำอธิบายเพิ่มเติม]\n${note}`;
-      }
-
-      showLoading(true, 'กำลังส่งผลการเช็คและอัปเดตสเปรดชีตสตรีมจริง...');
-      closeModal();
-
-      try {
-        const payload = {
-          action: 'savePM',
-          Asset_ID: selectedAsset.Asset_ID,
-          Checker_Name: checker,
-          Status: overallStatus,
-          Note: finalNote,
-          Dept_Name: selectedAsset.Dept_Name
-        };
-
-        // ยิง Fetch API ส่งข้อมูลแบบ Post ตรงหา Google Apps Script
-        await fetch(SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        showNotification('success', 'บันทึกข้อมูลเรียบร้อยแล้ว! กำลังปรับปรุงแดชบอร์ด...');
-        
-        // รอรับสัญญาณอัปเดตข้อมูลบน Google Sheets ประมาณ 1.5 วินาทีก่อนโหลดสถานะล่าสุด
-        setTimeout(async () => {
-          try {
-            await Promise.all([loadPMHistory(), loadAbnormalList()]);
-            renderDashboard();
-            switchTab('dashboard');
-            showNotification('success', 'ปรับปรุงฐานข้อมูลชีทแบบสดเรียบร้อย');
-          } catch (fetchErr) {
-            showNotification('warning', 'บันทึกสำเร็จแล้วแต่ดึงหน้าแดชบอร์ดขัดข้อง: ' + fetchErr.message);
-          } finally {
-            showLoading(false);
-          }
-        }, 1500);
-
-      } catch (err) {
-        showLoading(false);
-        showNotification('error', 'บันทึกล้มเหลว: ' + err.message);
-      }
+      
+      html += `</div>`; // ปิด div สุดท้ายของกลุ่มล่าสุด
+      modalBody.innerHTML = html;
+    } else {
+      modalBody.innerHTML = `<p>ไม่พบรายการเช็คลิสต์สำหรับ ID: ${typeToSearch}</p>`;
     }
-
+  } catch (err) {
+    modalBody.innerHTML = `<p style="color:red;">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${err.message}</p>`;
+  }
+}
     function closeModal() {
       document.getElementById('modalOverlay').classList.remove('show');
     }
