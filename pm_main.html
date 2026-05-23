@@ -1,85 +1,707 @@
 <!doctype html>
-<html lang="th" class="h-full w-full">
+<html lang="th">
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบตรวจสอบครุภัณฑ์คอมพิวเตอร์</title>
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>IT Preventive Maintenance - Udon Thani Hospital</title>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     html, body {
       height: 100%;
       width: 100%;
-      margin: 0;
-    }
-
-    body {
       font-family: 'Kanit', sans-serif;
+      background: linear-gradient(135deg, #fff5f7 0%, #fce9ee 50%, #ffffff 100%);
+      color: #333;
     }
 
-    .soft-bg {
-      background:
-        radial-gradient(circle at 15% 10%, rgba(255, 199, 221, 0.75), transparent 34%),
-        radial-gradient(circle at 90% 20%, rgba(255, 232, 240, 0.9), transparent 32%),
-        linear-gradient(135deg, #fff7fb 0%, #ffe8f1 48%, #ffffff 100%);
+    .app-wrapper {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ==================== HEADER ==================== */
+    .header {
+      background: linear-gradient(135deg, #ff9ecb 0%, #ffb3d9 50%, #ffc9e3 100%);
+      padding: 24px 20px;
+      box-shadow: 0 4px 15px rgba(255, 158, 203, 0.2);
+      border-bottom: 3px solid #ff7fa0;
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 20px;
       position: relative;
-      overflow: auto;
+    }
+
+    .logo-icon {
+      font-size: 40px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .header-text h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 4px;
+    }
+
+    .header-text p {
+      font-size: 14px;
+      color: rgba(255,255,255,0.95);
+      margin-bottom: 2px;
     }
 
     .watermark {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      opacity: 0.055;
-      display: grid;
-      place-items: center;
-      z-index: 0;
+      position: absolute;
+      right: 30px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+      font-weight: 500;
+      letter-spacing: 2px;
     }
 
-    .watermark span {
-      font-size: clamp(42px, 9vw, 138px);
-      font-weight: 800;
-      color: #9f174d;
-      transform: rotate(-18deg);
-      letter-spacing: 0.08em;
+    /* ==================== NAV TABS ==================== */
+    .nav-tabs {
+      display: flex;
+      background: white;
+      border-bottom: 2px solid #ffe0ec;
+      box-shadow: 0 2px 8px rgba(255, 158, 203, 0.1);
+      padding: 0 20px;
+      gap: 0;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      padding: 16px 24px;
+      background: none;
+      border: none;
+      font-family: 'Kanit', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      color: #999;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-bottom: 3px solid transparent;
       white-space: nowrap;
     }
 
-    .glass-card {
-      background: rgba(255, 255, 255, 0.78);
-      backdrop-filter: blur(18px);
-      border: 1px solid rgba(255, 255, 255, 0.92);
-      box-shadow: 0 20px 50px rgba(190, 24, 93, 0.11);
+    .tab-btn:hover {
+      color: #ff9ecb;
     }
 
-    .soft-shadow {
-      box-shadow: 0 14px 34px rgba(190, 24, 93, 0.13);
+    .tab-btn.active {
+      color: #ff7fa0;
+      border-bottom-color: #ff7fa0;
+    }
+
+    /* ==================== MAIN CONTENT ==================== */
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #fff5f7 0%, #fce9ee 50%, #ffffff 100%);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ==================== DASHBOARD ==================== */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .dashboard-card {
+      background: white;
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 2px 12px rgba(255, 158, 203, 0.15);
+      border-top: 5px solid #ff9ecb;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dashboard-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(255, 158, 203, 0.05) 0%, transparent 100%);
+      pointer-events: none;
+    }
+
+    .dashboard-card.warning {
+      border-top-color: #ff9800;
+    }
+
+    .dashboard-card.error {
+      border-top-color: #f44336;
+    }
+
+    .dashboard-card.success {
+      border-top-color: #4caf50;
+    }
+
+    .card-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+
+    .card-label {
+      font-size: 14px;
+      color: #999;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .card-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #ff7fa0;
+      margin-bottom: 12px;
+    }
+
+    .card-detail {
+      font-size: 12px;
+      color: #ccc;
+      font-weight: 500;
+    }
+
+    .chart-container {
+      background: white;
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 2px 12px rgba(255, 158, 203, 0.15);
+      margin-bottom: 30px;
+    }
+
+    .chart-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #ff7fa0;
+      margin-bottom: 20px;
+    }
+
+    .chart-bar {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+
+    .chart-label {
+      min-width: 120px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .chart-bar-container {
+      flex: 1;
+      background: #ffe0ec;
+      border-radius: 6px;
+      overflow: hidden;
+      height: 32px;
+      position: relative;
+    }
+
+    .chart-bar-fill {
+      background: linear-gradient(90deg, #ff9ecb 0%, #ff7fa0 100%);
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 12px;
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      transition: width 0.5s ease;
+    }
+
+    /* ==================== SEARCH SECTION ==================== */
+    .search-section {
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(255, 158, 203, 0.15);
+      margin-bottom: 24px;
+      border: 2px solid rgba(255, 158, 203, 0.2);
+    }
+
+    .search-container {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-input-wrapper {
+      flex: 1;
+      min-width: 200px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #ffe0ec;
+      border-radius: 12px;
+      font-size: 16px;
+      font-family: 'Kanit', sans-serif;
+      transition: all 0.3s ease;
+      background: #fff9fb;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #ff9ecb;
+      box-shadow: 0 0 0 3px rgba(255, 158, 203, 0.1);
+      background: white;
+    }
+
+    .search-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-qr, .btn-search, .btn-clear {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Kanit', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-qr {
+      background: linear-gradient(135deg, #ffa6d5 0%, #ff9ecb 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(255, 158, 203, 0.3);
+    }
+
+    .btn-qr:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(255, 158, 203, 0.4);
+    }
+
+    .btn-search {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-search:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-clear {
+      background: #f0f0f0;
+      color: #666;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .btn-clear:hover:not(:disabled) {
+      background: #e0e0e0;
+    }
+
+    /* ==================== ASSET LIST ==================== */
+    .assets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
     }
 
     .asset-card {
-      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 2px 12px rgba(255, 158, 203, 0.15);
+      border-left: 5px solid #ff9ecb;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
     }
 
-    .asset-card:hover,
-    .asset-card:focus {
-      transform: translateY(-3px);
-      box-shadow: 0 18px 42px rgba(190, 24, 93, 0.16);
-      border-color: rgba(244, 114, 182, 0.55);
+    .asset-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(255, 158, 203, 0.05) 0%, transparent 100%);
+      pointer-events: none;
     }
 
-    .pill {
-      border: 1px solid rgba(244, 114, 182, 0.22);
-      background: rgba(255, 241, 246, 0.82);
+    .asset-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(255, 158, 203, 0.25);
+      border-left-color: #ff7fa0;
     }
 
-    .loader {
-      width: 46px;
-      height: 46px;
-      border: 5px solid #ffe4ef;
-      border-top-color: #ec4899;
-      border-radius: 999px;
+    .asset-card.abnormal {
+      border-left-color: #ff9800;
+      background: #fff8f0;
+    }
+
+    .asset-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .asset-id {
+      font-size: 18px;
+      font-weight: 700;
+      color: #ff7fa0;
+    }
+
+    .dept-badge {
+      background: linear-gradient(135deg, #ffa6d5 0%, #ff9ecb 100%);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(255, 158, 203, 0.3);
+    }
+
+    .asset-serial {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .asset-details {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+    }
+
+    .asset-details p {
+      margin-bottom: 6px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .detail-label {
+      font-weight: 600;
+      color: #ff7fa0;
+      min-width: 80px;
+    }
+
+    .highlight {
+      background: #ffeb3b;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-weight: 600;
+    }
+
+    /* ==================== MODAL ==================== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 16px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80%;
+      overflow-y: auto;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      animation: slideUp 0.3s ease;
+      position: relative;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-header {
+      padding: 24px;
+      border-bottom: 2px solid #ffe0ec;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #ff7fa0;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 28px;
+      color: #ccc;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    .modal-close:hover {
+      color: #ff7fa0;
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .modal-footer {
+      padding: 20px 24px;
+      border-top: 2px solid #ffe0ec;
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .btn-modal {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Kanit', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #ff9ecb 0%, #ff7fa0 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(255, 158, 203, 0.3);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(255, 158, 203, 0.4);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #666;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #e0e0e0;
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #f44336 0%, #e91e63 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(244, 67, 54, 0.4);
+    }
+
+    /* ==================== FORM ELEMENTS ==================== */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #ffe0ec;
+      border-radius: 8px;
+      font-family: 'Kanit', sans-serif;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      background: #fff9fb;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      outline: none;
+      border-color: #ff9ecb;
+      box-shadow: 0 0 0 3px rgba(255, 158, 203, 0.1);
+      background: white;
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    /* ==================== NOTIFICATION ==================== */
+    .notification {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      background: white;
+      padding: 20px 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      z-index: 2000;
+      animation: slideInRight 0.3s ease;
+      max-width: 400px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .notification.success {
+      border-left: 4px solid #4caf50;
+    }
+
+    .notification.error {
+      border-left: 4px solid #f44336;
+    }
+
+    .notification.warning {
+      border-left: 4px solid #ff9800;
+    }
+
+    .notification.info {
+      border-left: 4px solid #2196f3;
+    }
+
+    .notification-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .notification-content h4 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .notification-content p {
+      font-size: 13px;
+      color: #666;
+    }
+
+    /* ==================== LOADING OVERLAY ==================== */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 158, 203, 0.3);
+      backdrop-filter: blur(3px);
+      z-index: 999;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .loading-overlay.show {
+      display: flex;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255, 158, 203, 0.2);
+      border-top-color: #ff9ecb;
+      border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
 
@@ -87,698 +709,802 @@
       to { transform: rotate(360deg); }
     }
 
-    .fade-in {
-      animation: fadeIn .25s ease both;
+    .loading-text {
+      position: absolute;
+      bottom: 30%;
+      font-size: 16px;
+      color: #ff7fa0;
+      font-weight: 600;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
+    /* ==================== PM PANEL ==================== */
+    .pm-panel {
+      background: white;
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 2px 12px rgba(255, 158, 203, 0.15);
+      border-top: 5px solid #ff9ecb;
     }
 
-    input[type="checkbox"] {
-      accent-color: #ec4899;
+    .pm-header {
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #ffe0ec;
+    }
+
+    .pm-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #ff7fa0;
+      margin-bottom: 8px;
+    }
+
+    .pm-subtitle {
+      font-size: 13px;
+      color: #999;
+    }
+
+    .pm-category {
+      margin-bottom: 24px;
+      background: #fff9fb;
+      padding: 16px;
+      border-radius: 10px;
+      border-left: 3px solid #ff9ecb;
+    }
+
+    .category-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #ff7fa0;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .checklist-item {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      padding: 12px;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #ffe0ec;
+      transition: all 0.3s;
+    }
+
+    .checklist-item:hover {
+      border-color: #ff9ecb;
+      box-shadow: 0 2px 8px rgba(255, 158, 203, 0.1);
+    }
+
+    .checkbox-custom {
+      width: 24px;
+      height: 24px;
+      border: 2px solid #ffe0ec;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.3s;
+    }
+
+    .checkbox-custom:hover {
+      border-color: #ff9ecb;
+    }
+
+    .checkbox-custom.checked {
+      background: linear-gradient(135deg, #ff9ecb 0%, #ff7fa0 100%);
+      border-color: #ff7fa0;
+      color: white;
+    }
+
+    .checklist-label {
+      flex: 1;
+      font-size: 14px;
+      color: #333;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .required-badge {
+      display: inline-block;
+      background: #ffebee;
+      color: #f44336;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .photo-badge {
+      display: inline-block;
+      background: #e3f2fd;
+      color: #2196f3;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-state-text {
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    /* ==================== RESPONSIVE ==================== */
+    @media (max-width: 768px) {
+      .header-text h1 {
+        font-size: 22px;
+      }
+
+      .watermark {
+        font-size: 10px;
+        right: 16px;
+      }
+
+      .assets-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .search-container {
+        flex-direction: column;
+      }
+
+      .search-buttons {
+        width: 100%;
+      }
+
+      .btn-qr, .btn-search, .btn-clear {
+        flex: 1;
+      }
+
+      .main-content {
+        padding: 12px;
+      }
+
+      .nav-tabs {
+        padding: 0 12px;
+      }
+
+      .tab-btn {
+        padding: 12px 16px;
+        font-size: 14px;
+      }
     }
 
     @media print {
       body {
-        background: #ffffff !important;
+        background: white;
       }
 
-      .no-print,
-      .watermark,
-      #overlay,
-      #modal {
+      .search-section, .loading-overlay, .modal-overlay, .notification, .nav-tabs {
         display: none !important;
       }
 
-      .print-area {
-        box-shadow: none !important;
-        border: 1px solid #e5e7eb !important;
-        background: #ffffff !important;
+      .assets-grid {
+        grid-template-columns: 1fr 1fr;
       }
 
-      @page {
-        size: A4 landscape;
-        margin: 10mm;
+      .app-wrapper {
+        height: auto;
       }
     }
   </style>
   <style>body { box-sizing: border-box; }</style>
-  <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
-
  </head>
- <body class="h-full w-full">
-  <main id="appWrapper" class="soft-bg h-full w-full overflow-auto text-pink-950">
-   <div class="watermark" aria-hidden="true"><span>IT UDON HOSP</span></div>
-   <div class="relative z-10 w-full px-4 py-5 sm:px-6 lg:px-8">
-    <section class="mx-auto max-w-7xl">
-     <header class="glass-card rounded-[2rem] p-5 sm:p-6 mb-5 print-area">
-      <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-       <div class="flex items-center gap-4">
-        <div class="h-16 w-16 shrink-0 rounded-3xl bg-gradient-to-br from-pink-400 to-rose-500 text-white grid place-items-center soft-shadow">
-         <svg viewbox="0 0 64 64" class="h-11 w-11" aria-label="โลโก้ IT UDON HOSP" role="img">
-          <circle cx="32" cy="32" r="25" fill="rgba(255,255,255,.22)"></circle> <path d="M30 14h6v15h14v6H36v15h-6V35H16v-6h14V14z" fill="white"></path> <path d="M18 48c8-6 20-6 28 0" stroke="white" stroke-width="4" fill="none" stroke-linecap="round"></path>
-         </svg>
-        </div>
-        <div>
-         <p class="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1 text-xs font-semibold text-pink-700 border border-pink-100"><i data-lucide="shield-check" class="h-4 w-4"></i> PM Production Flow</p>
-         <h1 id="appTitle" class="mt-2 text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">ระบบตรวจสอบครุภัณฑ์คอมพิวเตอร์</h1>
-         <p id="hospitalName" class="mt-1 text-base sm:text-lg font-medium text-pink-800">โรงพยาบาลอุดรธานี</p>
-         <p id="departmentName" class="text-sm sm:text-base text-pink-700">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
-        </div>
-       </div>
-       <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-3 min-w-full lg:min-w-[360px]">
-        <div class="rounded-3xl bg-white/70 p-4 border border-pink-100">
-         <p class="text-xs text-pink-600">Session</p>
-         <p class="font-bold text-green-600">Online</p>
-        </div>
-        <div class="rounded-3xl bg-white/70 p-4 border border-pink-100">
-         <p class="text-xs text-pink-600">Cache</p>
-         <p class="font-bold text-pink-700" id="cacheState">Ready</p>
-        </div>
-        <div class="rounded-3xl bg-white/70 p-4 border border-pink-100">
-         <p class="text-xs text-pink-600">วันนี้ตรวจแล้ว</p>
-         <p class="font-bold text-pink-900"><span id="pmCount">0</span> รายการ</p>
-        </div><button id="printBtn" class="no-print rounded-3xl bg-pink-600 hover:bg-pink-700 text-white font-semibold p-4 transition focus:outline-none focus:ring-4 focus:ring-pink-200"> พิมพ์รายงาน </button>
-       </div>
-      </div>
-     </header>
-     <section class="grid grid-cols-1 xl:grid-cols-[420px_1fr] gap-5">
-      <aside class="space-y-5 no-print">
-       <div class="glass-card rounded-[2rem] p-5">
-        <div class="flex items-center justify-between gap-3">
-         <div>
-          <h2 class="text-xl font-bold">ค้นหา / QR Scan</h2>
-          <p class="text-sm text-pink-700">รองรับ URL QR, RAW CODE และรูปแบบผสม</p>
-         </div>
-         <div class="rounded-2xl bg-pink-100 p-3 text-pink-700">
-          <i data-lucide="scan-line" class="h-6 w-6"></i>
-         </div>
-        </div>
-        <form id="searchForm" class="mt-4 space-y-3">
-         <label for="searchInput" class="block text-sm font-semibold text-pink-800">รหัสครุภัณฑ์ / QR</label>
-         <div class="flex gap-2">
-          <input id="searchInput" type="text" autocomplete="off" class="w-full rounded-2xl border border-pink-200 bg-white/85 px-4 py-3 outline-none focus:ring-4 focus:ring-pink-100 focus:border-pink-400" placeholder="พิมพ์รหัส / สแกน QR / วาง URL"> <button type="submit" class="rounded-2xl bg-pink-600 hover:bg-pink-700 text-white px-4 font-semibold transition focus:outline-none focus:ring-4 focus:ring-pink-200"> ค้นหา </button>
-         </div>
-         <p class="text-xs text-pink-600">ระบบจะ normalize และค้นหาแบบ includes + reverse match อัตโนมัติ</p>
-        </form>
-       </div>
-       <div class="glass-card rounded-[2rem] p-5">
-        <div class="flex items-center justify-between mb-4">
-         <h2 class="text-xl font-bold">รายการครุภัณฑ์</h2><span id="resultCount" class="pill rounded-full px-3 py-1 text-sm font-semibold text-pink-700">0 รายการ</span>
-        </div>
-        <div id="assetList" class="space-y-3"></div>
-       </div>
-      </aside>
-      <section class="glass-card rounded-[2rem] p-5 sm:p-6 print-area">
-       <div id="emptyPanel" class="min-h-[520px] flex flex-col items-center justify-center text-center">
-        <div class="h-24 w-24 rounded-[2rem] bg-pink-100 text-pink-600 grid place-items-center mb-5">
-         <i data-lucide="clipboard-check" class="h-12 w-12"></i>
-        </div>
-        <h2 class="text-2xl font-bold">เลือกครุภัณฑ์เพื่อเริ่ม PM</h2>
-        <p class="mt-2 max-w-xl text-pink-700">ค้นหาจากรหัสหรือสแกน QR แล้วคลิกการ์ดครุภัณฑ์ ระบบจะแสดง checklist แยกตาม Physical, Performance, Risk และ Security</p>
-       </div>
-       <div id="pmPanel" class="hidden fade-in">
-        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between border-b border-pink-100 pb-5">
-         <div>
-          <p class="text-sm font-semibold text-pink-600">PM Panel / Checklist</p>
-          <h2 id="assetName" class="text-2xl sm:text-3xl font-bold mt-1"></h2>
-          <div class="mt-3 flex flex-wrap gap-2">
-           <span id="assetIdBadge" class="pill rounded-full px-3 py-1 text-sm font-semibold"></span> <span id="deptBadge" class="pill rounded-full px-3 py-1 text-sm font-semibold"></span> <span id="typeBadge" class="pill rounded-full px-3 py-1 text-sm font-semibold"></span>
-          </div>
-         </div>
-         <div class="rounded-3xl bg-white/75 border border-pink-100 p-4 min-w-[220px]">
-          <p class="text-xs text-pink-600">สถานะงาน</p>
-          <p id="workStatus" class="text-lg font-bold text-amber-600">รอตรวจสอบ</p>
-          <div class="mt-3 h-3 rounded-full bg-pink-100 overflow-hidden">
-           <div id="progressBar" class="h-full bg-gradient-to-r from-pink-400 to-rose-500 rounded-full" style="width: 0%"></div>
-          </div>
-          <p id="progressText" class="mt-2 text-xs text-pink-700">0% completed</p>
-         </div>
-        </div>
-        <form id="pmForm" class="mt-5 space-y-5">
-         <div id="checklistWrap" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
-         <div class="rounded-[1.7rem] bg-white/70 border border-pink-100 p-4">
-          <h3 class="text-lg font-bold flex items-center gap-2"><i data-lucide="camera" class="h-5 w-5 text-pink-600"></i> รูปภาพประกอบ</h3>
-          <p class="text-sm text-pink-700 mb-3">ในตัวอย่างนี้จะแสดงชื่อไฟล์และจำลองการอัปโหลดเพื่อความปลอดภัยของหน้าเว็บ</p><label for="imageUpload" class="block text-sm font-semibold text-pink-800 mb-2">Upload / ถ่ายรูป</label> <input id="imageUpload" type="file" accept="image/*" class="w-full rounded-2xl border border-pink-200 bg-white p-3">
-          <div id="imageList" class="mt-3 text-sm text-pink-700"></div>
-         </div>
-         <div class="rounded-[1.7rem] bg-white/70 border border-pink-100 p-4">
-          <label for="inspectorNote" class="block text-sm font-semibold text-pink-800">หมายเหตุเจ้าหน้าที่</label> <textarea id="inspectorNote" rows="3" class="mt-2 w-full rounded-2xl border border-pink-200 bg-white/90 px-4 py-3 outline-none focus:ring-4 focus:ring-pink-100 focus:border-pink-400" placeholder="ระบุอาการ / ข้อเสนอแนะ / งานที่ต้องติดตาม"></textarea>
-         </div>
-         <div class="flex flex-col sm:flex-row gap-3 no-print">
-          <button id="savePmBtn" type="submit" class="flex-1 rounded-2xl bg-pink-600 hover:bg-pink-700 text-white px-5 py-4 font-bold transition focus:outline-none focus:ring-4 focus:ring-pink-200"> บันทึก PM </button> <button id="confirmBtn" type="button" class="flex-1 rounded-2xl bg-white hover:bg-pink-50 text-pink-700 border border-pink-200 px-5 py-4 font-bold transition focus:outline-none focus:ring-4 focus:ring-pink-100"> Confirm ตรวจสอบ </button>
-         </div>
-        </form>
-        <div class="mt-6 rounded-[1.7rem] bg-pink-950 text-white p-4 no-print">
-         <div class="flex items-center justify-between gap-3 mb-3">
-          <h3 class="font-bold flex items-center gap-2"><i data-lucide="history" class="h-5 w-5"></i> ACTION LOG</h3><span class="text-xs text-pink-200">Audit Trail</span>
-         </div>
-         <div id="actionLog" class="space-y-2 text-sm text-pink-50 max-h-48 overflow-auto"></div>
-        </div>
-       </div>
-      </section>
-     </section>
-     <footer class="relative z-10 mt-5 text-center text-sm text-pink-700 pb-4">
-      <span id="footerNote">IT UDON HOSP • Production Flow PM</span>
-     </footer>
-    </section>
-   </div>
-   <div id="overlay" class="hidden fixed inset-0 z-50 bg-pink-950/35 backdrop-blur-sm items-center justify-center p-4">
-    <div class="rounded-[2rem] bg-white p-7 text-center soft-shadow max-w-sm w-full">
-     <div class="loader mx-auto"></div>
-     <h2 id="overlayTitle" class="mt-5 text-xl font-bold text-pink-950">กำลังทำงาน</h2>
-     <p id="overlayText" class="mt-1 text-pink-700">โปรดรอสักครู่ ระบบกำลังประมวลผล</p>
-    </div>
-   </div>
-   <div id="modal" class="hidden fixed inset-0 z-50 bg-pink-950/35 backdrop-blur-sm items-center justify-center p-4">
-    <div class="rounded-[2rem] bg-white p-6 soft-shadow max-w-md w-full fade-in">
-     <div id="modalIcon" class="h-14 w-14 rounded-2xl bg-green-100 text-green-600 grid place-items-center mb-4">
-      <i data-lucide="check" class="h-8 w-8"></i>
+ <body>
+  <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js" type="text/javascript"></script>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <div class="app-wrapper">
+   <!-- HEADER -->
+   <div class="header">
+    <div class="header-content">
+     <div class="logo-icon">
+      🏥
      </div>
-     <h2 id="modalTitle" class="text-2xl font-bold text-pink-950">สำเร็จ</h2>
-     <p id="modalText" class="mt-2 text-pink-700">ดำเนินการเรียบร้อย</p><button id="modalClose" class="mt-5 w-full rounded-2xl bg-pink-600 hover:bg-pink-700 text-white px-5 py-3 font-bold transition focus:outline-none focus:ring-4 focus:ring-pink-200"> ตกลง </button>
+     <div class="header-text">
+      <h1 id="sysTitle">IT PREVENTIVE SYSTEM</h1>
+      <p id="hospitalName">โรงพยาบาลอุดรธานี</p>
+      <p id="deptName">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
+     </div>
+     <div class="watermark">
+      IT UDON HOSP
+     </div>
     </div>
-   </div>
-  </main>
+   </div><!-- NAV TABS -->
+   <div class="nav-tabs" id="navTabs"><button class="tab-btn active" data-tab="dashboard" onclick="switchTab('dashboard')">📊 Dashboard</button> <button class="tab-btn" data-tab="assets" onclick="switchTab('assets')">📦 Assets</button> <button class="tab-btn" data-tab="completed" onclick="switchTab('completed')">✅ Completed</button> <button class="tab-btn" data-tab="abnormal" onclick="switchTab('abnormal')">⚠️ Abnormal</button>
+   </div><!-- MAIN CONTENT -->
+   <div class="main-content">
+    <div class="container">
+     <!-- DASHBOARD VIEW -->
+     <div class="tab-panel active" id="tab-dashboard">
+      <div class="dashboard-grid" id="dashboardGrid"></div>
+      <div class="chart-container">
+       <div class="chart-title">
+        📊 Asset Distribution
+       </div>
+       <div id="chartContainer"></div>
+      </div>
+     </div><!-- ASSETS VIEW -->
+     <div class="tab-panel" id="tab-assets">
+      <!-- SEARCH SECTION -->
+      <div class="search-section">
+       <div class="search-container">
+        <div class="search-input-wrapper">
+         <input type="text" class="search-input" id="searchInput" placeholder="ค้นหา Asset ID หรือ Serial Number..." autocomplete="off">
+        </div>
+        <div class="search-buttons">
+         <button class="btn-qr" id="btnQR" title="สแกน QR Code"> <span>📷</span> QR Scan </button> <button class="btn-search" id="btnSearch" title="ค้นหา"> <span>🔍</span> Search </button> <button class="btn-clear" id="btnClear" title="ล้างข้อมูล"> <span>✕</span> </button>
+        </div>
+       </div>
+      </div><!-- ASSETS GRID -->
+      <div class="assets-grid" id="assetsGrid">
+       <!-- Assets will be rendered here -->
+      </div>
+     </div><!-- COMPLETED VIEW -->
+     <div class="tab-panel" id="tab-completed">
+      <div id="completedContainer"></div>
+     </div><!-- ABNORMAL VIEW -->
+     <div class="tab-panel" id="tab-abnormal">
+      <div id="abnormalContainer"></div>
+     </div>
+    </div>
+   </div><!-- LOADING OVERLAY -->
+   <div class="loading-overlay" id="loadingOverlay">
+    <div>
+     <div class="spinner"></div>
+     <div class="loading-text">
+      กำลังประมวลผล...
+     </div>
+    </div>
+   </div><!-- MODALS -->
+   <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal" id="modalContent" onclick="event.stopPropagation()">
+     <div class="modal-header">
+      <h2 class="modal-title" id="modalTitle">Modal Title</h2><button class="modal-close" onclick="closeModal()">×</button>
+     </div>
+     <div class="modal-body" id="modalBody">
+      <!-- Modal content -->
+     </div>
+     <div class="modal-footer" id="modalFooter">
+      <!-- Modal buttons -->
+     </div>
+    </div>
+   </div><!-- NOTIFICATION -->
+   <div id="notificationContainer"></div><!-- HIDDEN FILE INPUT FOR QR CAMERA --> <input type="file" id="qrFileInput" accept="image/*" style="display: none;" onchange="handleQRUpload(event)">
+   <script src="/_sdk/element_sdk.js"></script>
+   <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzcgxVWPQ5w7YonfYWfAUs1fABezDzadx_i06xSvd05Xo2US4Lj3jYKtQXx2MIQKzycOw/exec";
+    let allAssets = [];
+    let filteredAssets = [];
+    let pmHistory = [];
+    let abnormalList = [];
+    let currentSearchQuery = '';
 
-  <script>
-    const defaultConfig = {
-      background_color: "#fff7fb",
-      surface_color: "#ffffff",
-      text_color: "#831843",
-      primary_action_color: "#ec4899",
-      secondary_action_color: "#f9a8d4",
-      font_family: "Kanit",
-      font_size: 16,
-      app_title: "ระบบตรวจสอบครุภัณฑ์คอมพิวเตอร์",
-      hospital_name: "โรงพยาบาลอุดรธานี",
-      department_name: "กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์",
-      search_placeholder: "พิมพ์รหัส / สแกน QR / วาง URL",
-      save_button_text: "บันทึก PM",
-      confirm_button_text: "Confirm ตรวจสอบ",
-      footer_note: "IT UDON HOSP • Production Flow PM"
-    };
-
-    let selectedAsset = null;
-    let pmSavedCount = 0;
-    let actionLogs = [];
-    let assets = [];
-    let topics = {};
-
-    const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzcgxVWPQ5w7YonfYWfAUs1fABezDzadx_i06xSvd05Xo2US4Lj3jYKtQXx2MIQKzycOw/exec";
-
-async function callGAS(action, params = {}) {
-  // สร้าง URL พร้อมพารามิเตอร์ (ส่งเป็น GET แทน POST)
-  // เพราะ GET ไม่มีการทำ Preflight (OPTIONS) จึงไม่ติด CORS
-  const url = new URL(GOOGLE_APPS_SCRIPT_URL);
-  url.searchParams.append("action", action);
-  Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
-
-  try {
-    const response = await fetch(url.toString(), {
-      method: "GET", // ใช้ GET แทน POST
-      mode: "cors"
+    // ==================== INITIALIZATION ====================
+    document.addEventListener('DOMContentLoaded', async () => {
+      await initializeApp();
     });
-    
-    return await response.json();
-  } catch (error) {
-    console.error("GAS Error:", error);
-    return { success: false, message: "Connection Failed" };
-  }
-}
- async function loadAssets() {
-  showOverlay("กำลังโหลดข้อมูล", "ดึง ASSET_LOGS จาก Google Sheet...");
-  const response = await callGAS("getAssets");
-  hideOverlay();
 
-  // 1. เช็คให้ตรงกับ key ที่คุณส่งกลับมา (ถ้าใน Code.gs ส่งมาเป็น status ให้ใช้ response.status)
-  // แต่ถ้าส่งมาเป็น {status: true, ...} ให้ใช้ response.status === true
-  if (!response || !response.status) { 
-    logAction("ERROR", "loadAssets failed");
-    showModal("เกิดข้อผิดพลาด", `ไม่สามารถโหลดข้อมูลครุภัณฑ์ได้: ${response?.message || "Unknown error"}`, "error");
-    return;
-  }
-
-  // 2. ข้อมูลที่ถูกต้องอยู่ใน response.data ไม่ใช่ assetData
-  const assetData = response.data || [];
-
-  // 3. ตอนนี้ assetData มีค่าแล้ว โค้ด map ของคุณจะทำงานได้ปกติ
-  assets = assetData.map(r => ({
-    asset_id: r?.Asset_ID || "-",
-    noid: r?.NOID || "-",
-    serial_number: r?.Serial_Number || "-",
-    name: `${r?.Asset_DB_Col8 || "Unknown"} (SN: ${r?.Serial_Number || "-"})`,
-    department: r?.Dept_Name || "ไม่ระบุ",
-    dept_id: r?.DEPT_ID || "-",
-    type: r?.Asset_DB_Col13 || "Computer",
-    status: "พร้อมตรวจ"
-  }));
-
-  // ... (ส่วนการโหลด topics ของคุณด้านล่างนี้เหมือนเดิม)
-  const topicsData = await callGAS("getPMTopics", { assetType: "Computer" });
-  if (topicsData && topicsData.status) { // เปลี่ยน .success เป็น .status ตามโครงสร้าง GAS ของคุณ
-    const topicsList = topicsData.data || [];
-    // ... logic เดิม ...
-  }
-
-  logAction("LOAD_ASSETS", `${assets.length} items, topics loaded`);
-  renderAssets(assets);
-}
-    async function savePMRecord(pmData) {
-      const payload = {
-        action: "savePM",
-        asset_code: selectedAsset.asset_id,
-        user: "IT OPERATOR",
-        result: "Pass",
-        note: els.inspectorNote.value,
-        details: []
-      };
-
-      document.querySelectorAll(".checklist-item").forEach(item => {
-        const topicId = item.id;
-        const isChecked = item.checked;
-        payload.details.push({
-          topic_id: topicId,
-          status: isChecked ? "Pass" : "Fail",
-          score: isChecked ? 1 : 0,
-          remark: ""
-        });
-      });
-
-      const result = await callGAS("savePM", payload);
-      return result && result.success;
-    }
-
-    const els = {};
-
-    function cacheEls() {
-      [
-        "appWrapper", "appTitle", "hospitalName", "departmentName", "searchInput", "assetList",
-        "resultCount", "emptyPanel", "pmPanel", "assetName", "assetIdBadge", "deptBadge",
-        "typeBadge", "workStatus", "progressBar", "progressText", "checklistWrap",
-        "pmForm", "searchForm", "overlay", "overlayTitle", "overlayText", "modal",
-        "modalTitle", "modalText", "modalClose", "modalIcon", "imageUpload", "imageList",
-        "confirmBtn", "savePmBtn", "actionLog", "pmCount", "cacheState", "printBtn",
-        "footerNote", "inspectorNote"
-      ].forEach(id => els[id] = document.getElementById(id));
-    }
-
-    function normalizeInput(value) {
-      const raw = String(value || "").trim().toUpperCase();
-      if (!raw) return "";
+    async function initializeApp() {
+      showLoading(true, 'กำลังโหลดข้อมูลระบบ...');
       try {
-        const url = new URL(raw);
-        const keys = ["ASSET_ID", "ASSET", "ID", "Q"];
-        for (const key of keys) {
-          const found = url.searchParams.get(key);
-          if (found) return found.trim().toUpperCase();
-        }
-        return url.pathname.split("/").filter(Boolean).pop().trim().toUpperCase();
-      } catch (e) {
-        return raw.replace(/[^A-Z0-9ก-๙\-_/]/g, "").split("/").pop();
+        await loadAssets();
+        await loadPMHistory();
+        await loadAbnormalList();
+        setupEventListeners();
+        renderDashboard();
+        showNotification('success', 'สำเร็จ', 'โหลดข้อมูลระบบเรียบร้อย');
+      } catch (err) {
+        showNotification('error', 'ข้อผิดพลาด', err.message);
+      } finally {
+        showLoading(false);
       }
     }
 
-    function reverseText(value) {
-      return String(value).split("").reverse().join("");
+    // ==================== ASSET LOADING ====================
+    async function loadAssets() {
+      try {
+        const response = await fetch(SCRIPT_URL + '?action=getAssets');
+        const result = await response.json();
+        if (result.status) {
+          allAssets = result.data || [];
+          filteredAssets = [...allAssets];
+        } else {
+          throw new Error(result.message || 'ไม่สามารถโหลดข้อมูล Asset');
+        }
+      } catch (err) {
+        console.error('Load Assets Error:', err);
+        throw err;
+      }
     }
 
-    function searchAssets(query) {
-      const keyword = normalizeInput(query);
-      if (!keyword) return assets;
-      const reversed = reverseText(keyword);
-      return assets.filter(asset => {
-        const target = `${asset.asset_id} ${asset.noid} ${asset.name} ${asset.department} ${asset.dept_id}`.toUpperCase();
-        return target.includes(keyword) || reverseText(target).includes(reversed);
+    async function loadPMHistory() {
+      try {
+        const response = await fetch(SCRIPT_URL + '?action=getPMHistory');
+        const result = await response.json();
+        pmHistory = result.status ? (result.data || []) : [];
+      } catch (err) {
+        console.error('Load PM History Error:', err);
+        pmHistory = [];
+      }
+    }
+
+    async function loadAbnormalList() {
+      try {
+        const response = await fetch(SCRIPT_URL + '?action=getAbnormalPM');
+        const result = await response.json();
+        abnormalList = result.status ? (result.data || []) : [];
+      } catch (err) {
+        console.error('Load Abnormal Error:', err);
+        abnormalList = [];
+      }
+    }
+
+    // ==================== DASHBOARD ====================
+    function renderDashboard() {
+      const grid = document.getElementById('dashboardGrid');
+      grid.innerHTML = '';
+
+      const totalAssets = allAssets.length;
+      const completedCount = pmHistory.length;
+      const abnormalCount = abnormalList.length;
+      const waitingCount = totalAssets - completedCount;
+
+      const cards = [
+        {
+          icon: '📦',
+          label: 'Total Assets',
+          value: totalAssets,
+          detail: 'All Equipment',
+          color: 'success'
+        },
+        {
+          icon: '✅',
+          label: 'Completed PM',
+          value: completedCount,
+          detail: 'Finished',
+          color: 'success'
+        },
+        {
+          icon: '⚠️',
+          label: 'Abnormal PM',
+          value: abnormalCount,
+          detail: 'Need Attention',
+          color: 'error'
+        },
+        {
+          icon: '⏳',
+          label: 'Waiting PM',
+          value: waitingCount,
+          detail: 'Not Started',
+          color: 'warning'
+        }
+      ];
+
+      cards.forEach(card => {
+        const div = document.createElement('div');
+        div.className = `dashboard-card ${card.color}`;
+        div.innerHTML = `
+          <div class="card-icon">${card.icon}</div>
+          <div class="card-label">${card.label}</div>
+          <div class="card-value">${card.value}</div>
+          <div class="card-detail">${card.detail}</div>
+        `;
+        grid.appendChild(div);
+      });
+
+      renderAssetChart();
+    }
+
+    function renderAssetChart() {
+      const chartContainer = document.getElementById('chartContainer');
+      const assetTypes = {};
+
+      allAssets.forEach(asset => {
+        const type = asset.Asset_Type || 'Other';
+        assetTypes[type] = (assetTypes[type] || 0) + 1;
+      });
+
+      let html = '';
+      const maxCount = Math.max(...Object.values(assetTypes));
+
+      Object.keys(assetTypes).forEach(type => {
+        const count = assetTypes[type];
+        const percentage = (count / maxCount) * 100;
+        html += `
+          <div class="chart-bar">
+            <div class="chart-label">${escapeHtml(type)}</div>
+            <div class="chart-bar-container">
+              <div class="chart-bar-fill" style="width: ${percentage}%">${count}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      chartContainer.innerHTML = html;
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-panel').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      
+      document.getElementById('tab-' + tabName).classList.add('active');
+      event.target.classList.add('active');
+
+      if (tabName === 'assets') {
+        renderAssets();
+      } else if (tabName === 'completed') {
+        renderCompletedList();
+      } else if (tabName === 'abnormal') {
+        renderAbnormalList();
+      }
+    }
+
+    // ==================== SEARCH LOGIC ====================
+    function setupEventListeners() {
+      const searchInput = document.getElementById('searchInput');
+      const btnSearch = document.getElementById('btnSearch');
+      const btnQR = document.getElementById('btnQR');
+      const btnClear = document.getElementById('btnClear');
+
+      searchInput.addEventListener('input', (e) => {
+        performSearch(e.target.value);
+      });
+
+      btnSearch.addEventListener('click', () => {
+        performSearch(searchInput.value);
+      });
+
+      btnQR.addEventListener('click', () => {
+        document.getElementById('qrFileInput').click();
+      });
+
+      btnClear.addEventListener('click', () => {
+        searchInput.value = '';
+        currentSearchQuery = '';
+        filteredAssets = [...allAssets];
+        renderAssets();
       });
     }
 
-    function renderAssets(list) {
-      els.assetList.innerHTML = "";
-      els.resultCount.textContent = `${list.length} รายการ`;
+    function performSearch(query) {
+      currentSearchQuery = query.trim().toUpperCase();
+      if (!currentSearchQuery) {
+        filteredAssets = [...allAssets];
+      } else {
+        filteredAssets = allAssets.filter(asset => {
+          const assetId = (asset.Asset_ID || '').toString().toUpperCase();
+          const serialNum = (asset.Serial_Number || '').toString().toUpperCase();
+          return assetId.includes(currentSearchQuery) || serialNum.includes(currentSearchQuery);
+        });
+      }
+      renderAssets();
+    }
 
-      if (!list.length) {
-        els.assetList.innerHTML = `
-          <div class="rounded-3xl bg-white/70 border border-pink-100 p-5 text-center text-pink-700">
-            ไม่พบครุภัณฑ์ที่ค้นหา
-          </div>
-        `;
+    function highlightText(text, query) {
+      if (!query) return escapeHtml(text);
+      const regex = new RegExp(`(${query})`, 'gi');
+      return escapeHtml(text).replace(regex, '<span class="highlight">$1</span>');
+    }
+
+    function handleQRUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      showNotification('info', 'QR Scan', 'โปรดกรอก Asset ID ด้วยตนเอง');
+    }
+
+    // ==================== RENDERING ====================
+    function renderAssets() {
+      const grid = document.getElementById('assetsGrid');
+      if (!currentSearchQuery) {
+        grid.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><div class="empty-state-icon">🔍</div><div class="empty-state-text">ค้นหา Asset เพื่อดูรายละเอียด</div></div>';
         return;
       }
 
-      list.forEach(asset => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "asset-card w-full text-left rounded-3xl bg-white/75 border border-pink-100 p-4 focus:outline-none focus:ring-4 focus:ring-pink-100";
-        button.innerHTML = `
-          <div class="flex items-start justify-between gap-3">
-            <div>
-              <p class="font-bold text-pink-950">${asset.name}</p>
-              <p class="text-sm text-pink-700">${asset.asset_id}</p>
-            </div>
-            <span class="rounded-full px-3 py-1 text-xs font-semibold ${asset.status === "พร้อมตรวจ" ? "bg-green-100 text-green-700" : asset.status === "ใกล้ครบกำหนด" ? "bg-amber-100 text-amber-700" : "bg-pink-100 text-pink-700"}">${asset.status}</span>
-          </div>
-          <div class="mt-3 grid grid-cols-2 gap-2 text-xs text-pink-700">
-            <span class="pill rounded-2xl px-3 py-2">${asset.department}</span>
-            <span class="pill rounded-2xl px-3 py-2">${asset.type}</span>
-          </div>
-        `;
-        button.addEventListener("click", () => {
-          showOverlay("กำลังเปิด PM Panel", "โหลดหัวข้อ PM_TOPIC ตามประเภทครุภัณฑ์");
-          setTimeout(() => {
-            selectAsset(asset);
-            hideOverlay();
-            logAction("OPEN_PM", asset.asset_id);
-          }, 500);
-        });
-        els.assetList.appendChild(button);
-      });
-    }
-
-    function selectAsset(asset) {
-      selectedAsset = asset;
-      els.emptyPanel.classList.add("hidden");
-      els.pmPanel.classList.remove("hidden");
-      els.assetName.textContent = asset.name;
-      els.assetIdBadge.textContent = `Asset_ID: ${asset.asset_id}`;
-      els.deptBadge.textContent = `${asset.department} (${asset.dept_id})`;
-      els.typeBadge.textContent = `Type: ${asset.type}`;
-      els.workStatus.textContent = "รอตรวจสอบ";
-      els.workStatus.className = "text-lg font-bold text-amber-600";
-      els.inspectorNote.value = "";
-      els.imageUpload.value = "";
-      els.imageList.innerHTML = "";
-      buildChecklist();
-      updateProgress();
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function buildChecklist() {
-      els.checklistWrap.innerHTML = "";
-      Object.entries(topics).forEach(([group, items]) => {
-        const card = document.createElement("section");
-        card.className = "rounded-[1.7rem] bg-white/70 border border-pink-100 p-4";
-        card.innerHTML = `
-          <h3 class="text-lg font-bold text-pink-950 mb-3">${group}</h3>
-          <div class="space-y-3">
-            ${items.map((item, idx) => {
-              const id = `TOPIC_${group.toUpperCase()}_${String(idx + 1).padStart(2, "0")}`;
-              const itemName = typeof item === 'string' ? item : item.name;
-              return `
-                <label for="${id}" class="flex gap-3 rounded-2xl bg-pink-50/70 border border-pink-100 p-3 cursor-pointer">
-                  <input id="${id}" type="checkbox" class="mt-1 h-5 w-5 checklist-item">
-                  <span>
-                    <span class="block font-medium text-pink-950">${itemName}</span>
-                    <span class="block text-xs text-pink-600">ID: ${id}</span>
-                  </span>
-                </label>
-              `;
-            }).join("")}
-          </div>
-        `;
-        els.checklistWrap.appendChild(card);
-      });
-
-      document.querySelectorAll(".checklist-item").forEach(item => {
-        item.addEventListener("change", updateProgress);
-      });
-    }
-
-    function updateProgress() {
-      const items = [...document.querySelectorAll(".checklist-item")];
-      const checked = items.filter(item => item.checked).length;
-      const percent = items.length ? Math.round((checked / items.length) * 100) : 0;
-      els.progressBar.style.width = `${percent}%`;
-      els.progressText.textContent = `${percent}% completed`;
-
-      if (percent === 100) {
-        els.workStatus.textContent = "พร้อมบันทึก";
-        els.workStatus.className = "text-lg font-bold text-green-600";
-      } else if (percent > 0) {
-        els.workStatus.textContent = "กำลังตรวจสอบ";
-        els.workStatus.className = "text-lg font-bold text-pink-600";
-      } else {
-        els.workStatus.textContent = "รอตรวจสอบ";
-        els.workStatus.className = "text-lg font-bold text-amber-600";
+      if (filteredAssets.length === 0) {
+        grid.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><div class="empty-state-icon">📦</div><div class="empty-state-text">ไม่พบข้อมูล Asset</div></div>';
+        return;
       }
-    }
 
-    function showOverlay(title, text) {
-      els.overlayTitle.textContent = title;
-      els.overlayText.textContent = text;
-      els.overlay.classList.remove("hidden");
-      els.overlay.classList.add("flex");
-    }
-
-    function hideOverlay() {
-      els.overlay.classList.add("hidden");
-      els.overlay.classList.remove("flex");
-    }
-
-    function showModal(title, text, type = "success") {
-      els.modalTitle.textContent = title;
-      els.modalText.textContent = text;
-      els.modalIcon.className = `h-14 w-14 rounded-2xl ${type === "success" ? "bg-green-100 text-green-600" : "bg-amber-100 text-amber-600"} grid place-items-center mb-4`;
-      els.modalIcon.innerHTML = `<i data-lucide="${type === "success" ? "check" : "info"}" class="h-8 w-8"></i>`;
-      els.modal.classList.remove("hidden");
-      els.modal.classList.add("flex");
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function closeModal() {
-      els.modal.classList.add("hidden");
-      els.modal.classList.remove("flex");
-    }
-
-    function logAction(action, detail) {
-      const time = new Date().toLocaleString("th-TH");
-      actionLogs.unshift({ action, detail, time });
-      actionLogs = actionLogs.slice(0, 10);
-      els.actionLog.innerHTML = actionLogs.map(log => `
-        <div class="rounded-2xl bg-white/10 border border-white/10 px-3 py-2">
-          <span class="font-semibold">${log.action}</span>
-          <span class="text-pink-200">• ${log.detail}</span>
-          <span class="block text-xs text-pink-300">${log.time}</span>
-        </div>
-      `).join("");
-    }
-
-    function simulateSafeRun(callback) {
-      setTimeout(callback, 700);
-    }
-
-    function initEvents() {
-      els.searchForm.addEventListener("submit", event => {
-        event.preventDefault();
-        const q = els.searchInput.value;
-        showOverlay("กำลังค้นหา", "parse QR และค้นหา Asset_ID แบบอัตโนมัติ");
-        simulateSafeRun(() => {
-          const result = searchAssets(q);
-          renderAssets(result);
-          hideOverlay();
-          logAction("SEARCH", normalizeInput(q) || "ALL");
-          showModal("ค้นหาเสร็จแล้ว", `พบข้อมูล ${result.length} รายการ`, "success");
-        });
+      grid.innerHTML = '';
+      filteredAssets.forEach(asset => {
+        const card = document.createElement('div');
+        card.className = 'asset-card';
+        card.innerHTML = `
+          <div class="asset-header">
+            <div class="asset-id">${highlightText(asset.Asset_ID || 'N/A', currentSearchQuery)}</div>
+            <div class="dept-badge">${escapeHtml(asset.Dept_Name || 'N/A')}</div>
+          </div>
+          <div class="asset-serial">SN: ${highlightText(asset.Serial_Number || 'N/A', currentSearchQuery)}</div>
+          <div class="asset-details">
+            <p>
+              <span class="detail-label">NOID:</span>
+              <span>${escapeHtml(asset.NOID || 'N/A')}</span>
+            </p>
+            <p>
+              <span class="detail-label">Status:</span>
+              <span style="color: #4caf50; font-weight: 600;">✓ Active</span>
+            </p>
+          </div>
+        `;
+        card.addEventListener('click', () => openPMPanel(asset));
+        grid.appendChild(card);
       });
+    }
 
-      els.searchInput.addEventListener("input", () => {
-        renderAssets(searchAssets(els.searchInput.value));
-      });
+    function renderCompletedList() {
+      const container = document.getElementById('completedContainer');
+      if (pmHistory.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✅</div><div class="empty-state-text">ยังไม่มี PM ที่เสร็จแล้ว</div></div>';
+        return;
+      }
 
-      els.pmForm.addEventListener("submit", event => {
-        event.preventDefault();
-        if (!selectedAsset) return;
-
-        showOverlay("กำลังบันทึก PM", "สร้าง PM_ID และบันทึก PM_RECORD / PM_DETAIL");
-        els.savePmBtn.disabled = true;
-
-        savePMRecord().then(success => {
-          els.savePmBtn.disabled = false;
-          hideOverlay();
-
-          if (success) {
-            pmSavedCount += 1;
-            els.pmCount.textContent = pmSavedCount;
-            logAction("SAVE_PM", `${selectedAsset.asset_id}`);
-            showModal("บันทึก PM สำเร็จ", "ระบบบันทึกข้อมูลตรวจสอบเรียบร้อย", "success");
-          } else {
-            showModal("เกิดข้อผิดพลาด", "ไม่สามารถบันทึกข้อมูลได้", "error");
-          }
-        });
-      });
-
-      els.confirmBtn.addEventListener("click", () => {
-        if (!selectedAsset) return;
-        showOverlay("กำลัง Confirm", "บันทึกผู้ยืนยัน เวลา และ Action_ID");
-        els.confirmBtn.disabled = true;
-
-        callGAS("confirmAsset", {
-          asset_id: selectedAsset.asset_id
-        }).then(result => {
-          els.confirmBtn.disabled = false;
-          hideOverlay();
-
-          if (result && result.success) {
-            els.workStatus.textContent = "ยืนยันแล้ว";
-            els.workStatus.className = "text-lg font-bold text-green-600";
-            logAction("CONFIRM", selectedAsset.asset_id);
-            showModal("Confirm สำเร็จ", "บันทึกผู้ยืนยันและ Audit Trail เรียบร้อย", "success");
-          } else {
-            showModal("เกิดข้อผิดพลาด", "ไม่สามารถยืนยันได้", "error");
-          }
-        });
-      });
-
-      els.imageUpload.addEventListener("change", () => {
-        const files = [...els.imageUpload.files];
-        if (!files.length) return;
-
-        showOverlay("กำลังอัปโหลดรูป", "ส่งไปยัง Google Drive");
-        setTimeout(() => {
-          els.imageList.innerHTML = files.map((file, idx) => `
-            <div class="rounded-2xl bg-pink-50 border border-pink-100 px-3 py-2 mt-2">
-              ${file.name} (${(file.size / 1024).toFixed(1)} KB)
+      let html = '';
+      pmHistory.forEach((pm, idx) => {
+        html += `
+          <div class="asset-card" style="margin-bottom: 16px;">
+            <div class="asset-header">
+              <div class="asset-id">${escapeHtml(pm.Asset_ID || 'N/A')}</div>
+              <button class="btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="editPM(${idx})">แก้ไข</button>
             </div>
-          `).join("");
-          hideOverlay();
-          logAction("UPLOAD_IMAGE", `${files.length} file`);
-          showModal("อัปโหลดรูปสำเร็จ", `ระบบบันทึกรูปภาพ ${files.length} ไฟล์เรียบร้อย`, "success");
-        }, 800);
+            <div class="asset-details">
+              <p><span class="detail-label">วันที่:</span><span>${escapeHtml(pm.Date || 'N/A')}</span></p>
+              <p><span class="detail-label">ผู้ทำ:</span><span>${escapeHtml(pm.User || 'N/A')}</span></p>
+              <p><span class="detail-label">ผลลัพธ์:</span><span style="color: #4caf50;">✓ ${escapeHtml(pm.Result || 'PASS')}</span></p>
+              <p><span class="detail-label">หมายเหตุ:</span><span>${escapeHtml(pm.Note || 'ไม่มี')}</span></p>
+            </div>
+          </div>
+        `;
       });
-
-      els.printBtn.addEventListener("click", () => {
-        showOverlay("เตรียมพิมพ์", "จัดหน้าแนวนอนสำหรับรายงาน");
-        setTimeout(() => {
-          hideOverlay();
-          window.print();
-        }, 450);
-      });
-
-      els.modalClose.addEventListener("click", closeModal);
+      container.innerHTML = html;
     }
 
-    function applyConfig(config) {
-      const cfg = { ...defaultConfig, ...config };
-      const fontStack = `${cfg.font_family}, Kanit, sans-serif`;
-      const base = Number(cfg.font_size) || 16;
+    function renderAbnormalList() {
+      const container = document.getElementById('abnormalContainer');
+      if (abnormalList.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-text">ไม่มี PM ที่ผิดปกติ</div></div>';
+        return;
+      }
 
-      document.body.style.fontFamily = fontStack;
-      els.appWrapper.style.color = cfg.text_color;
-      els.appWrapper.style.background = `
-        radial-gradient(circle at 15% 10%, ${cfg.secondary_action_color}55, transparent 34%),
-        radial-gradient(circle at 90% 20%, ${cfg.surface_color}cc, transparent 32%),
-        linear-gradient(135deg, ${cfg.background_color} 0%, #ffe8f1 48%, ${cfg.surface_color} 100%)
+      let html = '';
+      abnormalList.forEach((pm, idx) => {
+        html += `
+          <div class="asset-card abnormal" style="margin-bottom: 16px;">
+            <div class="asset-header">
+              <div class="asset-id">${escapeHtml(pm.Asset_ID || 'N/A')}</div>
+              <button class="btn-danger" style="padding: 6px 12px; font-size: 12px;" onclick="editAbnormalPM(${idx})">แก้ไข</button>
+            </div>
+            <div class="asset-details">
+              <p><span class="detail-label">วันที่:</span><span>${escapeHtml(pm.Date || 'N/A')}</span></p>
+              <p><span class="detail-label">ผู้ทำ:</span><span>${escapeHtml(pm.User || 'N/A')}</span></p>
+              <p><span class="detail-label">ผลลัพธ์:</span><span style="color: #ff9800;">⚠️ ${escapeHtml(pm.Result || 'FAIL')}</span></p>
+              <p><span class="detail-label">ปัญหา:</span><span>${escapeHtml(pm.Issue || 'ไม่ระบุ')}</span></p>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function editPM(idx) {
+      const pm = pmHistory[idx];
+      const modal = document.getElementById('modalOverlay');
+      const title = document.getElementById('modalTitle');
+      const body = document.getElementById('modalBody');
+      const footer = document.getElementById('modalFooter');
+
+      title.textContent = 'แก้ไข PM - ' + pm.Asset_ID;
+      body.innerHTML = `
+        <div class="form-group">
+          <label class="form-label">Asset ID</label>
+          <input type="text" class="form-input" value="${escapeHtml(pm.Asset_ID)}" disabled>
+        </div>
+        <div class="form-group">
+          <label class="form-label">หมายเหตุ</label>
+          <textarea class="form-textarea" id="editNote">${escapeHtml(pm.Note || '')}</textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ผลลัพธ์</label>
+          <select class="form-select" id="editResult">
+            <option value="PASS" ${pm.Result === 'PASS' ? 'selected' : ''}>ผ่าน</option>
+            <option value="FAIL" ${pm.Result === 'FAIL' ? 'selected' : ''}>ไม่ผ่าน</option>
+          </select>
+        </div>
       `;
 
-      els.appTitle.textContent = cfg.app_title;
-      els.hospitalName.textContent = cfg.hospital_name;
-      els.departmentName.textContent = cfg.department_name;
-      els.searchInput.placeholder = cfg.search_placeholder;
-      els.savePmBtn.textContent = cfg.save_button_text;
-      els.confirmBtn.textContent = cfg.confirm_button_text;
-      els.footerNote.textContent = cfg.footer_note;
+      footer.innerHTML = `
+        <button class="btn-secondary" onclick="closeModal()">ยกเลิก</button>
+        <button class="btn-primary" onclick="savePMEdit(${idx})">บันทึก</button>
+      `;
 
-      els.appTitle.style.fontSize = `${base * 2}px`;
-      els.hospitalName.style.fontSize = `${base * 1.08}px`;
-      els.departmentName.style.fontSize = `${base * 0.96}px`;
-      els.footerNote.style.fontSize = `${base * 0.88}px`;
-      document.querySelectorAll("p, label, input, textarea, button, span").forEach(el => {
-        el.style.fontFamily = fontStack;
-      });
-      document.querySelectorAll("h1, h2, h3").forEach(el => {
-        el.style.fontFamily = fontStack;
-      });
+      modal.classList.add('show');
+    }
 
-      document.querySelectorAll(".glass-card, .print-area").forEach(el => {
-        el.style.backgroundColor = `${cfg.surface_color}cc`;
-      });
+    function editAbnormalPM(idx) {
+      editPM(idx);
+    }
 
-      document.querySelectorAll("button").forEach(btn => {
-        if (btn.textContent.includes(cfg.save_button_text) || btn.textContent.includes("ค้นหา") || btn.textContent.includes("พิมพ์") || btn.textContent.includes("ตกลง")) {
-          btn.style.backgroundColor = cfg.primary_action_color;
+    function savePMEdit(idx) {
+      const note = document.getElementById('editNote').value;
+      const result = document.getElementById('editResult').value;
+      pmHistory[idx].Note = note;
+      pmHistory[idx].Result = result;
+      showNotification('success', 'บันทึกสำเร็จ', 'อัปเดตข้อมูล PM เรียบร้อย');
+      closeModal();
+      renderCompletedList();
+    }
+
+    // ==================== PM PANEL ====================
+    async function openPMPanel(asset) {
+      showLoading(true, 'กำลังโหลดข้อมูล PM...');
+      try {
+        const payload = { action: 'getPMTopics', assetType: 'GENERAL' };
+        const response = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const result = await response.json();
+        if (result.status) {
+          showPMModal(asset, result.data);
+        } else {
+          throw new Error(result.message || 'ไม่สามารถโหลด PM Topics');
         }
-      });
-
-      els.confirmBtn.style.color = cfg.primary_action_color;
-      els.confirmBtn.style.borderColor = cfg.secondary_action_color;
-    }
-
-    function initElementSdk() {
-      if (!window.elementSdk) {
-        applyConfig(defaultConfig);
-        return;
+      } catch (err) {
+        showNotification('error', 'ข้อผิดพลาด', err.message);
+      } finally {
+        showLoading(false);
       }
+    }
 
+    function showPMModal(asset, topics) {
+      const modal = document.getElementById('modalOverlay');
+      const title = document.getElementById('modalTitle');
+      const body = document.getElementById('modalBody');
+      const footer = document.getElementById('modalFooter');
+
+      title.textContent = 'PM Checklist - ' + asset.Asset_ID;
+
+      let categoryGroups = {};
+      topics.forEach(t => {
+        const cat = t.asset_type || 'อื่น ๆ';
+        if (!categoryGroups[cat]) categoryGroups[cat] = [];
+        categoryGroups[cat].push(t);
+      });
+
+      let bodyHTML = '';
+      Object.keys(categoryGroups).forEach(cat => {
+        bodyHTML += `<div class="pm-category"><div class="category-name">📋 ${escapeHtml(cat)}</div><div class="checklist-items">`;
+        categoryGroups[cat].forEach(t => {
+          const required = t.required ? '<span class="required-badge">บังคับ</span>' : '';
+          const photo = t.photo_required ? '<span class="photo-badge">ต้องถ่ายรูป</span>' : '';
+          bodyHTML += `
+            <div class="checklist-item">
+              <div class="checkbox-custom" data-topic="${t.topic_id}" onclick="toggleCheckbox(this)"></div>
+              <label class="checklist-label">
+                <span>${escapeHtml(t.topic_name || 'N/A')}</span>
+                <span style="font-size: 12px; color: #999;">${required} ${photo}</span>
+              </label>
+            </div>
+          `;
+        });
+        bodyHTML += '</div></div>';
+      });
+
+      body.innerHTML = bodyHTML;
+      footer.innerHTML = `
+        <button class="btn-secondary" onclick="closeModal()">ยกเลิก</button>
+        <button class="btn-primary" onclick="savePM('${asset.Asset_ID}')">บันทึก PM</button>
+      `;
+
+      modal.classList.add('show');
+    }
+
+    function toggleCheckbox(el) {
+      el.classList.toggle('checked');
+      el.innerHTML = el.classList.contains('checked') ? '✓' : '';
+    }
+
+    async function savePM(assetId) {
+      showLoading(true, 'กำลังบันทึก PM...');
+      try {
+        const checked = document.querySelectorAll('.checkbox-custom.checked');
+        const details = Array.from(checked).map(el => ({ topic_id: el.getAttribute('data-topic'), status: 'PASS', score: 100, remark: '' }));
+        const payload = { action: 'savePM', asset_code: assetId, user: 'USER', result: 'PASS', note: '', details: details };
+        const response = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const result = await response.json();
+        if (result.status) {
+          showNotification('success', 'บันทึกสำเร็จ', 'บันทึก PM เรียบร้อยแล้ว');
+          pmHistory.push({ Asset_ID: assetId, Date: new Date().toLocaleDateString('th-TH'), User: 'USER', Result: 'PASS', Note: '' });
+          closeModal();
+        } else {
+          throw new Error(result.message || 'ไม่สามารถบันทึก PM');
+        }
+      } catch (err) {
+        showNotification('error', 'ข้อผิดพลาด', err.message);
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // ==================== MODAL HELPERS ====================
+    function closeModal(event) {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById('modalOverlay').classList.remove('show');
+    }
+
+    // ==================== NOTIFICATION ====================
+    function showNotification(type, title, message) {
+      const container = document.getElementById('notificationContainer');
+      const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
+      const notif = document.createElement('div');
+      notif.className = 'notification ' + type;
+      notif.innerHTML = `
+        <div class="notification-icon">${icons[type]}</div>
+        <div class="notification-content">
+          <h4>${escapeHtml(title)}</h4>
+          <p>${escapeHtml(message)}</p>
+        </div>
+      `;
+      container.appendChild(notif);
+      setTimeout(() => notif.remove(), 3000);
+    }
+
+    // ==================== LOADING ====================
+    function showLoading(show, text = 'กำลังประมวลผล...') {
+      const overlay = document.getElementById('loadingOverlay');
+      if (show) {
+        overlay.querySelector('.loading-text').textContent = text;
+        overlay.classList.add('show');
+      } else {
+        overlay.classList.remove('show');
+      }
+    }
+
+    // ==================== UTILITIES ====================
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Initialize Element SDK if available
+    if (window.elementSdk) {
       window.elementSdk.init({
-        defaultConfig,
-        onConfigChange: async (config) => {
-          applyConfig(config);
+        defaultConfig: {
+          system_title: 'IT PREVENTIVE SYSTEM',
+          hospital_name: 'โรงพยาบาลอุดรธานี',
+          department_name: 'กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์'
         },
-        mapToCapabilities: (config) => ({
-          recolorables: [
-            {
-              get: () => config.background_color || defaultConfig.background_color,
-              set: (value) => window.elementSdk.setConfig({ background_color: value })
-            },
-            {
-              get: () => config.surface_color || defaultConfig.surface_color,
-              set: (value) => window.elementSdk.setConfig({ surface_color: value })
-            },
-            {
-              get: () => config.text_color || defaultConfig.text_color,
-              set: (value) => window.elementSdk.setConfig({ text_color: value })
-            },
-            {
-              get: () => config.primary_action_color || defaultConfig.primary_action_color,
-              set: (value) => window.elementSdk.setConfig({ primary_action_color: value })
-            },
-            {
-              get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
-              set: (value) => window.elementSdk.setConfig({ secondary_action_color: value })
-            }
-          ],
-          borderables: [],
-          fontEditable: {
-            get: () => config.font_family || defaultConfig.font_family,
-            set: (value) => window.elementSdk.setConfig({ font_family: value })
-          },
-          fontSizeable: {
-            get: () => config.font_size || defaultConfig.font_size,
-            set: (value) => window.elementSdk.setConfig({ font_size: value })
-          }
-        }),
-        mapToEditPanelValues: (config) => new Map([
-          ["app_title", config.app_title || defaultConfig.app_title],
-          ["hospital_name", config.hospital_name || defaultConfig.hospital_name],
-          ["department_name", config.department_name || defaultConfig.department_name],
-          ["search_placeholder", config.search_placeholder || defaultConfig.search_placeholder],
-          ["save_button_text", config.save_button_text || defaultConfig.save_button_text],
-          ["confirm_button_text", config.confirm_button_text || defaultConfig.confirm_button_text],
-          ["footer_note", config.footer_note || defaultConfig.footer_note]
-        ])
+        onConfigChange: async (config) => {
+          document.getElementById('sysTitle').textContent = config.system_title;
+          document.getElementById('hospitalName').textContent = config.hospital_name;
+          document.getElementById('deptName').textContent = config.department_name;
+        },
+        mapToCapabilities: () => ({ recolorables: [], borderables: [], fontEditable: undefined, fontSizeable: undefined }),
+        mapToEditPanelValues: (config) => new Map([['system_title', config.system_title], ['hospital_name', config.hospital_name], ['department_name', config.department_name]])
       });
     }
-
-    async function boot() {
-      cacheEls();
-      initEvents();
-      initElementSdk();
-
-      showOverlay("กำลังเข้าสู่ระบบ", "ตรวจ session token และโหลดข้อมูลเริ่มต้น");
-      
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      els.cacheState.textContent = "Hit";
-      hideOverlay();
-
-      await loadAssets();
-
-      if (window.lucide) lucide.createIcons();
-    }
-
-    boot();
   </script>
- </body>
+  </div>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9fffd8c38d57f8c8',t:'MTc3OTQ5NTEyMg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
