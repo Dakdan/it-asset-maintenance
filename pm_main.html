@@ -600,7 +600,7 @@
   <input type="file" id="qrFileInput" accept="image/*" style="display: none;" onchange="handleQRUpload(event)">
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzcgxVWPQ5w7YonfYWfAUs1fABezDzadx_i06xSvd05Xo2US4Lj3jYKtQXx2MIQKzycOw/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw8UHJAO4hBK9kYX_tZ1JrZSPtujTOAuFtVvHrjiHzk6O7D3ZUDQv5cMbEs8hEl8TqR3g/exec";
     
     let allAssets = [];
     let filteredAssets = [];
@@ -786,13 +786,17 @@
       renderAssetChart();
     }
 
-    function renderAssetChart() {
-      const container = document.getElementById('chartContainer');
-      const types = {};
-      allAssets.forEach(a => {
-        const t = a.col23 || a.Asset_Type || 'ไม่ระบุประเภท';
-        types[t] = (types[t] || 0) + 1;
-      });
+ function renderAssetChart() {
+  const container = document.getElementById('chartContainer');
+  const types = {};
+  allAssets.forEach(a => {
+    // ระบบจะดึงชื่อจากคอลัมน์ C (เช่น "คอมพิวเตอร์ตั้งโต๊ะ", "เครื่องพิมพ์") มาจัดกลุ่มทำกราฟ
+    const t = a.Asset_Group_Name || 'ไม่ระบุประเภท';
+    types[t] = (types[t] || 0) + 1;
+  });
+  
+  // ... (โค้ดลูป Render แท่งกราฟเดิมของคุณทำงานได้ทันที) ...
+
 
       const max = Math.max(...Object.values(types), 1);
       let html = '';
@@ -811,26 +815,73 @@
       container.innerHTML = html || '<p class="text-gray-400 text-center text-sm py-4">ไม่พบโครงสร้างกลุ่มประเภทครุภัณฑ์</p>';
     }
 
-    function renderAssets() {
-      const grid = document.getElementById('assetsGrid');
-      if (!currentSearchQuery) {
-        grid.innerHTML = `<div class="empty-state" style="grid-column: 1/-1;">
-          <div class="empty-state-icon">🔎</div>
-          <div class="empty-state-text">กรุณากรอกรหัสครุภัณฑ์หรือแผนกที่ติดตั้งในช่องด้านบน เพื่อเปิดหน้าบันทึก PM</div>
-        </div>`;
-        return;
+ function renderAssets() {
+  const grid = document.getElementById('assetsGrid');
+  if (!currentSearchQuery) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column: 1/-1;">
+      <div class="empty-state-icon">🔎</div>
+      <div class="empty-state-text">กรุณากรอกรหัสครุภัณฑ์หรือแผนกที่ติดตั้งในช่องด้านบน เพื่อเปิดหน้าบันทึก PM</div>
+    </div>`;
+    return;
+  }
+
+  const query = currentSearchQuery.toLowerCase().trim();
+
+  // 1. [ปรับปรุง] กรองข้อมูล (Filter) โดยให้ความสำคัญกับการจับคู่จาก ขวา ไป ซ้าย
+  // แม้จะพิมพ์แค่เลขท้ายเครื่องย่อย ระบบก็ต้องสแกนเจอ
+  let matchedAssets = filteredAssets.filter(asset => {
+    const id = String(asset.Asset_ID || "").toLowerCase();
+    const dept = String(asset.Dept_Name || "").toLowerCase();
+    const sn = String(asset.Serial_Number || "").toLowerCase();
+
+    // เช็คว่าคำค้นหาตรงกับส่วนใดส่วนหนึ่งของข้อมูล (รองรับการพิมพ์เลขท้ายย่อย)
+    return id.includes(query) || dept.includes(query) || sn.includes(query);
+  });
+
+  // 2. [ปรับปรุง] เรียงลำดับ (Sort) โดยคำนวณคะแนนอ้างอิงตำแหน่งจาก ขวา ไป ซ้าย
+  matchedAssets.sort((a, b) => {
+    const getRightToLeftScore = (asset) => {
+      const id = String(asset.Asset_ID || "").toLowerCase();
+      const dept = String(asset.Dept_Name || "").toLowerCase();
+
+      // กรณีตรงกันเป๊ะ เอาไป 100 คะแนนเต็ม
+      if (id === query) return 100;
+
+      // กรณีที่ "ลงท้ายด้วยคำที่ค้นหาพอดี" (ขวาสุดตรงเป๊ะ เช่น พิมพ์ 022 แล้วเจอ ...-022) เอาไป 90 คะแนน
+      if (id.endsWith(query)) return 90;
+
+      // ค้นหาตำแหน่งจากขวาไปซ้ายโดยใช้ lastIndexOf
+      const lastIdx = id.lastIndexOf(query);
+      if (lastIdx !== -1) {
+        // ยิ่งคำค้นหาอยู่ใกล้ฝั่งขวาสุด (ตัวหารมีค่ามาก) คะแนนจะยิ่งสูงและถูกดันขึ้นบนสุด
+        return 10 + (lastIdx / id.length) * 50;
       }
 
-      if (filteredAssets.length === 0) {
-        grid.innerHTML = `<div class="empty-state" style="grid-column: 1/-1;">
-          <div class="empty-state-icon">📦</div>
-          <div class="empty-state-text">ไม่พบข้อมูลรหัสครุภัณฑ์ไอทีนี้ในฐานข้อมูล Google Sheets ปัจจุบัน</div>
-        </div>`;
-        return;
-      }
+      // ถ้าไปตรงกับชื่อแผนก ให้คะแนนพื้นฐาน
+      if (dept.includes(query)) return 5;
+
+      return 0;
+    };
+
+    return getRightToLeftScore(b) - getRightToLeftScore(a);
+  });
+
+  // 3. ตรวจสอบว่ามีข้อมูลหลังผ่านตัวกรองขวาไปซ้ายหรือไม่
+  if (matchedAssets.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column: 1/-1;">
+      <div class="empty-state-icon">📦</div>
+      <div class="empty-state-text">ไม่พบข้อมูลรหัสครุภัณฑ์ไอทีนี้ในฐานข้อมูล Google Sheets ปัจจุบัน</div>
+    </div>`;
+    return;
+  }
 
       grid.innerHTML = '';
       filteredAssets.forEach(asset => {
+        
+        // ดึงค่า Asset_Group_Name ที่ผ่านการ Mapping ชื่อภาษาไทยมาจากหลังบ้านเรียบร้อยแล้ว
+        const typeNameToDisplay = asset.Asset_Group_Name || 'ไม่ระบุประเภท';
+        const detail = asset.Asset_DB_Col8 ||'ไม่มีบันทึก';
+
         const card = document.createElement('div');
         card.className = 'asset-card';
         card.innerHTML = `
@@ -840,8 +891,8 @@
           </div>
           <div class="asset-serial">SN: ${highlightText(asset.Serial_Number || 'N/A', currentSearchQuery)}</div>
           <div class="asset-details">
-            <p><span class="detail-label">ชื่อพาร์ทครุภัณฑ์:</span><span>${escapeHtml(asset.Asset_Name || 'N/A')}</span></p>
-            <p><span class="detail-label">ประเภทอุปกรณ์ (Col23):</span><span>${escapeHtml(asset.col23 || asset.Asset_Type || 'N/A')}</span></p>
+            <p><span class="detail-label">ประเภทอุปกรณ์:</span><span style="font-weight: bold; color: #d81b60;">${escapeHtml(typeNameToDisplay)}</span></p>
+            <p><span class="detail-label">รายละเอียด:</span><span style="font-weight: bold; color: #d81b60;">${escapeHtml(detail)}</span></p>
           </div>
         `;
         card.onclick = () => openPMPanel(asset);
@@ -903,10 +954,22 @@ async function openPMPanel(asset) {
   const modalBody = document.getElementById('modalBody');
   const modalTitle = document.getElementById('modalTitle');
   
-  modalTitle.innerText = `ระบบบันทึกงาน PM: ${asset.Asset_ID}`;
+  // 💡 ปรับเปลี่ยนส่วนหัวข้อหน้าต่าง Modal ให้แสดงรายละเอียดครบถ้วน
+  modalTitle.innerHTML = `
+    <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">🔧 ระบบบันทึกงาน PM: ${escapeHtml(asset.Asset_ID || '')}</div>
+    <div style="font-size: 13px; font-weight: normal; color: #666; line-height: 1.5;">
+      <div><b>ชื่อพาร์ทครุภัณฑ์:</b> ${escapeHtml(asset.Asset_Name || asset.Asset_ID || 'N/A')}</div>
+      <div><b>ประเภทอุปกรณ์:</b> ${escapeHtml(asset.Asset_Group_Name || 'N/A')}</div>
+      <div><b>Serial Number:</b> ${escapeHtml(asset.Serial_Number || 'N/A')}</div>
+      <div><b>แผนก/หน่วยงาน:</b> ${escapeHtml(asset.Dept_Name || 'ไม่พบคลังหน่วยงาน')}</div>
+      <div><b>ข้อมูลรายละเอียดครุภัณฑ์:</b> ${escapeHtml(asset.Asset_DB_Col8 || 'N/A')}</div>
+    </div>
+  `;
+  
   modalBody.innerHTML = '<p>กำลังโหลดรายการเช็คลิสต์...</p>';
   modal.classList.add('show');
 
+  // ดึงรหัส Asset_Type_ID (คอลัมน์ E จากชีท ASSET_LOGS) ไปวิ่งหา Key ตัวเชื่อมที่คอลัมน์ B ในหลังบ้าน
   const typeToSearch = asset.Asset_Type_ID;
   
   try {
@@ -918,34 +981,41 @@ async function openPMPanel(asset) {
       let lastCategory = ""; 
 
       res.data.forEach(topic => {
+        // ดึงค่าตามโครงสร้างคีย์ที่ส่งมาจากเวอร์ชันหลังบ้านล่าสุด
+        const categoryName = topic.category_name || 'การประเมินและตรวจสภาพทั่วไป';
+        const topicName = topic.topic_name || '';
+        const inputType = String(topic.input_type || "").toLowerCase().trim();
+        
+        // Backend แปลงค่ามาให้เป็น Boolean (true/false) เรียบร้อยแล้ว
+        const isCritical = topic.critical === true;
+        const isPhotoRequired = topic.photo_required === true;
+
         // 1. ตรวจสอบและแยกกลุ่มหมวดหมู่
-        if (topic.category_name !== lastCategory) {
+        if (categoryName !== lastCategory) {
           if (lastCategory !== "") html += `</div>`; 
-          html += `<div class="pm-category"><div class="category-name">📁 ${topic.category_name}</div>`;
-          lastCategory = topic.category_name;
+          html += `<div class="pm-category"><div class="category-name">📁 ${escapeHtml(categoryName)}</div>`;
+          lastCategory = categoryName;
         }
 
-        // 2. สร้าง Input ตาม INPUT_TYPE (จัดการตัวแปรครั้งเดียว)
+        // 2. สร้าง Input ตาม INPUT_TYPE
         let inputHtml = "";
-        let type = String(topic.input_type || "").toLowerCase().trim();
-
-        if (type === 'checkbox') {
+        if (inputType === 'checkbox') {
             inputHtml = `<input type="checkbox" class="form-check">`;
-        } else if (type === 'number' || type === 'score') {
+        } else if (inputType === 'number' || inputType === 'score') {
             inputHtml = `<input type="number" min="${topic.min_score}" max="${topic.max_score}" class="form-input" placeholder="คะแนน">`;
-        } else if (type === 'text') {
+        } else if (inputType === 'text') {
             inputHtml = `<input type="text" class="form-input" placeholder="ระบุรายละเอียด">`;
         } else {
-            inputHtml = `<input type="text" value="${type}" class="form-input" placeholder="ระบุข้อมูล">`; 
+            inputHtml = `<input type="text" class="form-input" placeholder="ระบุข้อมูล">`; 
         }
 
-        // 3. รวมโครงสร้าง HTML
+        // 3. รวมโครงสร้าง HTML พร้อมระบบป้องกันความปลอดภัย XSS
         html += `
           <div class="checklist-item">
-            <label>${topic.topic_name} ${topic.critical == 'TRUE' ? '<span style="color:red; font-size:10px;">(สำคัญ)</span>' : ''}</label>
+            <label>${escapeHtml(topicName)} ${isCritical ? '<span style="color:red; font-size:10px;">(สำคัญ)</span>' : ''}</label>
             <div class="checklist-control">
               ${inputHtml}
-              ${topic.photo_req == 'TRUE' ? '<input type="file" accept="image/*">' : ''}
+              ${isPhotoRequired ? '<input type="file" accept="image/*" class="form-file">' : ''}
             </div>
           </div>`;
       });
@@ -953,35 +1023,35 @@ async function openPMPanel(asset) {
       html += `</div>`; // ปิด div สุดท้ายของกลุ่มล่าสุด
       modalBody.innerHTML = html;
     } else {
-      modalBody.innerHTML = `<p>ไม่พบรายการเช็คลิสต์สำหรับ ID: ${typeToSearch}</p>`;
+      modalBody.innerHTML = `<p class="p-4 text-center text-gray-500">ไม่พบรายการเช็คลิสต์สำหรับ ID: ${escapeHtml(typeToSearch)}</p>`;
     }
   } catch (err) {
-    modalBody.innerHTML = `<p style="color:red;">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${err.message}</p>`;
+    modalBody.innerHTML = `<p style="color:red;" class="p-4">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${err.message}</p>`;
   }
 }
-    function closeModal() {
-      document.getElementById('modalOverlay').classList.remove('show');
-    }
 
-    function handleQRUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      showNotification('success', 'รับภาพถ่ายแล้ว กรุณาพิมพ์หมายเลขครุภัณฑ์ในช่องค้นหาเพื่อค้นหาอย่างรวดเร็ว');
-    }
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
 
-    function setConnectionStatus(isOnline, text) {
-      const indicator = document.getElementById('connIndicator');
-      const textEl = document.getElementById('connText');
-      
-      if (isOnline) {
-        indicator.className = 'status-indicator';
-        textEl.innerText = text || 'เชื่อมต่อระบบหลัก';
-      } else {
-        indicator.className = 'status-indicator offline';
-        textEl.innerText = text || 'การเชื่อมต่อขาดหาย';
-      }
-    }
+function handleQRUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  showNotification('success', 'รับภาพถ่ายแล้ว กรุณาพิมพ์หมายเลขครุภัณฑ์ในช่องค้นหาเพื่อค้นหาอย่างรวดเร็ว');
+}
 
+function setConnectionStatus(isOnline, text) {
+  const indicator = document.getElementById('connIndicator');
+  const textEl = document.getElementById('connText');
+  
+  if (isOnline) {
+    indicator.className = 'status-indicator';
+    textEl.innerText = text || 'เชื่อมต่อระบบหลัก';
+  } else {
+    indicator.className = 'status-indicator offline';
+    textEl.innerText = text || 'การเชื่อมต่อขาดหาย';
+  }
+}
     function renderConnectionError(errMsg) {
       const grid = document.getElementById('dashboardGrid');
       grid.innerHTML = `
