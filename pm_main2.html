@@ -697,6 +697,27 @@
             }
         }
 
+        // API Caller for GET requests (fetching data)
+        async function fetchGetApi(action, params = {}) {
+            try {
+                let urlString = config.apiUrl + "?action=" + action;
+                for (const key in params) {
+                    urlString += `&${key}=${encodeURIComponent(params[key])}`;
+                }
+                const response = await fetch(urlString, {
+                    method: "GET"
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`เซิร์ฟเวอร์ตอบกลับรหัสสถานะ: ${response.status}`);
+                }
+                return await response.json();
+            } catch (err) {
+                console.error("API GET Connection Error:", err);
+                throw err;
+            }
+        }
+
         window.onload = function() {
             document.getElementById("settings-api-url").value = config.apiUrl;
 
@@ -739,10 +760,10 @@
         }
 
         async function fetchAssetsFromDatabase() {
-            showOverlay("กำลังดึงข้อมูลครุภัณฑ์จาก Google Sheet...");
+            showOverlay("กำลังดึงข้อมูลครุภัณฑ์จาก Google Sheet (ระบบจริง)...");
             
             try {
-                const result = await fetchPostApi({ action: "getAssets" });
+                const result = await fetchGetApi("getAssets");
                 
                 if (result && result.status) {
                     state.assets = result.data;
@@ -765,18 +786,9 @@
                         <p class="text-rose-500 font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i> ดึงข้อมูลออนไลน์ล้มเหลว (Failed to fetch)</p>
                         <p class="text-slate-600 font-semibold text-xs border-b pb-1">กรุณาตรวจสอบระบบความปลอดภัย Google Apps Script (หลังบ้าน) ดังนี้:</p>
                         <ol class="list-decimal pl-4 text-xs text-slate-500 space-y-2">
-                            <li>
-                                <strong class="text-slate-700">สิทธิ์การเข้าใช้งาน Web App:</strong><br>
-                                ตอนกด Deploy (การใช้งานใช้ได้) ในหน้าต่าง Google Apps Script ต้องตั้งค่าช่อง <span class="bg-pink-100 text-pink-600 px-1 py-0.5 rounded font-bold">Who has access</span> เป็น <span class="text-emerald-600 font-bold">Anyone (ทุกคน)</span> เสมอ หากเลือกตัวเลือกอื่น เบราว์เซอร์จะบล็อกและแสดงข้อผิดพลาด CORS ทันที
-                            </li>
-                            <li>
-                                <strong class="text-slate-700">สิทธิ์ในการเปิดเขียน Spreadsheet:</strong><br>
-                                กรุณาตรวจสอบว่าสิทธิ์ของอีเมลที่สั่งรัน Apps Script นั้น มีสิทธิ์แก้ไขอ่านเขียนไฟล์ Spreadsheet ID ต่าง ๆ ตามที่ระบุไว้ใน Code.gs ครบถ้วนหรือไม่ หากโค้ดทำงานแครช ระบบจะแสดงข้อผิดพลาด CORS
-                            </li>
-                            <li>
-                                <strong class="text-slate-700">ตรวจสอบ URL API:</strong><br>
-                                กดที่ปุ่มฟันเฟืองมุมขวาบนของระบบ และตรวจสอบให้แน่ใจว่าลิงก์ Web App ตรงกับลิงก์เวอร์ชันล่าสุดของคุณ
-                            </li>
+                            <li><strong class="text-slate-700">สิทธิ์การเข้าใช้งาน Web App:</strong> ตั้งค่าช่อง <span class="bg-pink-100 text-pink-600 px-1 py-0.5 rounded font-bold">Who has access</span> เป็น <span class="text-emerald-600 font-bold">Anyone</span> เสมอ</li>
+                            <li><strong class="text-slate-700">สิทธิ์ในการเปิดเขียน Spreadsheet:</strong> ตรวจสอบว่าบัญชีที่รันมีสิทธิ์เข้าถึง Spreadsheet เต็มรูปแบบ</li>
+                            <li><strong class="text-slate-700">ตรวจสอบ URL API:</strong> ตั้งค่าลิงก์ Web App ให้ตรงกับ Deployment ล่าสุด</li>
                         </ol>
                     </div>
                 `;
@@ -827,40 +839,58 @@
 
             let query = state.currentSearchQuery.trim().toUpperCase();
 
+            // ฟังก์ชันค้นหาแบบ Reverse Match (ตรวจสอบจากขวาไปซ้าย) และ Fallback ด้วย includes()
+            const searchMatchLogic = (targetText, searchQuery) => {
+                if (!targetText) return false;
+                const t = String(targetText).toUpperCase();
+                // 1. Logic reverse match (ขวา -> ซ้าย): ตรวจสอบว่าลงท้ายด้วยคำค้นหาหรือไม่ (เหมาะกับค้นหาด้วยเลข Running Number จากท้ายสุด)
+                if (t.endsWith(searchQuery)) return true;
+                // 2. Fallback ด้วย includes(): ค้นหาทั่วไปแบบมีคำนี้อยู่ตรงไหนก็ได้
+                return t.includes(searchQuery);
+            };
+
+            // 1. คัดกรองข้อมูลจาก Query และ Filter สถานะ
             let filteredList = state.assets.filter(asset => {
-                const assetIdStr = String(asset.Asset_ID || "");
-                const isCompleted = state.completedAssetCodes.includes(assetIdStr);
-                if (state.currentFilter === "PENDING" && isCompleted) return false;
-                if (state.currentFilter === "COMPLETED" && !isCompleted) return false;
+                const assetIdStr = String(asset.Asset_ID || "").toUpperCase();
+                const serialStr = String(asset.Serial_Number || "").toUpperCase();
+                const nameStr = String(asset.Asset_Name || asset.Asset_Group_Name || "").toUpperCase();
+                const deptStr = String(asset.Dept_Name || "").toUpperCase();
 
-                if (!query) return true;
+                // ตรวจสอบ Keyword ค้นหา (เป้าหมายหลัก ASSET_LOGS, Serial และอื่นๆ)
+                const matchesQuery = !query ||
+                    searchMatchLogic(assetIdStr, query) ||
+                    searchMatchLogic(serialStr, query) ||
+                    searchMatchLogic(nameStr, query) ||
+                    searchMatchLogic(deptStr, query);
 
-                const safeAssetId = assetIdStr.toUpperCase();
-                const safeSerial = String(asset.Serial_Number || "").toUpperCase();
-                const safeDeptName = String(asset.Dept_Name || "").toUpperCase();
+                // ตรวจสอบแท็บสถานะ (รอดำเนินการ / บำรุงรักษาแล้ว)
+                const isCompleted = state.completedAssetCodes.includes(String(asset.Asset_ID || ""));
+                const matchesFilter = state.currentFilter === "ALL" ||
+                                      (state.currentFilter === "COMPLETED" && isCompleted) ||
+                                      (state.currentFilter === "PENDING" && !isCompleted);
 
-                // Reverse match logic (Right-to-Left endsWith)
-                const isReverseMatch = safeAssetId.endsWith(query) || safeSerial.endsWith(query);
-                // Fallback standard checks (Contains anywhere)
-                const isNormalMatch = safeAssetId.includes(query) || 
-                                      safeSerial.includes(query) ||
-                                      safeDeptName.includes(query);
-
-                return isReverseMatch || isNormalMatch;
+                return matchesQuery && matchesFilter;
             });
 
-            document.getElementById("search-count").innerText = `${filteredList.length} รายการ`;
-
-            if (filteredList.length === 0) {
-                grid.classList.add("hidden");
-                emptyState.classList.remove("hidden");
-                return;
+            // อัปเดตตัวเลขจำนวนรายการที่ค้นพบ
+            const searchCountBadge = document.getElementById("search-count");
+            if (searchCountBadge) {
+                searchCountBadge.innerText = `${filteredList.length} รายการ`;
             }
 
-            grid.classList.remove("hidden");
-            emptyState.classList.add("hidden");
+            // 2. จัดการหน้าจอเมื่อไม่พบข้อมูล (Empty State)
+            if (filteredList.length === 0) {
+                grid.style.display = "none";
+                emptyState.classList.remove("hidden");
+                emptyState.classList.add("flex");
+                return;
+            } else {
+                grid.style.display = "grid";
+                emptyState.classList.remove("flex");
+                emptyState.classList.add("hidden");
+            }
 
-            // Build Card deck layout
+            // 3. วาดการ์ดแสดงผลสำหรับรายการที่ผ่านการคัดกรอง
             filteredList.forEach(asset => {
                 const assetIdStr = String(asset.Asset_ID || "");
                 const isCompleted = state.completedAssetCodes.includes(assetIdStr);
@@ -868,6 +898,7 @@
                 let assetIdHtml = highlightMatchedText(assetIdStr, query);
                 let serialHtml = highlightMatchedText(asset.Serial_Number || "N/A", query);
                 let deptNameHtml = highlightMatchedText(asset.Dept_Name || "ไม่ระบุแผนก", query);
+                let assetNameHtml = highlightMatchedText(asset.Asset_Name || asset.Asset_Group_Name || "ไม่ระบุชื่อครุภัณฑ์", query);
 
                 const card = document.createElement("div");
                 card.className = "bg-white p-5 rounded-3xl border border-pink-100 hover:border-pink-300 shadow-sm hover:shadow-md smooth-transition flex flex-col justify-between glow-card glow-card-hover cursor-pointer relative overflow-hidden";
@@ -888,7 +919,7 @@
                             </div>
                             <div>
                                 <h4 class="font-extrabold text-slate-800 leading-tight text-base">${assetIdHtml}</h4>
-                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">${asset.Asset_Group_Name}</span>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">${assetNameHtml}</span>
                             </div>
                         </div>
 
@@ -1003,8 +1034,10 @@
         function handleDecodedScanResult(text) {
             logAction("QR_SCAN_DETECTED", `กล้องสแกนเจอค่า: "${text}"`, "SUCCESS");
             
+            // นำค่า Link URL ที่ได้จากการสแกนมาแยกให้เหลือแค่ Asset_ID
             const parsedAssetId = parseAssetIdFromUrl(text);
 
+            // ใส่ค่าลงในช่องค้นหา และทำการ Auto Search ทันที
             document.getElementById("asset-search-input").value = parsedAssetId;
             state.currentSearchQuery = parsedAssetId;
             document.getElementById("search-clear-btn").style.display = "flex";
@@ -1032,14 +1065,14 @@
             // Switch view
             switchTab("pm-form");
 
-            // Fill UI fields
-            document.getElementById("pm-asset-id").innerText = asset.Asset_ID;
-            document.getElementById("pm-asset-name").innerText = asset.Dept_Name || "ไม่พบหน่วยงาน";
+            // Fill UI fields (Fixed Data Mapping)
+            document.getElementById("pm-asset-id").innerText = asset.Asset_ID || "ไม่ระบุรหัส";
+            document.getElementById("pm-asset-name").innerText = asset.Asset_Name || asset.Asset_Group_Name || "ไม่ระบุชื่อครุภัณฑ์";
             document.getElementById("pm-asset-serial").innerText = asset.Serial_Number || "N/A";
-            document.getElementById("pm-asset-group-name").innerText = asset.Asset_Group_Name;
+            document.getElementById("pm-asset-group-name").innerText = asset.Asset_Group_Name || "-";
             document.getElementById("pm-asset-dept").innerText = asset.Dept_Name || "N/A";
             document.getElementById("pm-asset-noid").innerText = asset.NOID || "-";
-            document.getElementById("pm-asset-type-badge").innerText = asset.Asset_Type_ID;
+            document.getElementById("pm-asset-type-badge").innerText = asset.Asset_Type_ID || "GENERAL";
 
             // Reset signature and picture files
             removeSelectedImage();
@@ -1048,16 +1081,15 @@
             document.getElementById("pm-remarks").value = "";
             document.getElementById("pm-overall-status").value = "PASS";
 
-            // Query checklist items from GAS via POST
+            // Query checklist items from GAS via GET
             await fetchAssessmentTopics(asset.Asset_Type_ID);
             hideOverlay();
         }
 
         async function fetchAssessmentTopics(assetType) {
             try {
-                const result = await fetchPostApi({
-                    action: "getPMTopics",
-                    assetType: assetType
+                const result = await fetchGetApi("getPMTopics", {
+                    Asset_Type_ID: assetType // Map key to exact uppercase schema for safety
                 });
 
                 if (result && result.status) {
@@ -1308,14 +1340,15 @@
             const overallStatus = document.getElementById("pm-overall-status").value;
             const remarks = document.getElementById("pm-remarks").value;
 
-            // Structure main submit payload
+            // Structure main submit payload (Fixed exact Schema Mapping)
             const pmPayload = {
                 action: "savePM",
-                asset_code: String(state.selectedAsset.Asset_ID),
-                user: inspectorName,
-                result: overallStatus,
-                note: remarks,
-                details: detailArray
+                Asset_ID: String(state.selectedAsset.Asset_ID),
+                Asset_Type_ID: String(state.selectedAsset.Asset_Type_ID || ""),
+                Inspector: inspectorName,
+                Overall_Status: overallStatus,
+                Remarks: remarks,
+                Details: detailArray
             };
 
             try {
@@ -1380,12 +1413,12 @@
             const today = new Date();
             const formattedDate = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()} ${today.getHours()}:${String(today.getMinutes()).padStart(2, '0')}`;
 
-            // Sync static headers
+            // Sync static headers (Fixed Mapping)
             document.getElementById("print-report-date").innerText = formattedDate;
-            document.getElementById("print-asset-id-val").innerText = asset.Asset_ID;
+            document.getElementById("print-asset-id-val").innerText = asset.Asset_ID || "-";
             document.getElementById("print-serial-val").innerText = asset.Serial_Number || "N/A";
-            document.getElementById("print-brand-val").innerText = asset.Asset_Group_Name;
-            document.getElementById("print-group-val").innerText = asset.Asset_Type_ID;
+            document.getElementById("print-brand-val").innerText = asset.Asset_Name || asset.Asset_Group_Name || "-";
+            document.getElementById("print-group-val").innerText = asset.Asset_Type_ID || "-";
             document.getElementById("print-dept-val").innerText = asset.Dept_Name || "N/A";
             document.getElementById("print-noid-val").innerText = asset.NOID || "-";
             
