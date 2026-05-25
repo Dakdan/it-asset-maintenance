@@ -6,8 +6,8 @@
   <title>IT Preventive Maintenance - Udon Thani Hospital</title>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
-  
   <style>
+    /* ==================== BASE & RESET ==================== */
     * {
       margin: 0;
       padding: 0;
@@ -18,8 +18,8 @@
       height: 100%;
       width: 100%;
       font-family: 'Kanit', sans-serif;
-      background: linear-gradient(135deg, #fff5f7 0%, #fce9ee 50%, #ffffff 100%);
-      color: #333;
+      background-color: #f8fafc; 
+      color: #334155;
     }
 
     .app-wrapper {
@@ -30,12 +30,12 @@
       overflow: hidden;
     }
 
-    /* ==================== HEADER (บานเย็น-ชมพูสว่าง) ==================== */
+    /* ==================== HEADER ==================== */
     .header {
-      background: linear-gradient(135deg, #ff9ecb 0%, #ff7fa0 50%, #e91e63 100%);
-      padding: 24px 20px;
-      box-shadow: 0 4px 15px rgba(255, 158, 203, 0.3);
-      border-bottom: 3px solid #d81b60;
+      background: linear-gradient(135deg, #d81b60 0%, #ad1457 100%); 
+      padding: 20px 24px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      z-index: 10;
     }
 
     .header-content {
@@ -45,7 +45,6 @@
       align-items: center;
       justify-content: space-between;
       gap: 20px;
-      position: relative;
     }
 
     .header-left {
@@ -54,97 +53,101 @@
       gap: 16px;
     }
 
-    .logo-icon {
-      font-size: 40px;
-      animation: pulse 2.5s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
+    .header-logo {
+      height: 48px;
+      width: auto;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 4px;
     }
 
     .header-text h1 {
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 700;
-      color: #fff;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      color: #ffffff;
       margin-bottom: 2px;
+      letter-spacing: 0.5px;
     }
 
     .header-text p {
       font-size: 13px;
-      color: rgba(255, 255, 255, 0.95);
-      margin-bottom: 1px;
+      color: rgba(255, 255, 255, 0.85);
+      margin-bottom: 0;
+      font-weight: 300;
     }
 
     .connection-badge {
-      background: rgba(255, 255, 255, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      padding: 6px 14px;
-      border-radius: 30px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 8px 16px;
+      border-radius: 9999px;
       color: white;
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 13px;
+      font-weight: 500;
       display: flex;
       align-items: center;
       gap: 8px;
+      transition: all 0.3s ease;
     }
 
     .status-indicator {
-      width: 8px;
-      height: 8px;
-      background-color: #4caf50;
+      width: 10px;
+      height: 10px;
+      background-color: #4ade80;
       border-radius: 50%;
       display: inline-block;
-      box-shadow: 0 0 8px #4caf50;
+      box-shadow: 0 0 10px rgba(74, 222, 128, 0.6);
     }
 
     .status-indicator.offline {
-      background-color: #f44336;
-      box-shadow: 0 0 8px #f44336;
+      background-color: #f87171;
+      box-shadow: 0 0 10px rgba(248, 113, 113, 0.6);
     }
 
     /* ==================== NAV TABS ==================== */
     .nav-tabs {
       display: flex;
       background: white;
-      border-bottom: 2px solid #ffe0ec;
-      box-shadow: 0 2px 8px rgba(255, 158, 203, 0.1);
-      padding: 0 20px;
-      gap: 0;
+      border-bottom: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+      padding: 0 24px;
+      gap: 8px;
       overflow-x: auto;
+      scrollbar-width: none; 
     }
+    
+    .nav-tabs::-webkit-scrollbar { display: none; } 
 
     .tab-btn {
-      padding: 16px 24px;
+      padding: 16px 20px;
       background: none;
       border: none;
       font-family: 'Kanit', sans-serif;
-      font-size: 16px;
-      font-weight: 600;
-      color: #999;
+      font-size: 15px;
+      font-weight: 500;
+      color: #64748b;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.2s ease;
       border-bottom: 3px solid transparent;
       white-space: nowrap;
     }
 
     .tab-btn:hover {
-      color: #ff9ecb;
+      color: #d81b60;
     }
 
     .tab-btn.active {
-      color: #e91e63;
-      border-bottom-color: #e91e63;
+      color: #d81b60;
+      font-weight: 600;
+      border-bottom-color: #d81b60;
     }
 
     /* ==================== MAIN CONTENT ==================== */
     .main-content {
       flex: 1;
       overflow-y: auto;
-      padding: 20px;
-      background: linear-gradient(135deg, #fff5f7 0%, #fce9ee 50%, #ffffff 100%);
+      padding: 24px;
     }
 
     .container {
@@ -158,54 +161,63 @@
 
     .tab-panel.active {
       display: block;
-      animation: fadeIn 0.3s ease;
+      animation: fadeIn 0.4s ease;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
+      from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
     /* ==================== DASHBOARD CARD ==================== */
     .dashboard-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
-      margin-bottom: 30px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
     }
 
     .dashboard-card {
       background: white;
-      border-radius: 14px;
+      border-radius: 16px;
       padding: 24px;
-      box-shadow: 0 2px 12px rgba(255, 158, 203, 0.15);
-      border-top: 5px solid #ff9ecb;
-      position: relative;
-      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      border-top: 4px solid #d81b60;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .dashboard-card.warning { border-top-color: #ff9800; }
-    .dashboard-card.error { border-top-color: #f44336; }
-    .dashboard-card.success { border-top-color: #4caf50; }
+    .dashboard-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
 
-    .card-icon { font-size: 32px; margin-bottom: 12px; }
-    .card-label { font-size: 14px; color: #777; margin-bottom: 8px; font-weight: 500; }
-    .card-value { font-size: 32px; font-weight: 700; color: #e91e63; margin-bottom: 12px; }
-    .card-detail { font-size: 12px; color: #aaa; font-weight: 500; }
+    .dashboard-card.warning { border-top-color: #f59e0b; }
+    .dashboard-card.error { border-top-color: #ef4444; }
+    .dashboard-card.success { border-top-color: #10b981; }
+
+    .card-icon { font-size: 28px; margin-bottom: 16px; }
+    .card-label { font-size: 14px; color: #64748b; margin-bottom: 8px; font-weight: 500; }
+    .card-value { font-size: 36px; font-weight: 700; color: #1e293b; margin-bottom: 8px; line-height: 1; }
+    .dashboard-card:not(.warning):not(.error):not(.success) .card-value { color: #d81b60; }
+    .card-detail { font-size: 13px; color: #94a3b8; font-weight: 400; }
 
     .chart-container {
       background: white;
-      border-radius: 14px;
-      padding: 24px;
-      box-shadow: 0 2px 12px rgba(255, 158, 203, 0.15);
-      margin-bottom: 30px;
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      margin-bottom: 32px;
+      border: 1px solid #f1f5f9;
     }
 
     .chart-title {
       font-size: 18px;
-      font-weight: 700;
-      color: #e91e63;
-      margin-bottom: 20px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .chart-bar {
@@ -216,23 +228,23 @@
     }
 
     .chart-label {
-      min-width: 140px;
+      min-width: 160px;
       font-size: 14px;
-      font-weight: 600;
-      color: #333;
+      font-weight: 500;
+      color: #475569;
     }
 
     .chart-bar-container {
       flex: 1;
-      background: #ffe0ec;
-      border-radius: 6px;
+      background: #f1f5f9;
+      border-radius: 8px;
       overflow: hidden;
-      height: 32px;
+      height: 28px;
       position: relative;
     }
 
     .chart-bar-fill {
-      background: linear-gradient(90deg, #ff9ecb 0%, #e91e63 100%);
+      background: linear-gradient(90deg, #f472b6 0%, #d81b60 100%);
       height: 100%;
       display: flex;
       align-items: center;
@@ -241,261 +253,417 @@
       color: white;
       font-size: 12px;
       font-weight: 600;
-      transition: width 0.5s ease;
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     /* ==================== SEARCH SECTION ==================== */
     .search-section {
       background: white;
-      padding: 20px;
+      padding: 24px;
       border-radius: 16px;
-      box-shadow: 0 2px 12px rgba(255, 158, 203, 0.15);
-      margin-bottom: 24px;
-      border: 2px solid rgba(255, 158, 203, 0.2);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      margin-bottom: 28px;
+      border: 1px solid #f1f5f9;
     }
 
     .search-container {
       display: flex;
-      gap: 12px;
+      gap: 16px;
       flex-wrap: wrap;
       align-items: center;
     }
 
     .search-input-wrapper {
       flex: 1;
-      min-width: 200px;
+      min-width: 280px;
       position: relative;
     }
 
     .search-input {
       width: 100%;
-      padding: 14px 16px;
-      border: 2px solid #ffe0ec;
+      padding: 14px 20px;
+      border: 1px solid #cbd5e1;
       border-radius: 12px;
-      font-size: 16px;
+      font-size: 15px;
       font-family: 'Kanit', sans-serif;
-      transition: all 0.3s ease;
-      background: #fff9fb;
+      transition: all 0.2s ease;
+      background: #f8fafc;
+      color: #334155;
     }
 
     .search-input:focus {
       outline: none;
-      border-color: #ff9ecb;
-      box-shadow: 0 0 0 3px rgba(255, 158, 203, 0.1);
+      border-color: #d81b60;
+      box-shadow: 0 0 0 4px rgba(216, 27, 96, 0.1);
       background: white;
     }
 
     .search-buttons {
       display: flex;
-      gap: 10px;
+      gap: 12px;
     }
 
     .btn-qr, .btn-search, .btn-clear {
-      padding: 12px 20px;
+      padding: 14px 24px;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       font-family: 'Kanit', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
+      font-size: 15px;
+      font-weight: 500;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.2s ease;
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
     .btn-qr {
-      background: linear-gradient(135deg, #ffa6d5 0%, #e91e63 100%);
-      color: white;
-      box-shadow: 0 4px 12px rgba(255, 158, 203, 0.3);
+      background: #fdf2f8;
+      color: #d81b60;
+      border: 1px solid #fbcfe8;
     }
-
-    .btn-qr:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(255, 158, 203, 0.4);
-    }
+    .btn-qr:hover:not(:disabled) { background: #fce7f3; }
 
     .btn-search {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #d81b60;
       color: white;
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      box-shadow: 0 4px 10px rgba(216, 27, 96, 0.2);
     }
-
     .btn-search:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+      background: #be185d;
+      box-shadow: 0 6px 14px rgba(216, 27, 96, 0.3);
+      transform: translateY(-1px);
     }
 
     .btn-clear {
-      background: #f0f0f0;
-      color: #666;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      background: #f1f5f9;
+      color: #64748b;
     }
-
-    .btn-clear:hover:not(:disabled) { background: #e0e0e0; }
+    .btn-clear:hover:not(:disabled) { background: #e2e8f0; color: #334155; }
 
     /* ==================== ASSET LIST & CARD ==================== */
     .assets-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 20px;
-      margin-bottom: 30px;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* ลดขนาด min-width ลงเล็กน้อยให้แสดงบนมือถือได้ดี */
+      gap: 24px;
+      margin-bottom: 32px;
     }
 
     .asset-card {
       background: white;
-      border-radius: 14px;
-      padding: 20px;
-      box-shadow: 0 2px 12px rgba(255, 158, 203, 0.15);
-      border-left: 5px solid #ff9ecb;
-      transition: all 0.3s ease;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e2e8f0;
+      border-left: 6px solid #d81b60; /* ทำให้แถบสีซ้ายหนาขึ้นนิดหน่อยเหมือนในภาพ */
+      transition: all 0.2s ease;
       cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
       position: relative;
-      overflow: hidden;
-    }
-
-    .asset-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: linear-gradient(135deg, rgba(255, 158, 203, 0.05) 0%, transparent 100%);
-      pointer-events: none;
     }
 
     .asset-card:hover {
       transform: translateY(-4px);
-      box-shadow: 0 8px 24px rgba(255, 158, 203, 0.25);
-      border-left-color: #e91e63;
+      box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      border-left-color: #be185d;
     }
 
-    .asset-card.abnormal {
-      border-left-color: #ff9800;
-      background: #fff8f0;
-    }
+    .asset-card.abnormal { border-left-color: #f59e0b; background-color: #fffbeb; }
 
     .asset-header {
       display: flex;
       justify-content: space-between;
-      align-items: start;
+      align-items: flex-start;
       margin-bottom: 12px;
-      position: relative;
-      z-index: 1;
+      gap: 12px;
+      flex-wrap: wrap; /* ป้องกัน Badge ดันออกนอก Card ถ้าข้อความยาว */
     }
 
-    .asset-id { font-size: 18px; font-weight: 700; color: #e91e63; }
+    .asset-id { 
+      font-size: 20px; 
+      font-weight: 700; 
+      color: #d81b60; /* ปรับสีตัวอักษร ID เป็นชมพูเข้มตามดีไซน์ */
+      line-height: 1.3;
+      word-break: break-word; /* ตัดคำหากเลขยาวเกิน */
+      flex: 1 1 auto;
+      min-width: 0;
+    }
     
     .dept-badge {
-      background: linear-gradient(135deg, #ffa6d5 0%, #ff9ecb 100%);
-      color: white;
-      padding: 6px 12px;
+      background: linear-gradient(135deg, #f9a8d4 0%, #f472b6 100%); /* เปลี่ยนพื้นหลังเป็นชมพู */
+      color: white; /* เปลี่ยนตัวอักษรเป็นสีขาว */
+      padding: 6px 14px;
       border-radius: 20px;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 600;
-      box-shadow: 0 2px 8px rgba(255, 158, 203, 0.3);
+      border: none;
+      word-break: break-word; /* ตัดคำหากชื่อแผนกยาวเกิน */
+      text-align: center;
+      max-width: 100%;
+      box-shadow: 0 2px 6px rgba(244, 114, 182, 0.3);
     }
 
-    .asset-serial { font-size: 13px; color: #999; margin-bottom: 8px; position: relative; z-index: 1; }
-    .asset-details { font-size: 14px; color: #666; line-height: 1.6; position: relative; z-index: 1; }
-    .asset-details p { margin-bottom: 6px; display: flex; gap: 8px; }
-    .detail-label { font-weight: 600; color: #e91e63; min-width: 100px; }
-    .highlight { background: #ffeb3b; padding: 2px 4px; border-radius: 3px; font-weight: 600; }
+    .asset-serial { 
+      font-size: 13px; 
+      color: #94a3b8; 
+      margin-bottom: 16px;
+      font-family: 'Kanit', sans-serif; /* เปลี่ยนจาก monospace เป็น Kanit เพื่อความนุ่มนวล */
+      word-break: break-all; /* ตัดคำเพื่อป้องกัน SN ยาวล้นกรอบ */
+      display: block;
+    }
+    
+    .asset-details { 
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .asset-details p { 
+      display: flex; 
+      flex-wrap: wrap; /* ยอมให้ข้อความ value ตกลงมาบรรทัดใหม่ถ้าพื้นที่ไม่พอ */
+      align-items: baseline; 
+      gap: 4px 8px; 
+      margin: 0;
+      width: 100%;
+    }
+    
+    .detail-label { 
+      font-size: 14px; 
+      color: #d81b60; /* เปลี่ยนสี Label เป็นสีบานเย็น */
+      font-weight: 600; 
+      white-space: nowrap; /* ไม่ให้คำใน Label ฉีกออกจากกัน */
+    }
+    
+    .detail-value {
+      font-size: 14px;
+      color: #475569;
+      font-weight: 500;
+      word-break: break-word; /* ให้ข้อความยาวๆ ตัดขึ้นบรรทัดใหม่ได้ */
+      flex: 1 1 0%;
+      min-width: 120px;
+    }
+    
+    .highlight { 
+      background: #fef08a; 
+      color: #854d0e;
+      padding: 0 4px; 
+      border-radius: 4px; 
+      font-weight: 600; 
+    }
 
     /* ==================== MODAL OVERLAY & POPUP ==================== */
     .modal-overlay {
       display: none;
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
       z-index: 1000;
-      animation: fadeIn 0.3s ease;
+      animation: fadeIn 0.2s ease;
     }
 
     .modal-overlay.show { display: flex; justify-content: center; align-items: center; }
 
     .modal {
       background: white;
-      border-radius: 16px;
-      max-width: 650px;
-      width: 90%;
-      max-height: 85%;
-      overflow-y: auto;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-      animation: slideUp 0.3s ease;
-      position: relative;
+      border-radius: 20px;
+      max-width: 680px;
+      width: 95%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     @keyframes slideUp {
-      from { transform: translateY(50px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+      from { transform: translateY(40px) scale(0.98); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
     }
 
     .modal-header {
-      padding: 24px;
-      border-bottom: 2px solid #ffe0ec;
+      padding: 24px 32px;
+      border-bottom: 1px solid #e2e8f0;
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
+      background: #fffbfa;
+      border-radius: 20px 20px 0 0;
     }
 
-    .modal-title { font-size: 22px; font-weight: 700; color: #e91e63; }
-    .modal-close { background: none; border: none; font-size: 28px; color: #ccc; cursor: pointer; transition: color 0.3s; }
-    .modal-close:hover { color: #e91e63; }
-    .modal-body { padding: 24px; }
-    .modal-footer { padding: 20px 24px; border-top: 2px solid #ffe0ec; display: flex; gap: 12px; justify-content: flex-end; }
-
-    .btn-modal { padding: 12px 24px; border: none; border-radius: 10px; font-family: 'Kanit', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
-    .btn-primary { background: linear-gradient(135deg, #ff9ecb 0%, #e91e63 100%); color: white; box-shadow: 0 4px 12px rgba(255, 158, 203, 0.3); }
-    .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(255, 158, 203, 0.4); }
-    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-    .btn-secondary { background: #f0f0f0; color: #666; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .btn-secondary:hover:not(:disabled) { background: #e0e0e0; }
-
-    /* ==================== FORM ELEMENTS ==================== */
-    .form-group { margin-bottom: 20px; }
-    .form-label { display: block; font-size: 14px; font-weight: 600; color: #333; margin-bottom: 8px; }
-    .form-input, .form-select, .form-textarea { width: 100%; padding: 12px 16px; border: 2px solid #ffe0ec; border-radius: 8px; font-family: 'Kanit', sans-serif; font-size: 14px; transition: all 0.3s ease; background: #fff9fb; }
-    .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: #ff9ecb; box-shadow: 0 0 0 3px rgba(255, 158, 203, 0.1); background: white; }
-    .form-textarea { resize: vertical; min-height: 80px; }
-
-    /* ==================== DYNAMIC CHECKLIST GROUP ==================== */
-    .pm-category { margin-bottom: 20px; background: #fff9fb; padding: 16px; border-radius: 10px; border-left: 4px solid #e91e63; }
-    .category-name { font-size: 15px; font-weight: 700; color: #e91e63; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-    .checklist-item { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; padding: 12px; background: white; border-radius: 8px; border: 1px solid #ffe0ec; }
-    .checklist-row { display: flex; align-items: center; gap: 12px; justify-content: space-between; flex-wrap: wrap; }
-    .checklist-label { flex: 1; font-size: 14px; color: #333; font-weight: 500; min-width: 200px; }
+    .modal-title { font-size: 20px; font-weight: 600; color: #1e293b; word-break: break-word; }
+    .modal-close { 
+      background: #f1f5f9; 
+      border: none; 
+      width: 36px; height: 36px; 
+      border-radius: 50%; 
+      color: #64748b; 
+      cursor: pointer; 
+      font-size: 20px; 
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; 
+      flex-shrink: 0;
+    }
+    .modal-close:hover { background: #e2e8f0; color: #0f172a; }
     
-    .status-options { display: flex; gap: 10px; }
-    .status-radio { display: none; }
-    .status-btn { padding: 6px 14px; border: 1px solid #ffe0ec; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; background: #fafafa; color: #888; transition: all 0.2s; }
-    .status-radio:checked + .status-btn.btn-pass { background: #e8f5e9; color: #2e7d32; border-color: #a5d6a7; }
-    .status-radio:checked + .status-btn.btn-fail { background: #ffebee; color: #c62828; border-color: #ef9a9a; }
+    .modal-body { 
+      padding: 32px; 
+      overflow-y: auto; 
+      flex: 1; 
+      background: #f8fafc;
+    }
+    
+    .modal-footer { 
+      padding: 20px 32px; 
+      border-top: 1px solid #e2e8f0; 
+      display: flex; gap: 12px; 
+      justify-content: flex-end; 
+      background: white; 
+      border-radius: 0 0 20px 20px; 
+    }
 
-    /* ==================== NOTIFICATION & LOADING ==================== */
-    .notification-toast { position: fixed; top: 24px; right: 24px; background: white; padding: 16px 24px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); z-index: 2000; animation: slideInRight 0.3s ease; display: flex; gap: 12px; align-items: center; border-left: 5px solid #ff9ecb; }
-    @keyframes slideInRight { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-    .notification-toast.success { border-left-color: #4caf50; }
-    .notification-toast.error { border-left-color: #f44336; }
-    .notification-toast.warning { border-left-color: #ff9800; }
+    .btn-modal { 
+      padding: 12px 24px; 
+      border: none; 
+      border-radius: 10px; 
+      font-family: 'Kanit', sans-serif; 
+      font-size: 15px; 
+      font-weight: 500; 
+      cursor: pointer; 
+      transition: all 0.2s ease; 
+    }
+    .btn-primary { 
+      background: #d81b60; 
+      color: white; 
+      box-shadow: 0 4px 6px -1px rgba(216, 27, 96, 0.2); 
+    }
+    .btn-primary:hover:not(:disabled) { 
+      transform: translateY(-1px); 
+      background: #be185d; 
+      box-shadow: 0 6px 10px -1px rgba(216, 27, 96, 0.3);
+    }
+    .btn-secondary { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+    .btn-secondary:hover:not(:disabled) { background: #e2e8f0; color: #1e293b; }
 
-    .loading-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255, 158, 203, 0.2); backdrop-filter: blur(4px); z-index: 999; justify-content: center; align-items: center; flex-direction: column; }
+    /* ==================== DYNAMIC CHECKLIST ==================== */
+    .pm-category { 
+      margin-bottom: 24px; 
+      background: white; 
+      padding: 24px; 
+      border-radius: 16px; 
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    }
+    .category-name { 
+      font-size: 16px; 
+      font-weight: 600; 
+      color: #334155; 
+      margin-bottom: 20px; 
+      display: flex; align-items: center; gap: 10px; 
+      border-bottom: 2px solid #f1f5f9; 
+      padding-bottom: 12px; 
+      word-break: break-word;
+    }
+    
+    .checklist-item { 
+      display: flex; flex-direction: column; gap: 10px; 
+      margin-bottom: 20px; 
+    }
+    .checklist-item:last-child { margin-bottom: 0; }
+    
+    .checklist-control { display: flex; gap: 12px; align-items: center; margin-top: 4px; flex-wrap: wrap; }
+    
+    .form-input { 
+      padding: 12px 16px; 
+      border: 1px solid #cbd5e1; 
+      border-radius: 10px; 
+      flex: 1 1 auto; 
+      font-family: 'Kanit'; 
+      font-size: 15px;
+      transition: all 0.2s;
+      min-width: 150px;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: #d81b60;
+      box-shadow: 0 0 0 3px rgba(216, 27, 96, 0.1);
+    }
+
+    .form-check { 
+      width: 24px; 
+      height: 24px; 
+      cursor: pointer; 
+      accent-color: #d81b60;
+    }
+    
+    .form-file {
+      font-family: 'Kanit';
+      font-size: 13px;
+    }
+
+    /* ==================== ALERTS / LOADERS ==================== */
+    .notification-toast { 
+      position: fixed; top: 24px; right: 24px; 
+      background: white; padding: 16px 20px; 
+      border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15); 
+      z-index: 2000; animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+      display: flex; gap: 12px; align-items: center; 
+      border-left: 4px solid #d81b60; 
+      max-width: 90vw;
+      word-break: break-word;
+    }
+    @keyframes slideInRight { 
+      from { transform: translateX(100%); opacity: 0; } 
+      to { transform: translateX(0); opacity: 1; } 
+    }
+    .notification-toast.success { border-left-color: #10b981; }
+    
+    .loading-overlay { 
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+      background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(4px); 
+      z-index: 9999; justify-content: center; align-items: center; flex-direction: column; 
+    }
     .loading-overlay.show { display: flex; }
-    .spinner { width: 50px; height: 50px; border: 4px solid rgba(255, 158, 203, 0.2); border-top-color: #e91e63; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    .spinner { 
+      width: 48px; height: 48px; 
+      border: 4px solid #fbcfe8; 
+      border-top-color: #d81b60; 
+      border-radius: 50%; 
+      animation: spin 0.8s linear infinite; 
+    }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .loading-text { margin-top: 16px; font-size: 16px; color: #e91e63; font-weight: 600; }
+    .loading-text { margin-top: 20px; font-size: 15px; color: #475569; font-weight: 500; }
 
-    .empty-state { text-align: center; padding: 40px 20px; color: #999; width: 100%; }
-    .empty-state-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
-    .empty-state-text { font-size: 15px; font-weight: 500; }
+    .empty-state { text-align: center; padding: 60px 20px; background: white; border-radius: 16px; border: 1px dashed #cbd5e1; width: 100%; word-break: break-word;}
+    .empty-state-icon { font-size: 56px; margin-bottom: 16px; opacity: 0.8; }
+    .empty-state-text { font-size: 16px; font-weight: 500; color: #64748b; }
 
-    /* ==================== RESPONSIVE BREAKPOINTS ==================== */
+    /* ==================== RESPONSIVE (MOBILE) ==================== */
     @media (max-width: 768px) {
+      .header { padding: 16px; }
+      .header-content { flex-direction: column; align-items: flex-start; gap: 16px; }
       .header-text h1 { font-size: 20px; }
-      .watermark { display: none; }
-      .assets-grid { grid-template-columns: 1fr; }
-      .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
+      .connection-badge { align-self: flex-start; }
+      
+      .main-content { padding: 16px; }
+      
+      .dashboard-grid { grid-template-columns: 1fr; gap: 16px; }
+      
       .search-container { flex-direction: column; align-items: stretch; }
-      .search-buttons { display: flex; }
-      .btn-qr, .btn-search, .btn-clear { flex: 1; justify-content: center; }
+      .search-input-wrapper { min-width: 100%; }
+      .search-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      .btn-clear { grid-column: span 2; justify-content: center; }
+      .btn-search, .btn-qr { justify-content: center; }
+      
+      .assets-grid { grid-template-columns: 1fr; gap: 16px; }
+      
+      .modal-header, .modal-body, .modal-footer { padding: 20px; }
+      .modal-footer { flex-direction: column; }
+      .btn-modal { width: 100%; }
+      
+      .pm-category { padding: 16px; }
     }
   </style>
 </head>
@@ -506,7 +674,7 @@
     <div class="header">
       <div class="header-content">
         <div class="header-left">
-          <img src="./favicon.png" class="header-logo">
+          <img src="./favicon.png" class="header-logo" alt="Logo" onerror="this.style.display='none'">
           <div class="header-text">
             <h1 id="sysTitle">IT PREVENTIVE SYSTEM</h1>
             <p id="hospitalName">โรงพยาบาลอุดรธานี</p>
@@ -550,7 +718,7 @@
               <div class="search-buttons">
                 <button class="btn-qr" id="btnQR" title="สแกน QR Code"><span>📷</span> QR Scan</button>
                 <button class="btn-search" id="btnSearch" title="ค้นหา"><span>🔍</span> ค้นหา</button>
-                <button class="btn-clear" id="btnClear" title="ล้างการค้นหา"><span>✕</span></button>
+                <button class="btn-clear" id="btnClear" title="ล้างการค้นหา"><span>✕</span> ล้าง</button>
               </div>
             </div>
           </div>
@@ -786,17 +954,13 @@
       renderAssetChart();
     }
 
- function renderAssetChart() {
-  const container = document.getElementById('chartContainer');
-  const types = {};
-  allAssets.forEach(a => {
-    // ระบบจะดึงชื่อจากคอลัมน์ C (เช่น "คอมพิวเตอร์ตั้งโต๊ะ", "เครื่องพิมพ์") มาจัดกลุ่มทำกราฟ
-    const t = a.Asset_Group_Name || 'ไม่ระบุประเภท';
-    types[t] = (types[t] || 0) + 1;
-  });
-  
-  // ... (โค้ดลูป Render แท่งกราฟเดิมของคุณทำงานได้ทันที) ...
-
+    function renderAssetChart() {
+      const container = document.getElementById('chartContainer');
+      const types = {};
+      allAssets.forEach(a => {
+        const t = a.Asset_Group_Name || 'ไม่ระบุประเภท';
+        types[t] = (types[t] || 0) + 1;
+      });
 
       const max = Math.max(...Object.values(types), 1);
       let html = '';
@@ -815,72 +979,58 @@
       container.innerHTML = html || '<p class="text-gray-400 text-center text-sm py-4">ไม่พบโครงสร้างกลุ่มประเภทครุภัณฑ์</p>';
     }
 
- function renderAssets() {
-  const grid = document.getElementById('assetsGrid');
-  if (!currentSearchQuery) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column: 1/-1;">
-      <div class="empty-state-icon">🔎</div>
-      <div class="empty-state-text">กรุณากรอกรหัสครุภัณฑ์หรือแผนกที่ติดตั้งในช่องด้านบน เพื่อเปิดหน้าบันทึก PM</div>
-    </div>`;
-    return;
-  }
-
-  const query = currentSearchQuery.toLowerCase().trim();
-
-  // 1. [ปรับปรุง] กรองข้อมูล (Filter) โดยให้ความสำคัญกับการจับคู่จาก ขวา ไป ซ้าย
-  // แม้จะพิมพ์แค่เลขท้ายเครื่องย่อย ระบบก็ต้องสแกนเจอ
-  let matchedAssets = filteredAssets.filter(asset => {
-    const id = String(asset.Asset_ID || "").toLowerCase();
-    const dept = String(asset.Dept_Name || "").toLowerCase();
-    const sn = String(asset.Serial_Number || "").toLowerCase();
-
-    // เช็คว่าคำค้นหาตรงกับส่วนใดส่วนหนึ่งของข้อมูล (รองรับการพิมพ์เลขท้ายย่อย)
-    return id.includes(query) || dept.includes(query) || sn.includes(query);
-  });
-
-  // 2. [ปรับปรุง] เรียงลำดับ (Sort) โดยคำนวณคะแนนอ้างอิงตำแหน่งจาก ขวา ไป ซ้าย
-  matchedAssets.sort((a, b) => {
-    const getRightToLeftScore = (asset) => {
-      const id = String(asset.Asset_ID || "").toLowerCase();
-      const dept = String(asset.Dept_Name || "").toLowerCase();
-
-      // กรณีตรงกันเป๊ะ เอาไป 100 คะแนนเต็ม
-      if (id === query) return 100;
-
-      // กรณีที่ "ลงท้ายด้วยคำที่ค้นหาพอดี" (ขวาสุดตรงเป๊ะ เช่น พิมพ์ 022 แล้วเจอ ...-022) เอาไป 90 คะแนน
-      if (id.endsWith(query)) return 90;
-
-      // ค้นหาตำแหน่งจากขวาไปซ้ายโดยใช้ lastIndexOf
-      const lastIdx = id.lastIndexOf(query);
-      if (lastIdx !== -1) {
-        // ยิ่งคำค้นหาอยู่ใกล้ฝั่งขวาสุด (ตัวหารมีค่ามาก) คะแนนจะยิ่งสูงและถูกดันขึ้นบนสุด
-        return 10 + (lastIdx / id.length) * 50;
+    function renderAssets() {
+      const grid = document.getElementById('assetsGrid');
+      if (!currentSearchQuery) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column: 1/-1;">
+          <div class="empty-state-icon">🔎</div>
+          <div class="empty-state-text">กรุณากรอกรหัสครุภัณฑ์หรือแผนกที่ติดตั้งในช่องด้านบน เพื่อเปิดหน้าบันทึก PM</div>
+        </div>`;
+        return;
       }
 
-      // ถ้าไปตรงกับชื่อแผนก ให้คะแนนพื้นฐาน
-      if (dept.includes(query)) return 5;
+      const query = currentSearchQuery.toLowerCase().trim();
 
-      return 0;
-    };
+      let matchedAssets = filteredAssets.filter(asset => {
+        const id = String(asset.Asset_ID || "").toLowerCase();
+        const dept = String(asset.Dept_Name || "").toLowerCase();
+        const sn = String(asset.Serial_Number || "").toLowerCase();
 
-    return getRightToLeftScore(b) - getRightToLeftScore(a);
-  });
+        return id.includes(query) || dept.includes(query) || sn.includes(query);
+      });
 
-  // 3. ตรวจสอบว่ามีข้อมูลหลังผ่านตัวกรองขวาไปซ้ายหรือไม่
-  if (matchedAssets.length === 0) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column: 1/-1;">
-      <div class="empty-state-icon">📦</div>
-      <div class="empty-state-text">ไม่พบข้อมูลรหัสครุภัณฑ์ไอทีนี้ในฐานข้อมูล Google Sheets ปัจจุบัน</div>
-    </div>`;
-    return;
-  }
+      matchedAssets.sort((a, b) => {
+        const getRightToLeftScore = (asset) => {
+          const id = String(asset.Asset_ID || "").toLowerCase();
+          const dept = String(asset.Dept_Name || "").toLowerCase();
+
+          if (id === query) return 100;
+          if (id.endsWith(query)) return 90;
+
+          const lastIdx = id.lastIndexOf(query);
+          if (lastIdx !== -1) {
+            return 10 + (lastIdx / id.length) * 50;
+          }
+
+          if (dept.includes(query)) return 5;
+          return 0;
+        };
+
+        return getRightToLeftScore(b) - getRightToLeftScore(a);
+      });
+
+      if (matchedAssets.length === 0) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column: 1/-1;">
+          <div class="empty-state-icon">📦</div>
+          <div class="empty-state-text">ไม่พบข้อมูลรหัสครุภัณฑ์ไอทีนี้ในฐานข้อมูล Google Sheets ปัจจุบัน</div>
+        </div>`;
+        return;
+      }
 
       grid.innerHTML = '';
       filteredAssets.forEach(asset => {
-        
-        // ดึงค่า Asset_Group_Name ที่ผ่านการ Mapping ชื่อภาษาไทยมาจากหลังบ้านเรียบร้อยแล้ว
         const typeNameToDisplay = asset.Asset_Group_Name || 'ไม่ระบุประเภท';
-        const detail = asset.Asset_DB_Col8 ||'ไม่มีบันทึก';
+        const detail = asset.Asset_DB_Col8 || 'ไม่มีบันทึก';
 
         const card = document.createElement('div');
         card.className = 'asset-card';
@@ -891,8 +1041,8 @@
           </div>
           <div class="asset-serial">SN: ${highlightText(asset.Serial_Number || 'N/A', currentSearchQuery)}</div>
           <div class="asset-details">
-            <p><span class="detail-label">ประเภทอุปกรณ์:</span><span style="font-weight: bold; color: #d81b60;">${escapeHtml(typeNameToDisplay)}</span></p>
-            <p><span class="detail-label">รายละเอียด:</span><span style="font-weight: bold; color: #d81b60;">${escapeHtml(detail)}</span></p>
+            <p><span class="detail-label">ประเภทอุปกรณ์:</span><span class="detail-value" style="font-weight: 600; color: #1e293b;">${escapeHtml(typeNameToDisplay)}</span></p>
+            <p><span class="detail-label">รายละเอียด:</span><span class="detail-value">${escapeHtml(detail)}</span></p>
           </div>
         `;
         card.onclick = () => openPMPanel(asset);
@@ -913,12 +1063,12 @@
         <div class="asset-card">
           <div class="asset-header">
             <div class="asset-id">${escapeHtml(pm.Asset_ID)}</div>
-            <div class="dept-badge" style="background:#4caf50;">ผ่านเกณฑ์ปกติ</div>
+            <div class="dept-badge" style="background: linear-gradient(135deg, #34d399 0%, #10b981 100%);">ผ่านเกณฑ์ปกติ</div>
           </div>
           <div class="asset-details">
-            <p><span class="detail-label">ผู้รับผิดชอบ:</span><span>${escapeHtml(pm.Checker_Name || 'เจ้าหน้าที่ไอที')}</span></p>
-            <p><span class="detail-label">วันที่ตรวจสภาพ:</span><span>${escapeHtml(pm.Check_Date || 'N/A')}</span></p>
-            <p><span class="detail-label">รายละเอียด:</span><span>${escapeHtml(pm.Note || '-')}</span></p>
+            <p><span class="detail-label">ผู้รับผิดชอบ:</span><span class="detail-value" style="font-weight: 600; color: #1e293b;">${escapeHtml(pm.Checker_Name || 'เจ้าหน้าที่ไอที')}</span></p>
+            <p><span class="detail-label">วันที่ตรวจสภาพ:</span><span class="detail-value">${escapeHtml(pm.Check_Date || 'N/A')}</span></p>
+            <p><span class="detail-label">รายละเอียด:</span><span class="detail-value">${escapeHtml(pm.Note || '-')}</span></p>
           </div>
         </div>
       `).join('');
@@ -937,133 +1087,133 @@
         <div class="asset-card abnormal">
           <div class="asset-header">
             <div class="asset-id">${escapeHtml(ab.Asset_ID)}</div>
-            <div class="dept-badge" style="background:#ff9800;">ตรวจพบชำรุด</div>
+            <div class="dept-badge" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);">ตรวจพบชำรุด</div>
           </div>
           <div class="asset-details">
-            <p><span class="detail-label">รายละเอียดขัดข้อง:</span><span class="text-red-600 font-bold">${escapeHtml(ab.Issue_Details || 'N/A')}</span></p>
-            <p><span class="detail-label">ติดตั้งที่แผนก:</span><span>${escapeHtml(ab.Dept_Name || 'N/A')}</span></p>
-            <p><span class="detail-label">ผู้รายงานปัญหา:</span><span>${escapeHtml(ab.Checker_Name || 'N/A')}</span></p>
+            <p><span class="detail-label">รายละเอียดขัดข้อง:</span><span class="detail-value" style="color:#ef4444; font-weight:600;">${escapeHtml(ab.Issue_Details || 'N/A')}</span></p>
+            <p><span class="detail-label">ติดตั้งที่แผนก:</span><span class="detail-value" style="font-weight: 600; color: #1e293b;">${escapeHtml(ab.Dept_Name || 'N/A')}</span></p>
+            <p><span class="detail-label">ผู้รายงานปัญหา:</span><span class="detail-value">${escapeHtml(ab.Checker_Name || 'N/A')}</span></p>
           </div>
         </div>
       `).join('');
     }
 
-async function openPMPanel(asset) {
-  selectedAsset = asset;
-  const modal = document.getElementById('modalOverlay');
-  const modalBody = document.getElementById('modalBody');
-  const modalTitle = document.getElementById('modalTitle');
-  
-  // 💡 ปรับเปลี่ยนส่วนหัวข้อหน้าต่าง Modal ให้แสดงรายละเอียดครบถ้วน
-  modalTitle.innerHTML = `
-    <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">🔧 ระบบบันทึกงาน PM: ${escapeHtml(asset.Asset_ID || '')}</div>
-    <div style="font-size: 13px; font-weight: normal; color: #666; line-height: 1.5;">
-      <div><b>ชื่อพาร์ทครุภัณฑ์:</b> ${escapeHtml(asset.Asset_Name || asset.Asset_ID || 'N/A')}</div>
-      <div><b>ประเภทอุปกรณ์:</b> ${escapeHtml(asset.Asset_Group_Name || 'N/A')}</div>
-      <div><b>Serial Number:</b> ${escapeHtml(asset.Serial_Number || 'N/A')}</div>
-      <div><b>แผนก/หน่วยงาน:</b> ${escapeHtml(asset.Dept_Name || 'ไม่พบคลังหน่วยงาน')}</div>
-      <div><b>ข้อมูลรายละเอียดครุภัณฑ์:</b> ${escapeHtml(asset.Asset_DB_Col8 || 'N/A')}</div>
-    </div>
-  `;
-  
-  modalBody.innerHTML = '<p>กำลังโหลดรายการเช็คลิสต์...</p>';
-  modal.classList.add('show');
-
-  // ดึงรหัส Asset_Type_ID (คอลัมน์ E จากชีท ASSET_LOGS) ไปวิ่งหา Key ตัวเชื่อมที่คอลัมน์ B ในหลังบ้าน
-  const typeToSearch = asset.Asset_Type_ID;
-  
-  try {
-    const response = await fetch(`${SCRIPT_URL}?action=getPMTopics&assetType=${encodeURIComponent(typeToSearch)}`);
-    const res = await response.json();
-
-    if (res.status && res.data && res.data.length > 0) {
-      let html = "";
-      let lastCategory = ""; 
-
-      res.data.forEach(topic => {
-        // ดึงค่าตามโครงสร้างคีย์ที่ส่งมาจากเวอร์ชันหลังบ้านล่าสุด
-        const categoryName = topic.category_name || 'การประเมินและตรวจสภาพทั่วไป';
-        const topicName = topic.topic_name || '';
-        const inputType = String(topic.input_type || "").toLowerCase().trim();
-        
-        // Backend แปลงค่ามาให้เป็น Boolean (true/false) เรียบร้อยแล้ว
-        const isCritical = topic.critical === true;
-        const isPhotoRequired = topic.photo_required === true;
-
-        // 1. ตรวจสอบและแยกกลุ่มหมวดหมู่
-        if (categoryName !== lastCategory) {
-          if (lastCategory !== "") html += `</div>`; 
-          html += `<div class="pm-category"><div class="category-name">📁 ${escapeHtml(categoryName)}</div>`;
-          lastCategory = categoryName;
-        }
-
-        // 2. สร้าง Input ตาม INPUT_TYPE
-        let inputHtml = "";
-        if (inputType === 'checkbox') {
-            inputHtml = `<input type="checkbox" class="form-check">`;
-        } else if (inputType === 'number' || inputType === 'score') {
-            inputHtml = `<input type="number" min="${topic.min_score}" max="${topic.max_score}" class="form-input" placeholder="คะแนน">`;
-        } else if (inputType === 'text') {
-            inputHtml = `<input type="text" class="form-input" placeholder="ระบุรายละเอียด">`;
-        } else {
-            inputHtml = `<input type="text" class="form-input" placeholder="ระบุข้อมูล">`; 
-        }
-
-        // 3. รวมโครงสร้าง HTML พร้อมระบบป้องกันความปลอดภัย XSS
-        html += `
-          <div class="checklist-item">
-            <label>${escapeHtml(topicName)} ${isCritical ? '<span style="color:red; font-size:10px;">(สำคัญ)</span>' : ''}</label>
-            <div class="checklist-control">
-              ${inputHtml}
-              ${isPhotoRequired ? '<input type="file" accept="image/*" class="form-file">' : ''}
-            </div>
-          </div>`;
-      });
+    async function openPMPanel(asset) {
+      selectedAsset = asset;
+      const modal = document.getElementById('modalOverlay');
+      const modalBody = document.getElementById('modalBody');
+      const modalTitle = document.getElementById('modalTitle');
       
-      html += `</div>`; // ปิด div สุดท้ายของกลุ่มล่าสุด
-      modalBody.innerHTML = html;
-    } else {
-      modalBody.innerHTML = `<p class="p-4 text-center text-gray-500">ไม่พบรายการเช็คลิสต์สำหรับ ID: ${escapeHtml(typeToSearch)}</p>`;
+      modalTitle.innerHTML = `
+        <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px; color: #1e293b; word-break: break-word;">🔧 ระบบบันทึกงาน PM: ${escapeHtml(asset.Asset_ID || '')}</div>
+        <div style="font-size: 14px; font-weight: normal; color: #475569; line-height: 1.6;">
+          <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+            <div style="flex: 1 1 0%; min-width: 140px; word-break: break-word;"><span style="color:#94a3b8; font-size:12px;">ชื่อพาร์ทครุภัณฑ์:</span> <br><strong style="color: #d81b60;">${escapeHtml(asset.Asset_Name || asset.Asset_ID || 'N/A')}</strong></div>
+            <div style="flex: 1 1 0%; min-width: 140px; word-break: break-word; text-align: left;"><span style="color:#94a3b8; font-size:12px;">ประเภทอุปกรณ์:</span> <br><strong>${escapeHtml(asset.Asset_Group_Name || 'N/A')}</strong></div>
+          </div>
+          <div style="margin-top:8px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; border-top: 1px solid #e2e8f0; padding-top:8px;">
+            <div style="flex: 1 1 0%; min-width: 140px; word-break: break-all;"><span style="color:#94a3b8; font-size:12px;">Serial Number:</span> <br><strong>${escapeHtml(asset.Serial_Number || 'N/A')}</strong></div>
+            <div style="flex: 1 1 0%; min-width: 140px; word-break: break-word; text-align: left;"><span style="color:#94a3b8; font-size:12px;">แผนก/หน่วยงาน:</span> <br><strong>${escapeHtml(asset.Dept_Name || 'ไม่พบคลังหน่วยงาน')}</strong></div>
+          </div>
+          <div style="margin-top:8px; border-top: 1px solid #e2e8f0; padding-top:8px; word-break: break-word;">
+            <span style="color:#94a3b8; font-size:12px;">ข้อมูลรายละเอียดครุภัณฑ์:</span> <br>
+            <span>${escapeHtml(asset.Asset_DB_Col8 || 'N/A')}</span>
+          </div>
+        </div>
+      `;
+      
+      modalBody.innerHTML = '<p style="text-align:center; padding: 20px; color: #64748b;">กำลังโหลดรายการเช็คลิสต์...</p>';
+      modal.classList.add('show');
+
+      const typeToSearch = asset.Asset_Type_ID;
+      
+      try {
+        const response = await fetch(`${SCRIPT_URL}?action=getPMTopics&assetType=${encodeURIComponent(typeToSearch)}`);
+        const res = await response.json();
+
+        if (res.status && res.data && res.data.length > 0) {
+          let html = "";
+          let lastCategory = ""; 
+
+          res.data.forEach(topic => {
+            const categoryName = topic.category_name || 'การประเมินและตรวจสภาพทั่วไป';
+            const topicName = topic.topic_name || '';
+            const inputType = String(topic.input_type || "").toLowerCase().trim();
+            const isCritical = topic.critical === true;
+            const isPhotoRequired = topic.photo_required === true;
+
+            if (categoryName !== lastCategory) {
+              if (lastCategory !== "") html += `</div>`; 
+              html += `<div class="pm-category"><div class="category-name">📁 ${escapeHtml(categoryName)}</div>`;
+              lastCategory = categoryName;
+            }
+
+            let inputHtml = "";
+            if (inputType === 'checkbox') {
+                inputHtml = `<input type="checkbox" class="form-check">`;
+            } else if (inputType === 'number' || inputType === 'score') {
+                inputHtml = `<input type="number" min="${topic.min_score}" max="${topic.max_score}" class="form-input" placeholder="คะแนน">`;
+            } else if (inputType === 'text') {
+                inputHtml = `<input type="text" class="form-input" placeholder="ระบุรายละเอียด">`;
+            } else {
+                inputHtml = `<input type="text" class="form-input" placeholder="ระบุข้อมูล">`; 
+            }
+
+            html += `
+              <div class="checklist-item">
+                <label style="font-size: 15px; font-weight: 500; color: #334155; word-break: break-word;">${escapeHtml(topicName)} ${isCritical ? '<span style="color:#ef4444; font-size:11px; font-weight: 600; background: #fee2e2; padding: 2px 6px; border-radius: 4px; margin-left: 4px; white-space: nowrap;">จำเป็น</span>' : ''}</label>
+                <div class="checklist-control">
+                  ${inputHtml}
+                  ${isPhotoRequired ? '<label class="btn-secondary" style="padding: 10px 14px; font-size: 13px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap;">📷 แนบรูป<input type="file" accept="image/*" class="form-file" style="display:none;"></label>' : ''}
+                </div>
+              </div>`;
+          });
+          
+          html += `</div>`; 
+          modalBody.innerHTML = html;
+        } else {
+          modalBody.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📄</div><div class="empty-state-text">ไม่พบรายการเช็คลิสต์สำหรับ ID: ${escapeHtml(typeToSearch)}</div></div>`;
+        }
+      } catch (err) {
+        modalBody.innerHTML = `<div class="empty-state" style="border-color: #fca5a5; background: #fef2f2;"><div class="empty-state-icon" style="color: #ef4444;">❌</div><div class="empty-state-text" style="color: #b91c1c;">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${err.message}</div></div>`;
+      }
     }
-  } catch (err) {
-    modalBody.innerHTML = `<p style="color:red;" class="p-4">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${err.message}</p>`;
-  }
-}
 
-function closeModal() {
-  document.getElementById('modalOverlay').classList.remove('show');
-}
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('show');
+    }
 
-function handleQRUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  showNotification('success', 'รับภาพถ่ายแล้ว กรุณาพิมพ์หมายเลขครุภัณฑ์ในช่องค้นหาเพื่อค้นหาอย่างรวดเร็ว');
-}
+    function handleQRUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      showNotification('success', 'รับภาพถ่ายแล้ว กรุณาพิมพ์หมายเลขครุภัณฑ์ในช่องค้นหาเพื่อค้นหาอย่างรวดเร็ว');
+    }
 
-function setConnectionStatus(isOnline, text) {
-  const indicator = document.getElementById('connIndicator');
-  const textEl = document.getElementById('connText');
-  
-  if (isOnline) {
-    indicator.className = 'status-indicator';
-    textEl.innerText = text || 'เชื่อมต่อระบบหลัก';
-  } else {
-    indicator.className = 'status-indicator offline';
-    textEl.innerText = text || 'การเชื่อมต่อขาดหาย';
-  }
-}
+    function setConnectionStatus(isOnline, text) {
+      const indicator = document.getElementById('connIndicator');
+      const textEl = document.getElementById('connText');
+      
+      if (isOnline) {
+        indicator.className = 'status-indicator';
+        textEl.innerText = text || 'เชื่อมต่อระบบหลัก';
+      } else {
+        indicator.className = 'status-indicator offline';
+        textEl.innerText = text || 'การเชื่อมต่อขาดหาย';
+      }
+    }
+
     function renderConnectionError(errMsg) {
       const grid = document.getElementById('dashboardGrid');
       grid.innerHTML = `
-        <div class="empty-state" style="grid-column: 1/-1; background: #fff5f5; border: 2px solid #ef9a9a; border-radius: 12px; padding: 40px;">
-          <div class="empty-state-icon" style="opacity: 1; color: #f44336;">🚨</div>
-          <div class="empty-state-text" style="color: #c62828; font-weight: 600; font-size: 18px; margin-bottom: 8px;">การเชื่อมต่อ Google Apps Script Web App ขัดข้อง</div>
-          <p style="font-size: 13px; color: #555; max-width: 600px; margin: 0 auto 16px auto; line-height: 1.6;">
+        <div class="empty-state" style="grid-column: 1/-1; background: #fef2f2; border: 2px solid #fecaca; border-radius: 16px; padding: 40px;">
+          <div class="empty-state-icon" style="opacity: 1; color: #ef4444;">🚨</div>
+          <div class="empty-state-text" style="color: #b91c1c; font-weight: 600; font-size: 18px; margin-bottom: 8px;">การเชื่อมต่อ Google Apps Script Web App ขัดข้อง</div>
+          <p style="font-size: 14px; color: #475569; max-width: 600px; margin: 0 auto 16px auto; line-height: 1.6;">
             ระบบนี้เชื่อมต่อตรงผ่าน LIVE API สตรีมเรียลไทม์เท่านั้น และไม่มีการจำลองข้อมูลไว้ภายนอก 
             กรุณาตรวจสอบการตั้งค่า Deploy ใน Apps Script ของคุณว่าเป็น "Anyone" หรืออาจติดขัดด้านนโยบาย CORS จากภายนอก
           </p>
-          <p style="font-size: 12px; font-family: monospace; color: #888; margin-bottom: 20px;">ข้อผิดพลาด: ${escapeHtml(errMsg)}</p>
-          <button onclick="initializeApp()" class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition" style="box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);">🔄 ลองเชื่อมต่อใหม่อีกครั้ง</button>
+          <p style="font-size: 13px; font-family: 'Kanit', sans-serif; color: #94a3b8; margin-bottom: 24px; word-break: break-word;">ข้อผิดพลาด: ${escapeHtml(errMsg)}</p>
+          <button onclick="initializeApp()" class="btn-primary" style="padding: 12px 32px;">🔄 ลองเชื่อมต่อใหม่อีกครั้ง</button>
         </div>
       `;
     }
@@ -1086,8 +1236,8 @@ function setConnectionStatus(isOnline, text) {
       if (type === 'warning') icon = '⚠️';
 
       toast.innerHTML = `
-        <span style="font-size: 18px;">${icon}</span>
-        <div style="font-size: 13px; font-weight: 600;">${escapeHtml(message)}</div>
+        <span style="font-size: 20px;">${icon}</span>
+        <div style="font-size: 14px; font-weight: 500; color: #334155; word-break: break-word;">${escapeHtml(message)}</div>
       `;
       container.appendChild(toast);
       setTimeout(() => {
