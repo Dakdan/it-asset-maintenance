@@ -229,13 +229,14 @@
 
     /* ==================== ASSET CARDS (RE-DESIGNED) ==================== */
     .assets-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 16px; margin-bottom: 24px;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 8px; margin-bottom: 10px;
     }
 
     .asset-card {
       background: var(--card-bg);
-      border-radius: var(--radius-md); padding: 16px 20px;
+      border-radius: var(--radius-md); padding: 8px 12px;
+      font-size: 0.85rem;
       box-shadow: var(--shadow-sm); border: 1px solid var(--border-light);
       cursor: pointer; display: flex; flex-direction: column;
       transition: all 0.2s ease;
@@ -469,6 +470,7 @@
       <button class="tab-btn" data-tab="assets" onclick="switchTab('assets')">📦 Assets & บันทึก PM</button>
       <button class="tab-btn" data-tab="completed" onclick="switchTab('completed')">✅ Completed</button>
       <button class="tab-btn" data-tab="abnormal" onclick="switchTab('abnormal')">⚠️ Abnormal</button>
+      <button class="tab-btn" data-tab="report" onclick="switchTab('report')">📄 รายงาน</button>
     </div>
 
     <!-- MAIN CONTENT -->
@@ -510,7 +512,9 @@
         <div class="tab-panel" id="tab-abnormal">
           <div class="assets-grid" id="abnormalContainer"></div>
         </div>
-
+        <div id="tab-report" class="tab-panel">
+          <div id="reportContainer">กำลังโหลดข้อมูล...</div>
+        </div>
       </div>
     </div>
   </div>
@@ -699,6 +703,7 @@
       if (tabName === 'assets') renderAssets();
       if (tabName === 'completed') renderCompletedList();
       if (tabName === 'abnormal') renderAbnormalListPanel();
+      if (tabName === 'report') renderReport();
     }
 
     function renderDashboard() {
@@ -861,19 +866,29 @@
         </div>`;
         return;
       }
-      container.innerHTML = abnormalList.map(ab => `
+
+      container.innerHTML = abnormalList.map(ab => {
+        // ค้นหาแผนกจากข้อมูลหลักอัตโนมัติ ถ้าค่าที่ส่งมาเป็นค่าว่าง
+        let realDept = ab.Dept_Name;
+        if (!realDept || realDept === 'รอดึงข้อมูลแผนก') {
+          const asset = allAssets.find(a => a.Asset_ID === ab.Asset_ID);
+          realDept = asset && asset.Dept_Name ? asset.Dept_Name : 'ไม่ระบุหน่วยงาน';
+        }
+
+        return `
         <div class="asset-card abnormal">
           <div class="asset-header">
             <div class="asset-id" style="color: #b45309;">${escapeHtml(ab.Asset_ID)}</div>
             <div class="dept-badge" style="background: #fef3c7; color: #b45309;">ตรวจพบชำรุด</div>
           </div>
           <div class="asset-details">
-            <p><span class="detail-label">ปัญหาที่พบ</span><span class="detail-value" style="color:var(--error); font-weight:600;" title="${escapeHtml(ab.Issue_Details || '')}">${escapeHtml(truncateText(ab.Issue_Details || 'N/A', 50))}</span></p>
-            <p><span class="detail-label">แผนก</span><span class="detail-value">${escapeHtml(ab.Dept_Name || 'N/A')}</span></p>
-            <p><span class="detail-label">ผู้รายงาน</span><span class="detail-value">${escapeHtml(ab.Checker_Name || 'N/A')}</span></p>
+            <p><span class="detail-label">ปัญหาที่พบ</span><span class="detail-value" style="color:var(--error); font-weight:600;" title="${escapeHtml(ab.Issue_Details || '')}">${escapeHtml(truncateText(ab.Issue_Details || 'ไม่มีระบุ', 50))}</span></p>
+            <p><span class="detail-label">แผนก</span><span class="detail-value">${escapeHtml(realDept)}</span></p>
+            <p><span class="detail-label">ผู้รายงาน</span><span class="detail-value">${escapeHtml(ab.Checker_Name || 'เจ้าหน้าที่')}</span></p>
           </div>
         </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     async function openPMPanel(asset) {
@@ -1214,6 +1229,66 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
+    }
+
+    function renderReport() {
+      const container = document.getElementById('reportContainer');
+      container.innerHTML = '<div style="padding:20px;">กำลังจัดกลุ่มรายงาน...</div>';
+      
+      try {
+        const reportData = {};
+
+        // ฟังก์ชันช่วยหาชื่อแผนกจาก allAssets ที่โหลดมาแล้ว
+        const getDept = (assetId) => {
+          const asset = allAssets.find(a => a.Asset_ID === assetId);
+          return asset && asset.Dept_Name ? asset.Dept_Name : "ไม่ระบุหน่วยงาน";
+        };
+
+        // 1. ดึงข้อมูล PM ที่ผ่านเกณฑ์มาใส่รายงาน
+        pmHistory.forEach(pm => {
+          const dept = getDept(pm.Asset_ID);
+          if (!reportData[dept]) reportData[dept] = [];
+          reportData[dept].push({ Asset_ID: pm.Asset_ID, Result: 'ผ่านเกณฑ์ปกติ' });
+        });
+
+        // 2. ดึงข้อมูล PM ที่ชำรุดมาใส่รายงาน
+        abnormalList.forEach(ab => {
+          const dept = ab.Dept_Name || getDept(ab.Asset_ID);
+          if (!reportData[dept]) reportData[dept] = [];
+          reportData[dept].push({ Asset_ID: ab.Asset_ID, Result: 'ตรวจพบชำรุด' });
+        });
+
+        // เช็คว่ามีข้อมูลหรือไม่
+        if (Object.keys(reportData).length === 0) {
+           container.innerHTML = '<div class="empty-state" style="margin:20px;"><div class="empty-state-icon">📄</div><div class="empty-state-text">ยังไม่มีประวัติการทำ PM ในระบบ</div></div>';
+           return;
+        }
+
+        // 3. สร้าง HTML เพื่อแสดงผล
+        let html = '<div style="padding:10px;">';
+        for (let dept in reportData) {
+          html += `<div class="dept-group" style="background:#fff; margin-bottom:15px; padding:15px; border-radius:8px; border-left:5px solid var(--primary); box-shadow: var(--shadow-sm);">
+                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #e2e8f0; padding-bottom:10px;">
+                       <h4 style="margin:0; font-size:16px; color:var(--text-main);">หน่วยงาน: ${escapeHtml(dept)}</h4>
+                       <button onclick="window.print()" class="btn btn-secondary" style="padding:6px 12px; cursor:pointer; background:#f1f5f9; border:none; border-radius:6px; font-weight:600;">🖨️ พิมพ์ใบรับรอง</button>
+                     </div>
+                     <table style="width:100%; font-size:0.85rem; border-collapse:collapse;">
+                       ${reportData[dept].map(item => `
+                         <tr style="border-bottom:1px solid #f8fafc;">
+                           <td style="padding:8px 0; font-weight:500; color:var(--text-main);">${escapeHtml(item.Asset_ID)}</td>
+                           <td style="padding:8px 0; text-align:right; font-weight:600; color: ${item.Result === 'ผ่านเกณฑ์ปกติ' ? 'var(--success)' : 'var(--error)'};">${item.Result}</td>
+                         </tr>`).join('')}
+                     </table>
+                   </div>`;
+        }
+        html += '</div>';
+        
+        // แสดงผลทันที
+        container.innerHTML = html;
+
+      } catch (err) {
+        container.innerHTML = `<div style="color: var(--error); padding: 20px;">เกิดข้อผิดพลาดในการประมวลผล: ${err.message}</div>`;
+      }
     }
 
     // ฟังก์ชันช่วยตัดข้อความที่ยาวเกินไป
