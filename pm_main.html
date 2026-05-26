@@ -112,7 +112,7 @@
     .tab-btn {
       padding: 16px 8px;
       background: none; border: none;
-      font-family: 'Kanit', sans-serif; font-size: 15px; font-weight: 500;
+      font-family: 'Prompt', sans-serif; font-size: 15px; font-weight: 500;
       color: var(--text-muted); cursor: pointer;
       position: relative; white-space: nowrap;
       transition: color 0.2s ease;
@@ -289,7 +289,7 @@
     }
     
     .highlight { 
-      background: #fef08a; color: #854d0e; padding: 0 4px; 
+      background: #bbf7d0; color: #166534; padding: 0 4px; 
       border-radius: 4px; font-weight: 600; 
     }
 
@@ -713,7 +713,7 @@
       const cards = [
         { icon: '📦', label: 'จำนวนครุภัณฑ์ทั้งหมด', value: total, detail: 'จากฐานข้อมูลหลัก', color: 'info' },
         { icon: '✅', label: 'ทำ PM ผ่านแล้ว', value: done, detail: 'ตรวจเช็คสภาวะปกติ', color: 'success' },
-        { icon: '⚠️', label: 'ผิดปกติ/ไม่ผานเกณฑ์', value: fail, detail: 'รอเสนอซ่อมบำรุง', color: 'error' },
+        { icon: '⚠️', label: 'ผิดปกติ/ไม่ผ่านเกณฑ์', value: fail, detail: 'รอเสนอซ่อมบำรุง', color: 'error' },
         { icon: '⏳', label: 'คงค้างการ PM', value: wait, detail: 'เป้าหมายที่ต้องเช็คต่อ', color: 'warning' }
       ];
 
@@ -800,7 +800,7 @@
       }
 
       grid.innerHTML = '';
-      filteredAssets.forEach(asset => {
+      matchedAssets.forEach(asset => {
         const typeNameToDisplay = asset.Asset_Group_Name || 'ไม่ระบุประเภท';
         const detail = asset.Asset_DB_Col8 || 'ไม่มีบันทึก';
 
@@ -935,8 +935,12 @@
             const categoryName = topic.category_name || 'การประเมินและตรวจสภาพทั่วไป';
             const topicName = topic.topic_name || '';
             const inputType = String(topic.input_type || "").toLowerCase().trim();
-            const isCritical = topic.critical === true;
-            const isPhotoRequired = topic.photo_required === true;
+            const isCritical = topic.critical === true || String(topic.critical).toUpperCase() === 'TRUE';
+            const isPhotoRequired = topic.photo_required === true || String(topic.photo_required).toUpperCase() === 'TRUE';
+
+            // ดึงค่า MIN_SCORE และ MAX_SCORE จากสเปรดชีตผ่าน API เพื่อสร้างตัวเลือกที่ถูกต้อง
+            const rawMin = String(topic.min_score !== undefined && topic.min_score !== null ? topic.min_score : "").trim();
+            const rawMax = String(topic.max_score !== undefined && topic.max_score !== null ? topic.max_score : "").trim();
 
             if (categoryName !== lastCategory) {
               if (lastCategory !== "") html += `</div>`; 
@@ -945,18 +949,60 @@
             }
 
             let inputHtml = "";
-            if (inputType === 'checkbox') {
-                inputHtml = `<input type="checkbox" class="form-check">`;
-            } else if (inputType === 'number' || inputType === 'score') {
-                inputHtml = `<input type="number" min="${topic.min_score}" max="${topic.max_score}" class="form-input" placeholder="ระบุคะแนน">`;
-            } else if (inputType === 'text') {
-                inputHtml = `<input type="text" class="form-input" placeholder="ระบุรายละเอียด">`;
+            
+            // ----------------------------------------------------
+            // ตรรกะควบคุมการสร้างรูปแบบอินพุตตามเงื่อนไขในภาพอ้างอิง
+            // ----------------------------------------------------
+            if (inputType === 'score') {
+                // สร้าง Dropdown คะแนนอ้างอิงตั้งแต่ MIN_SCORE ถึง MAX_SCORE
+                const minScore = parseInt(rawMin, 10) || 1;
+                const maxScore = parseInt(rawMax, 10) || 5;
+                inputHtml = `<select class="form-input pm-val" data-tid="${topic.topic_id}">`;
+                for (let i = minScore; i <= maxScore; i++) {
+                    inputHtml += `<option value="${i}">${i} คะแนน</option>`;
+                }
+                inputHtml += `</select>`;
+                
+            } else if (inputType === 'checkbox') {
+                // ตัวเลือก ปกติ (1) / ไม่ปกติ (0) ตามกฎที่กำหนด
+                inputHtml = `
+                <div style="display: flex; gap: 16px; align-items: center; padding: 4px 0;">
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 6px; color: var(--success); font-weight: 600;">
+                        <input type="radio" name="chk_${topic.topic_id}" value="1" class="pm-val-radio" style="width: 18px; height: 18px; accent-color: var(--success);"> 
+                        ปกติ
+                    </label>
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 6px; color: var(--error); font-weight: 600;">
+                        <input type="radio" name="chk_${topic.topic_id}" value="0" class="pm-val-radio" style="width: 18px; height: 18px; accent-color: var(--error);"> 
+                        ไม่ปกติ
+                    </label>
+                </div>`;
+                
+            } else if (inputType === 'number') {
+                // ตัวเลือกกรอกตัวเลข ควบคุมขอบเขตต่ำสุด-สูงสุดตาม MIN_SCORE และ MAX_SCORE
+                const minVal = rawMin !== "" ? `min="${rawMin}"` : "";
+                const maxVal = rawMax !== "" ? `max="${rawMax}"` : "";
+                const placeholder = (rawMin !== "" && rawMax !== "") ? `ระบุตัวเลข (${rawMin}-${rawMax})` : "ระบุตัวเลข";
+                inputHtml = `<input type="number" ${minVal} ${maxVal} class="form-input pm-val" data-tid="${topic.topic_id}" placeholder="${placeholder}">`;
+                
+            } else if (inputType === 'text multi select') {
+                // ตัวเลือก Dropdown ดึงค่าตัวเลือก (Labels) จาก MAX_SCORE และค่ารหัสส่งออก (Values) จาก MIN_SCORE
+                const values = rawMin.split(',').map(v => v.trim());
+                const labels = rawMax.split(',').map(l => l.trim());
+                
+                inputHtml = `<select class="form-input pm-val" data-tid="${topic.topic_id}">`;
+                labels.forEach((label, idx) => {
+                    const val = values[idx] !== undefined && values[idx] !== "" ? values[idx] : label;
+                    inputHtml += `<option value="${escapeHtml(val)}">${escapeHtml(label)}</option>`;
+                });
+                inputHtml += `</select>`;
+                
             } else {
-                inputHtml = `<input type="text" class="form-input" placeholder="ระบุข้อมูล">`; 
+                // Fallback ตัวเลือกกรอกข้อความทั่วไป
+                inputHtml = `<input type="text" class="form-input pm-val" data-tid="${topic.topic_id}" placeholder="ระบุรายละเอียด">`; 
             }
 
             html += `
-              <div class="checklist-item">
+              <div class="checklist-item" data-topic="${topic.topic_id}" data-critical="${isCritical}">
                 <label style="font-size: 14px; font-weight: 500; color: var(--text-main); word-break: break-word;">
                   ${escapeHtml(topicName)} 
                   ${isCritical ? '<span style="color:var(--error); font-size:11px; font-weight: 700; background: #fee2e2; padding: 2px 6px; border-radius: 4px; margin-left: 6px; white-space: nowrap;">* จำเป็น</span>' : ''}
@@ -980,6 +1026,103 @@
 
     function closeModal() {
       document.getElementById('modalOverlay').classList.remove('show');
+    }
+
+    async function submitPMForm() {
+      if (!selectedAsset) return;
+      
+      const items = document.querySelectorAll('.checklist-item');
+      let details = [];
+      let isValid = true;
+      let hasFail = false;
+      
+      items.forEach(item => {
+        const tid = item.getAttribute('data-topic');
+        const isCritical = item.getAttribute('data-critical') === 'true';
+        
+        let val = "";
+        const textInput = item.querySelector('.pm-val');
+        const radioInputs = item.querySelectorAll('.pm-val-radio');
+        
+        if (textInput) {
+          val = textInput.value.trim();
+        } else if (radioInputs.length > 0) {
+          const checkedRadio = item.querySelector('.pm-val-radio:checked');
+          if (checkedRadio) val = checkedRadio.value;
+        }
+        
+        // ตรวจสอบข้อมูลจำเป็น
+        if (isCritical && val === "") {
+          isValid = false;
+          item.style.border = "1px solid var(--error)";
+          item.style.padding = "8px";
+          item.style.borderRadius = "8px";
+          item.style.backgroundColor = "#fef2f2";
+        } else {
+          item.style.border = "none";
+          item.style.padding = "0";
+          item.style.backgroundColor = "transparent";
+        }
+        
+        // ประเมินสถานะ PASS/FAIL 
+        // สำหรับ Checkbox (Radio): 0 คือ FAIL, 1 คือ PASS
+        let status = "PASS";
+        if (val === "0" || val === 0) {
+          status = "FAIL";
+          hasFail = true;
+        }
+        
+        details.push({
+          topic_id: tid,
+          status: status,
+          score: val,
+          remark: "" 
+        });
+      });
+      
+      if (!isValid) {
+        showNotification('warning', 'กรุณากรอกข้อมูลในหัวข้อที่จำเป็น (*) ให้ครบถ้วน');
+        return;
+      }
+      
+      const payload = {
+        action: 'savePM',
+        asset_code: selectedAsset.Asset_ID,
+        user: "เจ้าหน้าที่ไอที", 
+        result: hasFail ? "FAIL" : "PASS",
+        note: hasFail ? "พบความผิดปกติ" : "ปกติ",
+        details: details
+      };
+      
+      showLoading(true, 'กำลังบันทึกข้อมูลเข้าระบบหลัก...');
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+        
+        const res = await response.json();
+        
+        if (res.status) {
+          showNotification('success', 'บันทึกข้อมูลสำเร็จ! (PM_ID: ' + res.data.pm_id + ')');
+          closeModal();
+          
+          await Promise.all([loadPMHistory(), loadAbnormalList()]);
+          renderDashboard();
+          
+          if (hasFail) switchTab('abnormal');
+          else switchTab('completed');
+          
+        } else {
+          showNotification('error', 'ข้อผิดพลาดจากเซิร์ฟเวอร์: ' + res.message);
+        }
+      } catch (err) {
+        console.error(err);
+        showNotification('error', 'เกิดข้อผิดพลาดในการเชื่อมต่อเครือข่าย');
+      } finally {
+        showLoading(false);
+      }
     }
 
     function handleQRUpload(event) {
@@ -1049,8 +1192,18 @@
 
     function highlightText(text, query) {
       if (!query) return escapeHtml(text);
-      const regex = new RegExp(`(${query})`, 'gi');
-      return escapeHtml(text).replace(regex, '<span class="highlight">$1</span>');
+      
+      // ไฮไลท์จากขวาไปซ้าย (ค้นหาตำแหน่งที่ตรงกันตัวสุดท้าย)
+      const strText = String(text);
+      const lastIdx = strText.toUpperCase().lastIndexOf(query.toUpperCase());
+      
+      if (lastIdx === -1) return escapeHtml(text);
+      
+      const before = escapeHtml(strText.substring(0, lastIdx));
+      const match = escapeHtml(strText.substring(lastIdx, lastIdx + query.length));
+      const after = escapeHtml(strText.substring(lastIdx + query.length));
+      
+      return `${before}<span class="highlight">${match}</span>${after}`;
     }
 
     function escapeHtml(str) {
@@ -1063,6 +1216,7 @@
         .replace(/'/g, '&#039;');
     }
 
+    // ฟังก์ชันช่วยตัดข้อความที่ยาวเกินไป
     function truncateText(text, maxLength) {
       if (!text) return '';
       return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
