@@ -563,7 +563,7 @@
     });
 
     async function initializeApp() {
-      showLoading(true, 'กำลังโหลดข้อมูลจาก Google Sheets (ระบบจริง)...');
+      showLoading(true, 'กำลังโหลดข้อมูล ...');
       setConnectionStatus(true, 'กำลังโหลดข้อมูล...');
       try {
         await Promise.all([
@@ -713,7 +713,7 @@
       const cards = [
         { icon: '📦', label: 'จำนวนครุภัณฑ์ทั้งหมด', value: total, detail: 'จากฐานข้อมูลหลัก', color: 'info' },
         { icon: '✅', label: 'ทำ PM ผ่านแล้ว', value: done, detail: 'ตรวจเช็คสภาวะปกติ', color: 'success' },
-        { icon: '⚠️', label: 'ชำรุดเสียหาย', value: fail, detail: 'รอเสนอซ่อมบำรุง', color: 'error' },
+        { icon: '⚠️', label: 'ผิดปกติ/ไม่ผานเกณฑ์', value: fail, detail: 'รอเสนอซ่อมบำรุง', color: 'error' },
         { icon: '⏳', label: 'คงค้างการ PM', value: wait, detail: 'เป้าหมายที่ต้องเช็คต่อ', color: 'warning' }
       ];
 
