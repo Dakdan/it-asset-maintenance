@@ -718,7 +718,7 @@
 
       const cards = [
         { icon: '📦', label: 'จำนวนครุภัณฑ์ทั้งหมด', value: total, detail: 'จากฐานข้อมูลหลัก', color: 'info' },
-        { icon: '✅', label: 'ทำ PM ผ่านแล้ว', value: done, detail: 'ตรวจเช็คสภาวะปกติ', color: 'success' },
+        { icon: '✅', label: 'ทำ PM ปกติ', value: done, detail: 'ตรวจเช็คสภาวะปกติ', color: 'success' },
         { icon: '⚠️', label: 'ผิดปกติ/ไม่ผ่านเกณฑ์', value: fail, detail: 'รอเสนอซ่อมบำรุง', color: 'error' },
         { icon: '⏳', label: 'คงค้างการ PM', value: wait, detail: 'เป้าหมายที่ต้องเช็คต่อ', color: 'warning' }
       ];
@@ -892,153 +892,521 @@
       }).join('');
     }
 
-    async function openPMPanel(asset) {
-      selectedAsset = asset;
-      const modal = document.getElementById('modalOverlay');
-      const modalBody = document.getElementById('modalBody');
-      const titleWrapper = document.getElementById('modalTitleWrapper');
-      
-      titleWrapper.innerHTML = `
-        <h2 class="modal-title">🔧 บันทึกงาน PM: <span style="color: var(--primary);">${escapeHtml(asset.Asset_ID || '')}</span></h2>
-        <div class="modal-subtitle">โปรดตรวจสอบรายละเอียดและบันทึกผลการทำงาน</div>
-      `;
+   ```javascript
+async function openPMPanel(asset) {
+  selectedAsset = asset;
 
-      let nameInfoHtml = '';
-      if (asset.Asset_Name && asset.Asset_Name.trim() !== asset.Asset_ID.trim()) {
-          nameInfoHtml = `
-          <div class="info-block">
-              <span class="info-label">ชื่อพาร์ทครุภัณฑ์</span>
-              <span class="info-val">${escapeHtml(asset.Asset_Name)}</span>
-          </div>`;
-      }
-      
-      modalBody.innerHTML = `
-        <div class="modal-info-grid">
-            ${nameInfoHtml}
-            <div class="info-block">
-                <span class="info-label">ประเภทอุปกรณ์</span>
-                <span class="info-val">${escapeHtml(asset.Asset_Group_Name || 'N/A')}</span>
-            </div>
-            <div class="info-block">
-                <span class="info-label">Serial Number</span>
-                <span class="info-val" style="font-family:monospace; background:#f1f5f9; padding:2px 6px; border-radius:4px; width:fit-content;">${escapeHtml(asset.Serial_Number || '-')}</span>
-            </div>
-            <div class="info-block">
-                <span class="info-label">แผนก/หน่วยงาน</span>
-                <span class="info-val">${escapeHtml(asset.Dept_Name || 'ไม่พบคลังหน่วยงาน')}</span>
-            </div>
-            <div class="info-block" style="grid-column: 1 / -1;">
-                <span class="info-label">ข้อมูลรายละเอียดครุภัณฑ์</span>
-                <span class="info-val" style="color: var(--text-muted); font-weight: 400;">${escapeHtml(truncateText(asset.Asset_DB_Col8 || 'N/A', 150))}</span>
-            </div>
-        </div>
-        <p style="text-align:center; padding: 20px; color: var(--text-muted);">กำลังโหลดรายการเช็คลิสต์...</p>
-      `;
-      
-      modal.classList.add('show');
+  const modal = document.getElementById('modalOverlay');
+  const modalBody = document.getElementById('modalBody');
+  const titleWrapper = document.getElementById('modalTitleWrapper');
 
-      const typeToSearch = asset.Asset_Type_ID;
-      
-      try {
-        const response = await fetch(`${SCRIPT_URL}?action=getPMTopics&assetType=${encodeURIComponent(typeToSearch)}`);
-        const res = await response.json();
+  titleWrapper.innerHTML = `
+    <h2 class="modal-title">
+      🔧 บันทึกงาน PM:
+      <span style="color: var(--primary);">
+        ${escapeHtml(asset.Asset_ID || '')}
+      </span>
+    </h2>
 
-        if (res.status && res.data && res.data.length > 0) {
-          let html = document.querySelector('.modal-info-grid').outerHTML; // Keep the info grid
-          let lastCategory = ""; 
+    <div class="modal-subtitle">
+      โปรดตรวจสอบรายละเอียดและบันทึกผลการทำงาน
+    </div>
+  `;
 
-          res.data.forEach(topic => {
-            const categoryName = topic.category_name || 'การประเมินและตรวจสภาพทั่วไป';
-            const topicName = topic.topic_name || '';
-            const inputType = String(topic.input_type || "").toLowerCase().trim();
-            const isCritical = topic.critical === true || String(topic.critical).toUpperCase() === 'TRUE';
-            const isPhotoRequired = topic.photo_required === true || String(topic.photo_required).toUpperCase() === 'TRUE';
+  let nameInfoHtml = '';
 
-            // ดึงค่า MIN_SCORE และ MAX_SCORE จากสเปรดชีตผ่าน API เพื่อสร้างตัวเลือกที่ถูกต้อง
-            const rawMin = String(topic.min_score !== undefined && topic.min_score !== null ? topic.min_score : "").trim();
-            const rawMax = String(topic.max_score !== undefined && topic.max_score !== null ? topic.max_score : "").trim();
+  if (
+    asset.Asset_Name &&
+    asset.Asset_Name.trim() !== asset.Asset_ID.trim()
+  ) {
+    nameInfoHtml = `
+      <div class="info-block">
+        <span class="info-label">ชื่อพาร์ทครุภัณฑ์</span>
+        <span class="info-val">
+          ${escapeHtml(asset.Asset_Name)}
+        </span>
+      </div>
+    `;
+  }
 
-            if (categoryName !== lastCategory) {
-              if (lastCategory !== "") html += `</div>`; 
-              html += `<div class="pm-category"><div class="category-name">📁 ${escapeHtml(categoryName)}</div>`;
-              lastCategory = categoryName;
-            }
+  modalBody.innerHTML = `
+    <div class="modal-info-grid">
 
-            let inputHtml = "";
-            
-            // ----------------------------------------------------
-            // ตรรกะควบคุมการสร้างรูปแบบอินพุตตามเงื่อนไขในภาพอ้างอิง
-            // ----------------------------------------------------
-            if (inputType === 'score') {
-                // สร้าง Dropdown คะแนนอ้างอิงตั้งแต่ MIN_SCORE ถึง MAX_SCORE
-                const minScore = parseInt(rawMin, 10) || 1;
-                const maxScore = parseInt(rawMax, 10) || 5;
-                inputHtml = `<select class="form-input pm-val" data-tid="${topic.topic_id}">`;
-                for (let i = minScore; i <= maxScore; i++) {
-                    inputHtml += `<option value="${i}">${i} คะแนน</option>`;
-                }
-                inputHtml += `</select>`;
-                
-            } else if (inputType === 'checkbox') {
-                // ตัวเลือก ปกติ (1) / ไม่ปกติ (0) ตามกฎที่กำหนด
-                inputHtml = `
-                <div style="display: flex; gap: 16px; align-items: center; padding: 4px 0;">
-                    <label style="cursor: pointer; display: flex; align-items: center; gap: 6px; color: var(--success); font-weight: 600;">
-                        <input type="radio" name="chk_${topic.topic_id}" value="1" class="pm-val-radio" style="width: 18px; height: 18px; accent-color: var(--success);"> 
-                        ปกติ
-                    </label>
-                    <label style="cursor: pointer; display: flex; align-items: center; gap: 6px; color: var(--error); font-weight: 600;">
-                        <input type="radio" name="chk_${topic.topic_id}" value="0" class="pm-val-radio" style="width: 18px; height: 18px; accent-color: var(--error);"> 
-                        ไม่ปกติ
-                    </label>
-                </div>`;
-                
-            } else if (inputType === 'number') {
-                // ตัวเลือกกรอกตัวเลข ควบคุมขอบเขตต่ำสุด-สูงสุดตาม MIN_SCORE และ MAX_SCORE
-                const minVal = rawMin !== "" ? `min="${rawMin}"` : "";
-                const maxVal = rawMax !== "" ? `max="${rawMax}"` : "";
-                const placeholder = (rawMin !== "" && rawMax !== "") ? `ระบุตัวเลข (${rawMin}-${rawMax})` : "ระบุตัวเลข";
-                inputHtml = `<input type="number" ${minVal} ${maxVal} class="form-input pm-val" data-tid="${topic.topic_id}" placeholder="${placeholder}">`;
-                
-            } else if (inputType === 'text multi select') {
-                // ตัวเลือก Dropdown ดึงค่าตัวเลือก (Labels) จาก MAX_SCORE และค่ารหัสส่งออก (Values) จาก MIN_SCORE
-                const values = rawMin.split(',').map(v => v.trim());
-                const labels = rawMax.split(',').map(l => l.trim());
-                
-                inputHtml = `<select class="form-input pm-val" data-tid="${topic.topic_id}">`;
-                labels.forEach((label, idx) => {
-                    const val = values[idx] !== undefined && values[idx] !== "" ? values[idx] : label;
-                    inputHtml += `<option value="${escapeHtml(val)}">${escapeHtml(label)}</option>`;
-                });
-                inputHtml += `</select>`;
-                
-            } else {
-                // Fallback ตัวเลือกกรอกข้อความทั่วไป
-                inputHtml = `<input type="text" class="form-input pm-val" data-tid="${topic.topic_id}" placeholder="ระบุรายละเอียด">`; 
-            }
+      ${nameInfoHtml}
 
-            html += `
-              <div class="checklist-item" data-topic="${topic.topic_id}" data-critical="${isCritical}">
-                <label style="font-size: 14px; font-weight: 500; color: var(--text-main); word-break: break-word;">
-                  ${escapeHtml(topicName)} 
-                  ${isCritical ? '<span style="color:var(--error); font-size:11px; font-weight: 700; background: #fee2e2; padding: 2px 6px; border-radius: 4px; margin-left: 6px; white-space: nowrap;">* จำเป็น</span>' : ''}
-                </label>
-                <div class="checklist-control">
-                  ${inputHtml}
-                  ${isPhotoRequired ? '<label class="btn btn-secondary" style="padding: 10px 14px; font-size: 13px; margin:0;"><span style="font-size:16px;">📷</span> แนบรูป<input type="file" accept="image/*" class="form-file" style="display:none;"></label>' : ''}
-                </div>
-              </div>`;
-          });
-          
-          html += `</div>`; 
-          modalBody.innerHTML = html;
-        } else {
-          modalBody.innerHTML = document.querySelector('.modal-info-grid').outerHTML + `<div class="empty-state" style="padding: 40px 20px;"><div class="empty-state-icon">📄</div><div class="empty-state-text">ไม่พบรายการเช็คลิสต์สำหรับ ID: ${escapeHtml(typeToSearch)}</div></div>`;
+      <div class="info-block">
+        <span class="info-label">ประเภทอุปกรณ์</span>
+        <span class="info-val">
+          ${escapeHtml(asset.Asset_Group_Name || 'N/A')}
+        </span>
+      </div>
+
+      <div class="info-block">
+        <span class="info-label">Serial Number</span>
+
+        <span class="info-val"
+          style="
+            font-family: monospace;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            width: fit-content;
+          ">
+          ${escapeHtml(asset.Serial_Number || '-')}
+        </span>
+      </div>
+
+      <div class="info-block">
+        <span class="info-label">แผนก/หน่วยงาน</span>
+        <span class="info-val">
+          ${escapeHtml(asset.Dept_Name || 'ไม่พบคลังหน่วยงาน')}
+        </span>
+      </div>
+
+      <div class="info-block" style="grid-column: 1 / -1;">
+        <span class="info-label">
+          ข้อมูลรายละเอียดครุภัณฑ์
+        </span>
+
+        <span class="info-val"
+          style="
+            color: var(--text-muted);
+            font-weight: 400;
+          ">
+          ${escapeHtml(
+            truncateText(asset.Asset_DB_Col8 || 'N/A', 150)
+          )}
+        </span>
+      </div>
+
+    </div>
+
+    <p style="
+      text-align:center;
+      padding:20px;
+      color:var(--text-muted);
+    ">
+      กำลังโหลดรายการเช็คลิสต์...
+    </p>
+  `;
+
+  modal.classList.add('show');
+
+  const typeToSearch = asset.Asset_Type_ID;
+
+  try {
+
+    const response = await fetch(
+      `${SCRIPT_URL}?action=getPMTopics&assetType=${encodeURIComponent(typeToSearch)}`
+    );
+
+    const res = await response.json();
+
+    if (res.status && res.data && res.data.length > 0) {
+
+      let html =
+        document.querySelector('.modal-info-grid').outerHTML;
+
+      let lastCategory = "";
+      let categoryIndex = 0;
+      let topicIndex = 0;
+
+      res.data.forEach(topic => {
+
+        const categoryName =
+          topic.category_name ||
+          'การประเมินและตรวจสภาพทั่วไป';
+
+        const topicName =
+          topic.topic_name || '';
+
+        const inputType =
+          String(topic.input_type || "")
+            .toLowerCase()
+            .trim();
+
+        const isCritical =
+          topic.critical === true ||
+          String(topic.critical).toUpperCase() === 'TRUE';
+
+        const isPhotoRequired =
+          topic.photo_required === true ||
+          String(topic.photo_required).toUpperCase() === 'TRUE';
+
+        const rawMin =
+          String(
+            topic.min_score !== undefined &&
+            topic.min_score !== null
+              ? topic.min_score
+              : ""
+          ).trim();
+
+        const rawMax =
+          String(
+            topic.max_score !== undefined &&
+            topic.max_score !== null
+              ? topic.max_score
+              : ""
+          ).trim();
+
+        // =========================
+        // เปลี่ยนหมวดใหม่
+        // =========================
+        if (categoryName !== lastCategory) {
+
+          if (lastCategory !== "") {
+            html += `</div>`;
+          }
+
+          categoryIndex++;
+          topicIndex = 0;
+
+          html += `
+            <div class="pm-category">
+
+              <div class="category-name"
+                style="
+                  font-size:16px;
+                  font-weight:700;
+                  color:var(--primary);
+                  margin-bottom:16px;
+                  padding:10px 14px;
+                  background:#f8fafc;
+                  border-radius:10px;
+                  border-left:4px solid var(--primary);
+                ">
+                📁 หมวด ${categoryIndex} :
+                ${escapeHtml(categoryName)}
+              </div>
+          `;
+
+          lastCategory = categoryName;
         }
-      } catch (err) {
-        modalBody.innerHTML = document.querySelector('.modal-info-grid').outerHTML + `<div class="empty-state" style="border-color: #fca5a5; background: #fef2f2; padding: 40px 20px;"><div class="empty-state-icon" style="color: #ef4444;">❌</div><div class="empty-state-text" style="color: #b91c1c;">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${err.message}</div></div>`;
-      }
+
+        topicIndex++;
+
+        let inputHtml = "";
+
+        // =========================
+        // SCORE
+        // =========================
+        if (inputType === 'score') {
+
+          const minScore =
+            parseInt(rawMin, 10) || 1;
+
+          const maxScore =
+            parseInt(rawMax, 10) || 5;
+
+          inputHtml = `
+            <select
+              class="form-input pm-val"
+              data-tid="${topic.topic_id}"
+            >
+          `;
+
+          for (let i = minScore; i <= maxScore; i++) {
+
+            inputHtml += `
+              <option value="${i}">
+                ${i} คะแนน
+              </option>
+            `;
+          }
+
+          inputHtml += `</select>`;
+        }
+
+        // =========================
+        // CHECKBOX
+        // =========================
+        else if (inputType === 'checkbox') {
+
+          inputHtml = `
+            <div style="
+              display:flex;
+              gap:16px;
+              align-items:center;
+              padding:4px 0;
+            ">
+
+              <label style="
+                cursor:pointer;
+                display:flex;
+                align-items:center;
+                gap:6px;
+                color:var(--success);
+                font-weight:600;
+              ">
+                <input
+                  type="radio"
+                  name="chk_${topic.topic_id}"
+                  value="1"
+                  class="pm-val-radio"
+                  style="
+                    width:18px;
+                    height:18px;
+                    accent-color:var(--success);
+                  "
+                >
+                ปกติ
+              </label>
+
+              <label style="
+                cursor:pointer;
+                display:flex;
+                align-items:center;
+                gap:6px;
+                color:var(--error);
+                font-weight:600;
+              ">
+                <input
+                  type="radio"
+                  name="chk_${topic.topic_id}"
+                  value="0"
+                  class="pm-val-radio"
+                  style="
+                    width:18px;
+                    height:18px;
+                    accent-color:var(--error);
+                  "
+                >
+                ไม่ปกติ
+              </label>
+
+            </div>
+          `;
+        }
+
+        // =========================
+        // NUMBER
+        // =========================
+        else if (inputType === 'number') {
+
+          const minVal =
+            rawMin !== ""
+              ? `min="${rawMin}"`
+              : "";
+
+          const maxVal =
+            rawMax !== ""
+              ? `max="${rawMax}"`
+              : "";
+
+          const placeholder =
+            (rawMin !== "" && rawMax !== "")
+              ? `ระบุตัวเลข (${rawMin}-${rawMax})`
+              : "ระบุตัวเลข";
+
+          inputHtml = `
+            <input
+              type="number"
+              ${minVal}
+              ${maxVal}
+              class="form-input pm-val"
+              data-tid="${topic.topic_id}"
+              placeholder="${placeholder}"
+            >
+          `;
+        }
+
+        // =========================
+        // TEXT MULTI SELECT
+        // =========================
+        else if (inputType === 'text multi select') {
+
+          const values =
+            rawMin.split(',')
+              .map(v => v.trim());
+
+          const labels =
+            rawMax.split(',')
+              .map(l => l.trim());
+
+          inputHtml = `
+            <select
+              class="form-input pm-val"
+              data-tid="${topic.topic_id}"
+            >
+          `;
+
+          labels.forEach((label, idx) => {
+
+            const val =
+              values[idx] !== undefined &&
+              values[idx] !== ""
+                ? values[idx]
+                : label;
+
+            inputHtml += `
+              <option value="${escapeHtml(val)}">
+                ${escapeHtml(label)}
+              </option>
+            `;
+          });
+
+          inputHtml += `</select>`;
+        }
+
+        // =========================
+        // DEFAULT TEXT
+        // =========================
+        else {
+
+          inputHtml = `
+            <input
+              type="text"
+              class="form-input pm-val"
+              data-tid="${topic.topic_id}"
+              placeholder="ระบุรายละเอียด"
+            >
+          `;
+        }
+
+        // =========================
+        // RENDER TOPIC
+        // =========================
+        html += `
+          <div
+            class="checklist-item"
+            data-topic="${topic.topic_id}"
+            data-critical="${isCritical}"
+          >
+
+            <label style="
+              font-size:14px;
+              font-weight:500;
+              color:var(--text-main);
+              word-break:break-word;
+              display:flex;
+              align-items:flex-start;
+              gap:10px;
+            ">
+
+              <span style="
+                min-width:30px;
+                height:30px;
+                border-radius:50%;
+                background:var(--primary);
+                color:#fff;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                font-size:12px;
+                font-weight:700;
+                flex-shrink:0;
+                margin-top:2px;
+              ">
+                ${categoryIndex}.${topicIndex}
+              </span>
+
+              <span style="flex:1;">
+                ${escapeHtml(topicName)}
+
+                ${isCritical
+                  ? `
+                    <span style="
+                      color:var(--error);
+                      font-size:11px;
+                      font-weight:700;
+                      background:#fee2e2;
+                      padding:2px 6px;
+                      border-radius:4px;
+                      margin-left:6px;
+                      white-space:nowrap;
+                    ">
+                      * จำเป็น
+                    </span>
+                  `
+                  : ''
+                }
+              </span>
+
+            </label>
+
+            <div class="checklist-control">
+              ${inputHtml}
+
+              ${isPhotoRequired
+                ? `
+                  <label
+                    class="btn btn-secondary"
+                    style="
+                      padding:10px 14px;
+                      font-size:13px;
+                      margin:0;
+                    "
+                  >
+                    <span style="font-size:16px;">📷</span>
+                    แนบรูป
+
+                    <input
+                      type="file"
+                      accept="image/*"
+                      class="form-file"
+                      style="display:none;"
+                    >
+                  </label>
+                `
+                : ''
+              }
+            </div>
+
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+
+      modalBody.innerHTML = html;
+
+    } else {
+
+      modalBody.innerHTML =
+        document.querySelector('.modal-info-grid').outerHTML +
+        `
+          <div class="empty-state"
+            style="padding:40px 20px;">
+
+            <div class="empty-state-icon">📄</div>
+
+            <div class="empty-state-text">
+              ไม่พบรายการเช็คลิสต์สำหรับ ID:
+              ${escapeHtml(typeToSearch)}
+            </div>
+
+          </div>
+        `;
     }
+
+  } catch (err) {
+
+    modalBody.innerHTML =
+      document.querySelector('.modal-info-grid').outerHTML +
+      `
+        <div class="empty-state"
+          style="
+            border-color:#fca5a5;
+            background:#fef2f2;
+            padding:40px 20px;
+          ">
+
+          <div class="empty-state-icon"
+            style="color:#ef4444;">
+            ❌
+          </div>
+
+          <div class="empty-state-text"
+            style="color:#b91c1c;">
+            เกิดข้อผิดพลาดในการโหลดข้อมูล:
+            ${err.message}
+          </div>
+
+        </div>
+      `;
+  }
+}
+
 
     function closeModal() {
       document.getElementById('modalOverlay').classList.remove('show');
