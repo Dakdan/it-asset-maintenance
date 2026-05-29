@@ -6,7 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IT Preventive Maintenance - Udon Thani Hospital</title>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
+  <script>
+    const session = localStorage.getItem("it_session");
+    if (!session) {
+      location.href = "./login.html";
+    }
+  </script>
   <style>
     /* ==================== DESIGN TOKENS & RESET ==================== */
     :root {
@@ -446,7 +451,6 @@
   </style>
 </head>
 <body>
-
   <div class="app-wrapper">
     <!-- HEADER -->
     <div class="header">
@@ -551,7 +555,7 @@
   <input type="file" id="qrFileInput" accept="image/*" style="display: none;" onchange="handleQRUpload(event)">
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw8UHJAO4hBK9kYX_tZ1JrZSPtujTOAuFtVvHrjiHzk6O7D3ZUDQv5cMbEs8hEl8TqR3g/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwVwQCHnNmRBS2rh0eOFjr8E1HQmgUZaflQeS2T-N66pYKwWkFBaNv-FBvqyeh3b1lr/exec";
     
     let allAssets = [];
     let filteredAssets = [];
