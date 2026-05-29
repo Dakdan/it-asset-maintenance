@@ -1,10 +1,7 @@
 
 const SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbwPk2LYTrUxUkEZmTuwrZ6vWtInLSbzTC7fscaKo7AENJ3cua0Nufl36OCFES3fqGw8hg/exec";
+  "https://script.google.com/macros/s/AKfycbwVwQCHnNmRBS2rh0eOFjr8E1HQmgUZaflQeS2T-N66pYKwWkFBaNv-FBvqyeh3b1lr/exec";
 
-/* =========================
-   CORE REQUEST
-========================= */
 async function apiRequest(payload) {
 
   try {
@@ -30,20 +27,17 @@ async function apiRequest(payload) {
   }
 }
 
-/* =========================
-   LOGIN API
-========================= */
 const api = {
 
   login: async (username, password) => {
 
     return await apiRequest({
       action: "login",
-      username: username,
-      password: password
+      username,
+      password
     });
 
   }
 
 };
-```
+
