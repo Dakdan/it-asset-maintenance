@@ -2,292 +2,523 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  <title>LOGIN | PM SYSTEM</title>
+    <meta charset="UTF-8">
 
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap"
-    rel="stylesheet"
-  />
+    <title>LOGIN | PM SYSTEM</title>
 
-  <style>
+    <script src="https://cdn.tailwindcss.com"></script>
 
-    :root{
-      --primary:#ec4899;
-    }
+    <link
+        href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap"
+        rel="stylesheet"
+    >
 
-    body{
-      font-family:'Kanit',sans-serif;
-      background:
-        linear-gradient(
-          135deg,
-          #fdf2f8 0%,
-          #ffffff 100%
-        );
+    <style>
 
-      min-height:100vh;
-      overflow:hidden;
-    }
+        :root {
 
-    .login-card{
-      background:rgba(255,255,255,.92);
-      backdrop-filter:blur(10px);
+            --primary: #ec4899;
 
-      border-radius:24px;
+            --bg-gradient:
+                linear-gradient(
+                    135deg,
+                    #fdf2f8 0%,
+                    #ffffff 100%
+                );
+        }
 
-      box-shadow:
-        0 10px 30px rgba(0,0,0,.08);
-    }
+        body {
 
-    .btn-primary{
-      background:var(--primary);
-      color:#fff;
+            font-family: 'Kanit', sans-serif;
 
-      transition:.2s;
-    }
+            background: var(--bg-gradient);
 
-    .btn-primary:hover{
-      transform:translateY(-1px);
-      box-shadow:
-        0 10px 20px rgba(236,72,153,.25);
-    }
+            color: #4a4a4a;
 
-    .btn-primary:active{
-      transform:scale(.98);
-    }
+            min-height: 100vh;
 
-    .watermark{
-      position:fixed;
-      inset:0;
+            overflow-x: hidden;
+        }
 
-      display:flex;
-      align-items:center;
-      justify-content:center;
+        .card {
 
-      pointer-events:none;
+            background: white;
 
-      font-size:10vw;
-      font-weight:800;
+            border-radius: 20px;
 
-      color:rgba(236,72,153,.03);
+            box-shadow:
+                0 4px 15px rgba(0,0,0,0.05);
+        }
 
-      transform:rotate(-25deg);
-    }
+        .btn-primary {
 
-  </style>
+            background: var(--primary);
+
+            color: white;
+
+            border-radius: 50px;
+
+            transition: 0.3s;
+        }
+
+        .btn-primary:active {
+
+            transform: scale(0.95);
+        }
+
+        .overlay {
+
+            display: none;
+
+            position: fixed;
+
+            top:0;
+            left:0;
+
+            width:100%;
+            height:100%;
+
+            background:
+                rgba(255,255,255,0.85);
+
+            z-index: 1000;
+
+            align-items: center;
+            justify-content: center;
+
+            flex-direction: column;
+        }
+
+        body::after {
+
+            content: "IT UDON HOSP";
+
+            position: fixed;
+
+            font-size: 8vw;
+
+            color:
+                rgba(214, 51, 132, 0.03);
+
+            font-weight: 800;
+
+            transform: rotate(-25deg);
+
+            white-space: nowrap;
+
+            z-index: -1;
+
+            pointer-events: none;
+
+            top: 30%;
+            left: 10%;
+        }
+
+    </style>
+
 </head>
 
 <body>
 
-  <!-- WATERMARK -->
-  <div class="watermark">
-    IT UDON HOSP
-  </div>
+    <!-- LOADING -->
+    <div id="overlay" class="overlay">
 
-  <!-- LOGIN -->
-  <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="
+            animate-spin
+            rounded-full
+            h-12
+            w-12
+            border-t-4
+            border-pink-500
+            mb-4
+        "></div>
 
-    <div class="login-card w-full max-w-md p-8">
-
-      <!-- LOGO -->
-      <div class="text-center mb-6">
-
-        <div class="w-24 h-24 mx-auto mb-4
-                    rounded-full
-                    border-4 border-pink-300
-                    overflow-hidden
-                    bg-white
-                    shadow-lg">
-
-          <img
-            <img src="./favicon.png" class="header-logo" alt="Logo" 
-            class="w-full h-full object-contain"
-          />
-
-        </div>
-
-        <h1 class="text-2xl font-bold text-pink-600">
-          PM SYSTEM
-        </h1>
-
-        <p class="text-gray-500 text-sm mt-1">
-          IT Maintenance And Service
-        </p>
-
-      </div>
-
-      <!-- FORM -->
-      <div class="space-y-4">
-
-        <div>
-
-          <label class="text-sm text-gray-600 ml-1">
-            Username
-          </label>
-
-          <input
-            type="text"
-            id="username"
-
-            class="
-              w-full
-              p-3
-              rounded-xl
-              border
-              border-pink-100
-              focus:outline-none
-              focus:border-pink-400
-              focus:ring-4
-              focus:ring-pink-100
-            "
-
-            placeholder="กรอก Username"
-          />
-
-        </div>
-
-        <div>
-
-          <label class="text-sm text-gray-600 ml-1">
-            Password
-          </label>
-
-          <input
-            type="password"
-            id="password"
-
-            class="
-              w-full
-              p-3
-              rounded-xl
-              border
-              border-pink-100
-              focus:outline-none
-              focus:border-pink-400
-              focus:ring-4
-              focus:ring-pink-100
-            "
-
-            placeholder="กรอกรหัสผ่าน"
-          />
-
-        </div>
-
-        <button
-          onclick="doLogin()"
-
-          class="
-            btn-primary
-            w-full
-            py-3
-            rounded-xl
+        <div class="
             font-bold
+            text-pink-500
             text-lg
-          "
-        >
-          เข้าสู่ระบบ
-        </button>
-
-      </div>
-
-      <!-- MESSAGE -->
-      <div
-        id="msg"
-        class="text-center text-sm mt-4"
-      ></div>
+        ">
+            กำลังตรวจสอบข้อมูล...
+        </div>
 
     </div>
 
-  </div>
+    <!-- MODAL -->
+    <div
+        id="alertModal"
 
-  <!-- API -->
-  <script>
+        class="
+            hidden
+            fixed
+            inset-0
+            bg-black
+            bg-opacity-50
+            flex
+            items-center
+            justify-center
+            z-50
+            p-4
+        "
+    >
 
-    const SCRIPT_URL =
-      "https://script.google.com/macros/s/AKfycbwPk2LYTrUxUkEZmTuwrZ6vWtInLSbzTC7fscaKo7AENJ3cua0Nufl36OCFES3fqGw8hg/exec";
+        <div class="
+            bg-white
+            rounded-2xl
+            p-6
+            w-full
+            max-w-sm
+            text-center
+        ">
 
-    async function apiRequest(payload){
+            <h3
+                id="alertTitle"
+                class="
+                    text-xl
+                    font-bold
+                    mb-2
+                "
+            ></h3>
 
-      try{
+            <p
+                id="alertMsg"
+                class="
+                    text-gray-600
+                    mb-6
+                "
+            ></p>
 
-        const res = await fetch(
-          SCRIPT_URL,
-          {
-            method:"POST",
+            <button
+                onclick="
+                    document
+                    .getElementById('alertModal')
+                    .classList
+                    .add('hidden')
+                "
 
-            headers:{
-              "Content-Type":"text/plain;charset=utf-8"
-            },
+                class="
+                    w-full
+                    btn-primary
+                    py-2
+                    font-bold
+                "
+            >
+                ตกลง
+            </button>
 
-            body:JSON.stringify(payload)
-          }
-        );
+        </div>
 
-        return await res.json();
+    </div>
 
-      }catch(err){
+    <!-- LOGIN -->
+    <div
+        class="
+            max-w-sm
+            mx-auto
+            pt-20
+            px-4
+        "
+    >
 
-        return {
-          status:false,
-          message:err.message
-        };
-      }
-    }
+        <div class="
+            card
+            p-8
+            text-center
+            border
+            border-pink-100
+            bg-white/90
+            backdrop-blur-md
+        ">
 
-    async function doLogin(){
+            <div class="
+                w-24
+                h-24
+                mx-auto
+                bg-white
+                rounded-full
+                p-2
+                border-2
+                border-pink-400
+                shadow-lg
+                mb-4
+                flex
+                items-center
+                justify-center
+                overflow-hidden
+            ">
 
-      const username =
-        document.getElementById("username").value;
+                <img
+                    src="https://img2.pic.in.th/-227e4f6f84f29f020.png"
 
-      const password =
-        document.getElementById("password").value;
+                    alt="Logo"
 
-      const msg =
-        document.getElementById("msg");
+                    class="
+                        w-full
+                        h-full
+                        object-contain
+                    "
+                >
 
-      msg.innerHTML =
-        '<span class="text-pink-500">กำลังเข้าสู่ระบบ...</span>';
+            </div>
 
-      const res =
-        await apiRequest({
-          action:"login",
-          username,
-          password
-        });
+            <h1 class="
+                text-xl
+                font-bold
+                text-pink-600
+                mb-1
+            ">
+                IT Maintenance And Service
+            </h1>
 
-      console.log(res);
+            <p class="
+                text-sm
+                text-gray-500
+                mb-6
+            ">
+                โรงพยาบาลอุดรธานี
+            </p>
 
-      if(res.status){
+            <!-- USERNAME -->
+            <div class="text-left mb-3">
 
-        localStorage.setItem(
-          "PM_USER",
-          JSON.stringify(res.data.user)
-        );
+                <label class="
+                    text-sm
+                    text-gray-600
+                    ml-2
+                ">
+                    ชื่อผู้ใช้งาน (Username)
+                </label>
 
-        msg.innerHTML =
-          '<span class="text-green-600">เข้าสู่ระบบสำเร็จ</span>';
+                <input
+                    type="text"
 
-        setTimeout(() => {
+                    id="username"
 
-          window.location.href =
-            "dashboard.html";
+                    class="
+                        w-full
+                        p-3
+                        border
+                        border-pink-100
+                        rounded-xl
+                        focus:outline-none
+                        focus:border-pink-400
+                        focus:ring-2
+                        focus:ring-pink-200
+                    "
 
-        }, 700);
+                    required
+                >
 
-      }else{
+            </div>
 
-        msg.innerHTML =
-          `<span class="text-red-500">
-            ${res.message || 'Login Failed'}
-          </span>`;
-      }
-    }
+            <!-- PASSWORD -->
+            <div class="text-left mb-6">
 
-  </script>
+                <label class="
+                    text-sm
+                    text-gray-600
+                    ml-2
+                ">
+                    รหัสผ่าน (Password)
+                </label>
+
+                <input
+                    type="password"
+
+                    id="password"
+
+                    class="
+                        w-full
+                        p-3
+                        border
+                        border-pink-100
+                        rounded-xl
+                        focus:outline-none
+                        focus:border-pink-400
+                        focus:ring-2
+                        focus:ring-pink-200
+                    "
+
+                    required
+                >
+
+            </div>
+
+            <!-- BUTTON -->
+            <button
+                onclick="doLogin()"
+
+                class="
+                    w-full
+                    btn-primary
+                    py-3
+                    font-bold
+                    text-lg
+                    shadow-md
+                    hover:shadow-lg
+                "
+            >
+                เข้าสู่ระบบ
+            </button>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        const GAS_URL =
+            "https://script.google.com/macros/s/AKfycbwVwQCHnNmRBS2rh0eOFjr8E1HQmgUZaflQeS2T-N66pYKwWkFBaNv-FBvqyeh3b1lr/exec";
+
+        function showLoading() {
+
+            document
+                .getElementById('overlay')
+                .style.display = 'flex';
+        }
+
+        function hideLoading() {
+
+            document
+                .getElementById('overlay')
+                .style.display = 'none';
+        }
+
+        function showModal(title, msg) {
+
+            document
+                .getElementById('alertTitle')
+                .innerText = title;
+
+            document
+                .getElementById('alertMsg')
+                .innerText = msg;
+
+            document
+                .getElementById('alertModal')
+                .classList
+                .remove('hidden');
+        }
+
+        async function callAPI(func, data) {
+
+            showLoading();
+
+            try {
+
+                const response =
+                    await fetch(
+                        GAS_URL,
+                        {
+                            method: 'POST',
+
+                            mode: 'cors',
+
+                            headers: {
+                                'Content-Type':
+                                    'text/plain;charset=utf-8'
+                            },
+
+                            body:
+                                JSON.stringify({
+                                    action: func,
+                                    ...data
+                                }),
+
+                            redirect: 'follow'
+                        }
+                    );
+
+                return await response.json();
+
+            } catch (e) {
+
+                console.error(e);
+
+                showModal(
+                    "Error",
+                    "ไม่สามารถเชื่อมต่อ Server ได้"
+                );
+
+                return null;
+
+            } finally {
+
+                hideLoading();
+            }
+        }
+
+        async function doLogin() {
+
+            const user =
+                document
+                .getElementById('username')
+                .value;
+
+            const pass =
+                document
+                .getElementById('password')
+                .value;
+
+            if(!user || !pass) {
+
+                showModal(
+                    "แจ้งเตือน",
+                    "กรุณากรอก Username และ Password"
+                );
+
+                return;
+            }
+
+            const res =
+                await callAPI(
+                    'login',
+                    {
+                        username: user,
+                        password: pass
+                    }
+                );
+
+            console.log(res);
+
+            if(res && (res.status || res.success)) {
+
+                localStorage.setItem(
+                    "PM_USER",
+                    JSON.stringify(
+                        res.data.user || res.data
+                    )
+                );
+
+                showModal(
+                    "สำเร็จ",
+                    "เข้าสู่ระบบสำเร็จ"
+                );
+
+                setTimeout(() => {
+
+                    window.location.href =
+                        "dashboard.html";
+
+                }, 800);
+
+            } else {
+
+                showModal(
+                    "เข้าสู่ระบบล้มเหลว",
+                    res?.message ||
+                    "Login Failed"
+                );
+            }
+        }
+
+    </script>
 
 </body>
 </html>
+
