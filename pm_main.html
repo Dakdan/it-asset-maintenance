@@ -6,7 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IT Preventive Maintenance - Udon Thani Hospital</title>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
+  <script src="./js/Frontend.js"></script>
+ 
   <style>
     /* ==================== DESIGN TOKENS & RESET ==================== */
     :root {
@@ -355,6 +356,9 @@
           </div>
         </div>
         <div class="connection-badge">
+           <button onclick="logout()" class="btn-login">
+            ออกจากระบบ
+          </button>
           <span class="status-indicator" id="connIndicator"></span>
           <span id="connText">เชื่อมต่อระบบหลัก</span>
         </div>
@@ -447,6 +451,7 @@
   <input type="file" id="qrFileInput" accept="image/*" style="display: none;" onchange="handleQRUpload(event)">
 
   <script>
+    
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw8UHJAO4hBK9kYX_tZ1JrZSPtujTOAuFtVvHrjiHzk6O7D3ZUDQv5cMbEs8hEl8TqR3g/exec";
     
     let allAssets = [];
@@ -1169,6 +1174,10 @@
     function truncateText(text, maxLength) {
       if (!text) return ''; return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
     }
+    function logout() {
+  localStorage.removeItem("it_session");
+  location.href = "./login.html";
+}
   </script>
 </body>
 </html>
