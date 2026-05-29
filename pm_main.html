@@ -1682,61 +1682,70 @@ async function openPMPanel(asset) {
       }
     }
 
-    // ฟังก์ชันช่วยตัดข้อความที่ยาวเกินไป
+       // ฟังก์ชันช่วยตัดข้อความที่ยาวเกินไป
     function truncateText(text, maxLength) {
       if (!text) return '';
-      return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+
+      return text.length > maxLength
+        ? text.substring(0, maxLength) + '...'
+        : text;
     }
-    <script>
 
-  /* =========================
-     LOGIN CHECK
-  ========================= */
+    /* =========================
+       LOGIN CHECK
+    ========================= */
 
-  const LOGIN_PAGE = "./login.html";
+    const LOGIN_PAGE = "./login.html";
 
-  const CURRENT_USER =
-    JSON.parse(localStorage.getItem("PM_USER"));
+    const CURRENT_USER =
+      JSON.parse(localStorage.getItem("PM_USER"));
 
-  // ถ้ายังไม่ได้ login
-  if (!CURRENT_USER) {
+    // ถ้ายังไม่ได้ login
+    if (!CURRENT_USER) {
 
-    window.location.href = LOGIN_PAGE;
+      window.location.href = LOGIN_PAGE;
 
-  }
+    }
 
-  // logout
-  function logout() {
+    // logout
+    function logout() {
 
-        localStorage.removeItem("PM_USER");
-    
-        window.location.href = LOGIN_PAGE;
-    
-      }
-    
-      // แสดงชื่อ user
-      window.addEventListener("DOMContentLoaded", () => {
-    
-        if (CURRENT_USER) {
-    
-          const dept =
-            CURRENT_USER.DeptName ||
-            CURRENT_USER.Dept ||
-            "";
-    
-          const name =
-            CURRENT_USER.Name ||
-            CURRENT_USER.UserName ||
-            CURRENT_USER.username ||
-            "USER";
-    
-          document.getElementById("connText").innerText =
+      localStorage.removeItem("PM_USER");
+
+      window.location.href = LOGIN_PAGE;
+
+    }
+
+    // แสดงชื่อ user
+    window.addEventListener("DOMContentLoaded", () => {
+
+      if (CURRENT_USER) {
+
+        const dept =
+          CURRENT_USER.DeptName ||
+          CURRENT_USER.Dept ||
+          "";
+
+        const name =
+          CURRENT_USER.Name ||
+          CURRENT_USER.UserName ||
+          CURRENT_USER.username ||
+          "USER";
+
+        const connText =
+          document.getElementById("connText");
+
+        if (connText) {
+
+          connText.innerText =
             `${name} ${dept}`;
-    
+
         }
-    
-      });
-    
+
+      }
+
+    });
+
 
   </script>
 </body>
