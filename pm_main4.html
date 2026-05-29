@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PM SYSTEM | UDON HOSP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #ec4899; --bg-gradient: linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%); }
+        body { font-family: 'Kanit', sans-serif; background: var(--bg-gradient); color: #4a4a4a; min-height: 100vh; overflow-x: hidden; }
+        .card { background: white; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .btn-primary { background: var(--primary); color: white; border-radius: 50px; transition: 0.3s; }
+        .btn-primary:active { transform: scale(0.95); }
+        .overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.85); z-index: 1000; align-items: center; justify-content: center; flex-direction: column; }
+        /* ลายน้ำ */
+        body::after {
+            content: "IT UDON HOSP";
+            position: fixed;
+            font-size: 8vw;
+            color: rgba(214, 51, 132, 0.03);
+            font-weight: 800;
+            transform: rotate(-25deg);
+            white-space: nowrap;
+            z-index: -1;
+            pointer-events: none;
+            top: 30%;
+            left: 10%;
+        }
+    </style>
+</head>
+<body>
+
+    <script>
+        // ใช้ URL ตัวที่พี่ทดสอบแล้วว่าใช้งานได้
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwPk2LYTrUxUkEZmTuwrZ6vWtInLSbzTC7fscaKo7AENJ3cua0Nufl36OCFES3fqGw8hg/exec"; 
+
+        // State Management
+        let state = {
+            user: null,
+            assets: [],
+            pmTopics: [],
+            currentAsset: null
+        };
+
+        // ฟังก์ชันเชื่อมต่อ API 
+        async function callAPI(func, data) {
+            showLoading();
+            try {
+                const response = await fetch(GAS_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: func, ...data }),
+                    redirect: 'follow' // เพิ่มบรรทัดนี้ เพื่อให้ fetch วิ่งตาม Redirect ของ Google Apps Script
+                });
+                
+                return await response.json();
+            } catch (e) {
+                console.error("Fetch Error:", e);
+                showModal("Error", "ไม่สามารถเชื่อมต่อ Server ได้ โปรดตรวจสอบว่า Deploy Web App เป็น 'Anyone' (ทุกคน) แล้วหรือไม่");
+                return null;
+            } finally {
+                hideLoading();
+            }
+        }
+    </script>
+
+    <!-- LOADING OVERLAY -->
+    <div id="overlay" class="overlay">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-pink-500 mb-4"></div>
+        <div class="font-bold text-pink-500 text-lg">กำลังตรวจสอบข้อมูล...</div>
+    </div>
+    
+    <!-- MODAL -->
+    <div id="alertModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm text-center transform transition-all">
+            <h3 id="alertTitle" class="text-xl font-bold mb-2"></h3>
+            <p id="alertMsg" class="text-gray-600 mb-6"></p>
+            <button onclick="document.getElementById('alertModal').classList.add('hidden')" class="w-full btn-primary py-2 font-bold">ตกลง</button>
+        </div>
+    </div>
+
+    <!-- VIEWS -->
+    <div id="app-container" class="container mx-auto pb-10">
+        
+        <!-- 1. LOGIN VIEW -->
+        <div id="view-login" class="max-w-sm mx-auto pt-20 px-4">
+            <div class="card p-8 text-center border border-pink-100 bg-white/90 backdrop-blur-md">
+                <div class="w-24 h-24 mx-auto bg-white rounded-full p-2 border-2 border-pink-400 shadow-lg mb-4 flex items-center justify-center overflow-hidden">
+                    <img src="https://img2.pic.in.th/-227e4f6f84f29f020.png" alt="Logo" class="w-full h-full object-contain">
+                </div>
+                <h1 class="text-xl font-bold text-pink-600 mb-1">IT Maintenance And Service</h1>
+                <p class="text-sm text-gray-500 mb-6">โรงพยาบาลอุดรธานี</p>
+
+                <div class="text-left mb-3">
+                    <label class="text-sm text-gray-600 ml-2">ชื่อผู้ใช้งาน (Username)</label>
+                    <input type="text" id="username" class="w-full p-3 border border-pink-100 rounded-xl focus:outline-none focus:border-pink-400 focus:ring-2 focus:ring-pink-200" required>
+                </div>
+                <div class="text-left mb-6">
+                    <label class="text-sm text-gray-600 ml-2">รหัสผ่าน (Password)</label>
+                    <input type="password" id="password" class="w-full p-3 border border-pink-100 rounded-xl focus:outline-none focus:border-pink-400 focus:ring-2 focus:ring-pink-200" required>
+                </div>
+                <button onclick="doLogin()" class="w-full btn-primary py-3 font-bold text-lg shadow-md hover:shadow-lg">เข้าสู่ระบบ</button>
+            </div>
+        </div>
+
+        <!-- 2. DASHBOARD VIEW -->
+        <div id="view-dashboard" class="hidden px-4 pt-6 max-w-4xl mx-auto">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-pink-600">IT Asset PM</h2>
+                    <p id="user-info" class="text-sm text-gray-500"></p>
+                </div>
+                <button onclick="showView('login')" class="text-sm text-red-400 hover:text-red-600 font-bold">ออกจากระบบ</button>
+            </div>
+
+            <div class="card p-4 mb-6">
+                <div class="flex flex-col md:flex-row gap-3">
+                    <input type="text" id="searchInput" placeholder="ค้นหา Asset ID, SN, NOID..." class="flex-1 p-3 border rounded-xl focus:outline-none focus:border-pink-400" onkeyup="filterAssets()">
+                    <button onclick="scanQR()" class="btn-primary px-6 py-3 font-bold flex items-center justify-center gap-2">
+                        <span>📷 สแกน QR</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="asset-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Data will be rendered here -->
+            </div>
+        </div>
+
+        <!-- 3. PM FORM VIEW -->
+        <div id="view-pm-form" class="hidden px-4 pt-6 max-w-3xl mx-auto">
+            <button onclick="showView('dashboard')" class="text-pink-500 font-bold mb-4 flex items-center gap-1">
+                <span>← กลับหน้าหลัก</span>
+            </button>
+            
+            <div class="card p-5 mb-6 border-l-4 border-pink-500">
+                <h3 id="pm-asset-id" class="text-xl font-bold"></h3>
+                <p id="pm-asset-desc" class="text-sm text-gray-600"></p>
+            </div>
+
+            <div id="pm-checklist" class="space-y-4">
+                <!-- Checklist items here -->
+            </div>
+
+            <div class="card p-5 mt-6">
+                <label class="font-bold block mb-2">หมายเหตุเพิ่มเติม</label>
+                <textarea id="pm-note" class="w-full p-3 border rounded-xl" rows="3" placeholder="ระบุอาการผิดปกติ หรือข้อเสนอแนะ..."></textarea>
+                
+                <button onclick="submitPM()" class="w-full btn-primary py-3 font-bold text-lg mt-4">บันทึกผล PM</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- SCRIPTS -->
+    <script>
+        /* === UI HELPERS === */
+        function showLoading() { document.getElementById('overlay').style.display = 'flex'; }
+        function hideLoading() { document.getElementById('overlay').style.display = 'none'; }
+        
+        function showModal(title, msg) {
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertMsg').innerText = msg;
+            document.getElementById('alertModal').classList.remove('hidden');
+        }
+
+        function showView(viewId) {
+            ['view-login', 'view-dashboard', 'view-pm-form'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(`view-${viewId}`).classList.remove('hidden');
+            window.scrollTo(0,0);
+        }
+
+        /* === CORE LOGIC === */
+        async function doLogin() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            
+            if(!user || !pass) { showModal("แจ้งเตือน", "กรุณากรอก Username และ Password"); return; }
+
+            const res = await callAPI('login', { username: user, password: pass });
+            
+            if(res && (res.status || res.success)) {
+                // รองรับข้อมูล user จาก Centralized API (userFound Object)
+                let userData = res.data.user || res.data; 
+                state.user = userData;
+                
+                // ดึงชื่อมาแสดงผลตาม Header (รองรับฟิลด์ Name หรือ UserNicName)
+                const displayName = userData.Name || userData.UserName || userData.UserNicName || 'IT Admin';
+                document.getElementById('user-info').innerText = `เจ้าหน้าที่: ${displayName}`;
+                
+                showView('dashboard');
+                loadAssets(); 
+            } else if(res) {
+                showModal("เข้าสู่ระบบล้มเหลว", res.message || "รหัสผ่านไม่ถูกต้อง");
+            }
+        }
+
+        async function loadAssets() {
+            const res = await callAPI('getAssets', {});
+            if(res && (res.status || res.success)) {
+                state.assets = res.data;
+                renderAssets(state.assets);
+            }
+        }
+
+        function renderAssets(dataList) {
+            const container = document.getElementById('asset-list');
+            container.innerHTML = '';
+            
+            if(dataList.length === 0) {
+                container.innerHTML = '<div class="col-span-full text-center py-10 text-gray-400">ไม่พบข้อมูลครุภัณฑ์</div>';
+                return;
+            }
+
+            dataList.slice(0, 50).forEach(item => {
+                container.innerHTML += `
+                    <div class="card p-4 hover:border-pink-300 border border-transparent cursor-pointer transition-all" onclick="openPMForm('${item.Asset_ID}', '${item.Asset_Type_ID}')">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="bg-pink-100 text-pink-600 text-xs font-bold px-2 py-1 rounded">${item.Asset_Group_Name || item.Asset_Type_ID}</span>
+                            <span class="text-xs text-gray-400">NOID: ${item.NOID}</span>
+                        </div>
+                        <h4 class="font-bold text-lg">${item.Asset_ID}</h4>
+                        <p class="text-sm text-gray-600 line-clamp-1">${item.Asset_DB_Col8}</p>
+                        <p class="text-xs text-gray-500 mt-2">📌 ${item.Dept_Name}</p>
+                    </div>
+                `;
+            });
+        }
+
+        function filterAssets() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = state.assets.filter(a => 
+                (a.Asset_ID || '').toLowerCase().includes(q) || 
+                (a.Serial_Number || '').toLowerCase().includes(q) ||
+                (a.NOID || '').toLowerCase().includes(q)
+            );
+            renderAssets(filtered);
+        }
+
+        function scanQR() {
+            const input = prompt("จำลองการสแกน QR Code\nกรุณากรอก Asset ID (เช่น PC-001):");
+            if(input) {
+                document.getElementById('searchInput').value = input;
+                filterAssets();
+            }
+        }
+
+        async function openPMForm(assetId, assetType) {
+            state.currentAsset = state.assets.find(a => a.Asset_ID === assetId);
+            
+            document.getElementById('pm-asset-id').innerText = state.currentAsset.Asset_ID;
+            document.getElementById('pm-asset-desc').innerText = state.currentAsset.Asset_DB_Col8;
+            document.getElementById('pm-note').value = '';
+
+            const res = await callAPI('getPMTopics', { assetType: assetType });
+            if(res && (res.status || res.success)) {
+                state.pmTopics = res.data;
+                renderChecklist();
+                showView('pm-form');
+            } else {
+                showModal("Error", "ไม่สามารถโหลดหัวข้อการตรวจ (PM Topic) ได้");
+            }
+        }
+
+        function renderChecklist() {
+            const container = document.getElementById('pm-checklist');
+            container.innerHTML = '';
+            
+            state.pmTopics.forEach((topic, idx) => {
+                container.innerHTML += `
+                    <div class="card p-4 border-l-4 ${topic.critical ? 'border-red-400' : 'border-gray-300'}">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="font-bold">${idx+1}. ${topic.topic_name}</span>
+                            ${topic.critical ? '<span class="text-xs text-red-500 font-bold bg-red-100 px-2 py-1 rounded">สำคัญ</span>' : ''}
+                        </div>
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="topic_${topic.topic_id}" value="PASS" class="w-5 h-5 text-pink-500" checked>
+                                <span class="text-green-600 font-bold">ปกติ (PASS)</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="topic_${topic.topic_id}" value="FAIL" class="w-5 h-5 text-pink-500">
+                                <span class="text-red-500 font-bold">ผิดปกติ (FAIL)</span>
+                            </label>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function submitPM() {
+            // รวบรวมข้อมูล
+            let details = [];
+            let allPass = true;
+
+            state.pmTopics.forEach(topic => {
+                const status = document.querySelector(`input[name="topic_${topic.topic_id}"]:checked`)?.value || 'PASS';
+                if(status === 'FAIL') allPass = false;
+                
+                details.push({
+                    topic_id: topic.topic_id,
+                    status: status,
+                    score: status === 'PASS' ? topic.max_score : 0,
+                    remark: ''
+                });
+            });
+
+            const payload = {
+                asset_code: state.currentAsset.Asset_ID,
+                user: state.user.Name || state.user.UserName || "Admin",
+                result: allPass ? 'PASS' : 'FAIL',
+                note: document.getElementById('pm-note').value,
+                details: details
+            };
+
+            const res = await callAPI('savePM', payload);
+            if(res && (res.status || res.success)) {
+                showModal("สำเร็จ!", "บันทึกผลการตรวจสอบเรียบร้อยแล้ว");
+                showView('dashboard');
+            } else {
+                showModal("ล้มเหลว", res.message || "ไม่สามารถบันตามข้อมูลได้");
+            }
+        }
+    </script>
+</body>
+</html>
