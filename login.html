@@ -1,75 +1,294 @@
+```html
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <title>เข้าสู่ระบบ - IT Maintenance</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
+  <title>LOGIN | PM SYSTEM</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+
+    :root{
+      --primary:#ec4899;
+    }
+
+    body{
+      font-family:'Kanit',sans-serif;
+      background:
+        linear-gradient(
+          135deg,
+          #fdf2f8 0%,
+          #ffffff 100%
+        );
+
+      min-height:100vh;
+      overflow:hidden;
+    }
+
+    .login-card{
+      background:rgba(255,255,255,.92);
+      backdrop-filter:blur(10px);
+
+      border-radius:24px;
+
+      box-shadow:
+        0 10px 30px rgba(0,0,0,.08);
+    }
+
+    .btn-primary{
+      background:var(--primary);
+      color:#fff;
+
+      transition:.2s;
+    }
+
+    .btn-primary:hover{
+      transform:translateY(-1px);
+      box-shadow:
+        0 10px 20px rgba(236,72,153,.25);
+    }
+
+    .btn-primary:active{
+      transform:scale(.98);
+    }
+
+    .watermark{
+      position:fixed;
+      inset:0;
+
+      display:flex;
+      align-items:center;
+      justify-content:center;
+
+      pointer-events:none;
+
+      font-size:10vw;
+      font-weight:800;
+
+      color:rgba(236,72,153,.03);
+
+      transform:rotate(-25deg);
+    }
+
+  </style>
 </head>
 
-<body class="login-page">
+<body>
 
-<!-- ================= LOADER ================= -->
-<div id="loader" class="loader-overlay" style="display:none;">
-  <div class="spinner"></div>
-</div>
-
-<!-- ================= POPUP ================= -->
-<div id="popup" class="popup-overlay" style="display:none;">
-  <div class="popup-box">
-    <h3 id="popup-title">แจ้งเตือน</h3>
-    <p id="popup-message"></p>
-    <button onclick="closePopup()" class="btn-login">ตกลง</button>
-  </div>
-</div>
-
-<div class="login-wrapper">
-
-  <!-- ================= HEADER ================= -->
-  <div class="login-header">
-    <img src="./โรงพยาบาลอุดรธานี.png" class="header-logo">
-    <h1>โรงพยาบาลอุดรธานี</h1>
-    <p>ระบบบริหารจัดการครุภัณฑ์คอมพิวเตอร์และบริการ</p>
+  <!-- WATERMARK -->
+  <div class="watermark">
+    IT UDON HOSP
   </div>
 
-  <!-- ================= LOGIN CARD ================= -->
-  <div class="login-card">
+  <!-- LOGIN -->
+  <div class="min-h-screen flex items-center justify-center p-4">
 
-    <div class="form-group">
-      <label>👤 Email / Username</label>
-      <input type="text" id="username" autocomplete="username">
-    </div>
+    <div class="login-card w-full max-w-md p-8">
 
-    <div class="form-group">
-      <label>🔒 Password</label>
-      <input type="password" id="password" autocomplete="current-password">
-    </div>
+      <!-- LOGO -->
+      <div class="text-center mb-6">
 
-    <button class="btn-login" onclick="handleLogin()">
-      🛡️ Login
-    </button>
+        <div class="w-24 h-24 mx-auto mb-4
+                    rounded-full
+                    border-4 border-pink-300
+                    overflow-hidden
+                    bg-white
+                    shadow-lg">
 
-    <div class="card-footer" style="text-align:center; margin-top:15px;">
-      ยังไม่มีบัญชี? <a href="register.html">ลงทะเบียน</a>
+          <img
+            src="https://img2.pic.in.th/pic/-227e4f6f84f29f020.png"
+            class="w-full h-full object-contain"
+          />
+
+        </div>
+
+        <h1 class="text-2xl font-bold text-pink-600">
+          PM SYSTEM
+        </h1>
+
+        <p class="text-gray-500 text-sm mt-1">
+          IT Maintenance And Service
+        </p>
+
+      </div>
+
+      <!-- FORM -->
+      <div class="space-y-4">
+
+        <div>
+
+          <label class="text-sm text-gray-600 ml-1">
+            Username
+          </label>
+
+          <input
+            type="text"
+            id="username"
+
+            class="
+              w-full
+              p-3
+              rounded-xl
+              border
+              border-pink-100
+              focus:outline-none
+              focus:border-pink-400
+              focus:ring-4
+              focus:ring-pink-100
+            "
+
+            placeholder="กรอก Username"
+          />
+
+        </div>
+
+        <div>
+
+          <label class="text-sm text-gray-600 ml-1">
+            Password
+          </label>
+
+          <input
+            type="password"
+            id="password"
+
+            class="
+              w-full
+              p-3
+              rounded-xl
+              border
+              border-pink-100
+              focus:outline-none
+              focus:border-pink-400
+              focus:ring-4
+              focus:ring-pink-100
+            "
+
+            placeholder="กรอกรหัสผ่าน"
+          />
+
+        </div>
+
+        <button
+          onclick="doLogin()"
+
+          class="
+            btn-primary
+            w-full
+            py-3
+            rounded-xl
+            font-bold
+            text-lg
+          "
+        >
+          เข้าสู่ระบบ
+        </button>
+
+      </div>
+
+      <!-- MESSAGE -->
+      <div
+        id="msg"
+        class="text-center text-sm mt-4"
+      ></div>
+
     </div>
 
   </div>
-</div>
 
-<!-- ================= SCRIPT ================= -->
-<script src="./js/api.js"></script>
-  <script src="./js/login.js"></script>
-<script src="./js/main.js"></script>
+  <!-- API -->
+  <script>
 
-<script>
-  // ===== auto login ถ้ามี session =====
-  const session = localStorage.getItem("it_session");
-  if (session) {
-    location.href = "./index.html";
-  }
-</script>
+    const SCRIPT_URL =
+      "https://script.google.com/macros/s/AKfycbwPk2LYTrUxUkEZmTuwrZ6vWtInLSbzTC7fscaKo7AENJ3cua0Nufl36OCFES3fqGw8hg/exec";
+
+    async function apiRequest(payload){
+
+      try{
+
+        const res = await fetch(
+          SCRIPT_URL,
+          {
+            method:"POST",
+
+            headers:{
+              "Content-Type":"text/plain;charset=utf-8"
+            },
+
+            body:JSON.stringify(payload)
+          }
+        );
+
+        return await res.json();
+
+      }catch(err){
+
+        return {
+          status:false,
+          message:err.message
+        };
+      }
+    }
+
+    async function doLogin(){
+
+      const username =
+        document.getElementById("username").value;
+
+      const password =
+        document.getElementById("password").value;
+
+      const msg =
+        document.getElementById("msg");
+
+      msg.innerHTML =
+        '<span class="text-pink-500">กำลังเข้าสู่ระบบ...</span>';
+
+      const res =
+        await apiRequest({
+          action:"login",
+          username,
+          password
+        });
+
+      console.log(res);
+
+      if(res.status){
+
+        localStorage.setItem(
+          "PM_USER",
+          JSON.stringify(res.data.user)
+        );
+
+        msg.innerHTML =
+          '<span class="text-green-600">เข้าสู่ระบบสำเร็จ</span>';
+
+        setTimeout(() => {
+
+          window.location.href =
+            "dashboard.html";
+
+        }, 700);
+
+      }else{
+
+        msg.innerHTML =
+          `<span class="text-red-500">
+            ${res.message || 'Login Failed'}
+          </span>`;
+      }
+    }
+
+  </script>
 
 </body>
 </html>
+```
