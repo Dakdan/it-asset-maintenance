@@ -459,29 +459,10 @@
             <p id="deptName" style="margin-top:2px;">กลุ่มงานเทคโนโลยีสารสนเทศคอมพิวเตอร์ โทร 1125, 1126, 1485</p>
           </div>
         </div>
-        <div style="display:flex; gap:10px; align-items:center;">
-
         <div class="connection-badge">
           <span class="status-indicator" id="connIndicator"></span>
           <span id="connText">เชื่อมต่อระบบหลัก</span>
         </div>
-      
-        <button
-          onclick="logout()"
-          style="
-            border:none;
-            background:#fff;
-            color:#e11d48;
-            padding:8px 14px;
-            border-radius:10px;
-            cursor:pointer;
-            font-weight:600;
-          "
-        >
-          Logout
-        </button>
-      
-      </div>
       </div>
     </div>
 
@@ -570,7 +551,6 @@
   <input type="file" id="qrFileInput" accept="image/*" style="display: none;" onchange="handleQRUpload(event)">
 
   <script>
-    
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw8UHJAO4hBK9kYX_tZ1JrZSPtujTOAuFtVvHrjiHzk6O7D3ZUDQv5cMbEs8hEl8TqR3g/exec";
     
     let allAssets = [];
@@ -1682,71 +1662,11 @@ async function openPMPanel(asset) {
       }
     }
 
-       // ฟังก์ชันช่วยตัดข้อความที่ยาวเกินไป
+    // ฟังก์ชันช่วยตัดข้อความที่ยาวเกินไป
     function truncateText(text, maxLength) {
       if (!text) return '';
-
-      return text.length > maxLength
-        ? text.substring(0, maxLength) + '...'
-        : text;
+      return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
     }
-
-    /* =========================
-       LOGIN CHECK
-    ========================= */
-
-    const LOGIN_PAGE = "./login.html";
-
-    const CURRENT_USER =
-      JSON.parse(localStorage.getItem("PM_USER"));
-
-    // ถ้ายังไม่ได้ login
-    if (!CURRENT_USER) {
-
-      window.location.href = LOGIN_PAGE;
-
-    }
-
-    // logout
-    function logout() {
-
-      localStorage.removeItem("PM_USER");
-
-      window.location.href = LOGIN_PAGE;
-
-    }
-
-    // แสดงชื่อ user
-    window.addEventListener("DOMContentLoaded", () => {
-
-      if (CURRENT_USER) {
-
-        const dept =
-          CURRENT_USER.DeptName ||
-          CURRENT_USER.Dept ||
-          "";
-
-        const name =
-          CURRENT_USER.Name ||
-          CURRENT_USER.UserName ||
-          CURRENT_USER.username ||
-          "USER";
-
-        const connText =
-          document.getElementById("connText");
-
-        if (connText) {
-
-          connText.innerText =
-            `${name} ${dept}`;
-
-        }
-
-      }
-
-    });
-
-
   </script>
 </body>
 </html>
