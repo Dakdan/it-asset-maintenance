@@ -175,29 +175,37 @@
         }
 
         /* === CORE LOGIC === */
-        async function doLogin() {
-            const user = document.getElementById('username').value;
-            const pass = document.getElementById('password').value;
-            
-            if(!user || !pass) { showModal("แจ้งเตือน", "กรุณากรอก Username และ Password"); return; }
+  
+async function doLogin() {
 
-            const res = await callAPI('login', { username: user, password: pass });
-            
-            if(res && (res.status || res.success)) {
-                // รองรับข้อมูล user จาก Centralized API (userFound Object)
-                let userData = res.data.user || res.data; 
-                state.user = userData;
-                
-                // ดึงชื่อมาแสดงผลตาม Header (รองรับฟิลด์ Name หรือ UserNicName)
-                const displayName = userData.Name || userData.UserName || userData.UserNicName || 'IT Admin';
-                document.getElementById('user-info').innerText = `เจ้าหน้าที่: ${displayName}`;
-                
-                showView('dashboard');
-                loadAssets(); 
-            } else if(res) {
-                showModal("เข้าสู่ระบบล้มเหลว", res.message || "รหัสผ่านไม่ถูกต้อง");
-            }
-        }
+  const username =
+    document.getElementById("username").value;
+
+  const password =
+    document.getElementById("password").value;
+
+  const res =
+    await api.login(username, password);
+
+  console.log(res);
+
+  if (res.status) {
+
+    alert("Login Success");
+
+    localStorage.setItem(
+      "PM_USER",
+      JSON.stringify(res.data.user)
+    );
+
+  } else {
+
+    alert(res.message || "Login Failed");
+
+  }
+}
+
+
 
         async function loadAssets() {
             const res = await callAPI('getAssets', {});
