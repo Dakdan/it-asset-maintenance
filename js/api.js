@@ -1,3 +1,4 @@
+
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbwPk2LYTrUxUkEZmTuwrZ6vWtInLSbzTC7fscaKo7AENJ3cua0Nufl36OCFES3fqGw8hg/exec";
 
@@ -5,41 +6,44 @@ const SCRIPT_URL =
    CORE REQUEST
 ========================= */
 async function apiRequest(payload) {
-  const res = await fetch(SCRIPT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
 
-  return res.json();
+  try {
+
+    const res = await fetch(SCRIPT_URL, {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8"
+      },
+
+      body: JSON.stringify(payload)
+    });
+
+    return await res.json();
+
+  } catch (err) {
+
+    return {
+      status: false,
+      message: err.message
+    };
+  }
 }
 
 /* =========================
-   API WRAPPER (สำคัญมาก)
+   LOGIN API
 ========================= */
 const api = {
 
-  login: (username, password) => {
-    return apiRequest({
+  login: async (username, password) => {
+
+    return await apiRequest({
       action: "login",
-      username,
-      password
+      username: username,
+      password: password
     });
-  },
 
-  register: (data) => {
-    return apiRequest({
-      action: "register",
-      ...data
-    });
-  },
-
-  verifyEmail: (userid, code) => {
-    return apiRequest({
-      action: "verifyEmail",
-      userid,
-      code
-    });
   }
 
 };
+```
