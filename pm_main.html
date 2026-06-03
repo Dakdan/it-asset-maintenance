@@ -1045,7 +1045,6 @@
       
       modal.classList.add('show');
       
-      // รีเซ็ต Title ตอนดูรายละเอียด (ปรับข้อความได้ตามต้องการ)
       if (titleWrapper) {
         titleWrapper.innerHTML = `
           <h2 class="modal-title">📄 รายละเอียดบันทึกงาน PM</h2>
@@ -1054,7 +1053,7 @@
       }
       
       modalBody.innerHTML = `<div style="text-align:center; padding:30px;"><p>กำลังโหลดรายละเอียด...</p></div>`;
-      if (modalFooter) modalFooter.innerHTML = ''; // ซ่อนปุ่มระหว่างโหลด
+      if (modalFooter) modalFooter.innerHTML = ''; 
       
       try {
         const response = await fetch(`${SCRIPT_URL}?action=getPMFullDetails&pmId=${encodeURIComponent(pmId)}`);
@@ -1118,54 +1117,62 @@
               
             </div>
           </div>
-      
-          <div style="margin-bottom: 15px; border-bottom: 2px solid #fdf2f8; padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 15px;">📋</span>
-            <span style="font-size: 14px; font-weight: 700; color: var(--primary);">รายการตรวจสอบและผลการตรวจ</span>
-          </div>
         `;
 
-        // --- 2. ส่วนรายการ Checklist (ประมวลผล 0, 1, Text, Number) ---
+        // --- 2. ส่วนรายการ Checklist (แยก Group, ใส่เลขหน้า, โชว์ Score) ---
         if (checklists && checklists.length > 0) {
           html += `<div style="display: flex; flex-direction: column; gap: 10px;">`;
           
+          let currentGroup = null;
+          let groupCounter = 0;
+          let itemCounter = 0;
+
           checklists.forEach((item, index) => {
+            // 🟢 จัดการเรื่อง Group (หมวดหมู่) และการรันเลขหน้า
+            let groupName = item.topic_group || 'รายการตรวจสอบ'; 
+            
+            if (groupName !== currentGroup) {
+              currentGroup = groupName;
+              groupCounter++;
+              itemCounter = 0; // รีเซ็ตลำดับเมื่อเปลี่ยนกลุ่มใหม่
+              
+              // แทรกหัวข้อ Group
+              html += `
+                <div style="margin-top: 15px; margin-bottom: 5px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">
+                  <span style="font-size: 15px; font-weight: 700; color: var(--primary);">
+                    ส่วนที่ ${groupCounter}: ${escapeHtml(currentGroup)}
+                  </span>
+                </div>
+              `;
+            }
+            
+            itemCounter++;
+            let itemNumber = `${groupCounter}.${itemCounter}`; // สร้างเลขหน้า เช่น 1.1, 1.2
+
+            // 🟢 จัดการเงื่อนไข PASS / FAIL และโชว์ Score เสมอ
             let displayScore = item.score !== undefined && item.score !== null ? String(item.score).trim() : '';
             let badgeBg = '#f1f5f9';
             let badgeColor = '#64748b';
             let badgeText = item.status || 'N/A';
 
-            // ตรวจสอบเงื่อนไข PASS / FAIL และแปลงข้อความ
             if (item.status === 'PASS') {
               badgeBg = '#d1fae5'; // พื้นหลังเขียว
               badgeColor = '#059669'; // ตัวหนังสือเขียว
-              
-              if (displayScore === '1') {
-                 badgeText = 'ปกติ';
-                 displayScore = ''; // ซ่อนเลข 1
-              } else {
-                 badgeText = 'ผ่าน';
-              }
+              badgeText = displayScore === '1' ? 'ปกติ' : 'ผ่าน';
             } else if (item.status === 'FAIL') {
               badgeBg = '#fee2e2'; // พื้นหลังแดง
               badgeColor = '#dc2626'; // ตัวหนังสือแดง
-              
-              if (displayScore === '0') {
-                 badgeText = 'ผิดปกติ';
-                 displayScore = ''; // ซ่อนเลข 0
-              } else {
-                 badgeText = 'ไม่ผ่าน';
-              }
+              badgeText = displayScore === '0' ? 'ผิดปกติ' : 'ไม่ผ่าน';
             }
 
-            // ถ้ามีค่าอื่นๆ (Text/Number) ให้แสดงในวงเล็บ
+            // นำ Score มาประกอบลงในวงเล็บ (แสดงเสมอไม่ว่าจะ 1, 0, หรือ Text)
             const scoreHtml = displayScore !== '' ? `<span style="margin-left:6px; opacity:0.9; font-weight:500;">(${escapeHtml(displayScore)})</span>` : '';
 
             html += `
               <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center;">
                 <div style="flex: 1;">
                   <div style="font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 4px;">
-                    ${index + 1}. ${escapeHtml(item.topic_name || 'หัวข้อการตรวจ')}
+                    ${itemNumber} ${escapeHtml(item.topic_name || 'หัวข้อการตรวจ')}
                   </div>
                   ${item.remark ? `<div style="font-size: 12px; color: #64748b;">หมายเหตุ: ${escapeHtml(item.remark)}</div>` : ''}
                 </div>
