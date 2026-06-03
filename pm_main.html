@@ -919,12 +919,12 @@
       }
     }
 
-   async function openPMPanel(asset) {
+  async function openPMPanel(asset) {
       selectedAsset = asset;
       const modal = document.getElementById('modalOverlay');
       const modalBody = document.getElementById('modalBody');
       const titleWrapper = document.getElementById('modalTitleWrapper');
-      const modalFooter = document.getElementById('modalFooter'); // นำ footer มารีเซ็ตด้วย
+      const modalFooter = document.getElementById('modalFooter');
     
       titleWrapper.innerHTML = `
         <h2 class="modal-title">🔧 บันทึกงาน PM: <span style="color: var(--primary);">${escapeHtml(asset.Asset_ID || '')}</span></h2>
@@ -944,7 +944,7 @@
         </div>
         <p style="text-align:center; padding:20px; color:var(--text-muted);">กำลังโหลดรายการเช็คลิสต์...</p>
       `;
-      // รีเซ็ตปุ่มใน Footer ให้กลับมาเป็นโหมด "บันทึก"
+      
       modalFooter.innerHTML = `
         <button class="btn btn-secondary" style="background:#f1f5f9; color:var(--text-muted);" onclick="closeModal()">ยกเลิก</button>
         <button class="btn btn-search" id="btnSubmitPM" onclick="submitPMForm()">บันทึกข้อมูลเข้าระบบหลัก</button>
@@ -978,7 +978,6 @@
             topicIndex++;
             let inputHtml = "";
             
-            // ตรวจสอบเงื่อนไขตาม Input Type
             if (inputType === 'score') {
               const minScore = parseInt(rawMin, 10) || 1;
               const maxScore = parseInt(rawMax, 10) || 5;
@@ -996,9 +995,8 @@
             } else if (inputType === 'number') {
               inputHtml = `<input type="number" ${rawMin!==""?`min="${rawMin}"`:""} ${rawMax!==""?`max="${rawMax}"`:""} class="form-input pm-val" data-tid="${topic.topic_id}" placeholder="${(rawMin!==""&&rawMax!=="")?`ระบุตัวเลข (${rawMin}-${rawMax})`:"ระบุตัวเลข"}">`;
               
-            // --- อัปเดตส่วน text retio (หรือ text radio) ที่นี่ ---
+            // --- อัปเดตส่วน text retio เป็น Checkbox ให้เลือกได้หลายรายการ ---
             } else if (inputType === 'text retio' || inputType === 'text radio') {
-              // ดึงข้อความจาก MIN_SCORE (หรือ MAX_SCORE ถ้า MIN ว่าง) แล้วแยกด้วยลูกน้ำ
               const optionsString = rawMin !== "" ? rawMin : rawMax;
               const options = optionsString.split(',').map(v => v.trim()).filter(v => v !== "");
               
@@ -1006,7 +1004,7 @@
               options.forEach(opt => {
                 inputHtml += `
                   <label style="cursor:pointer; display:flex; align-items:center; gap:6px; color:var(--text-main); font-weight:500;">
-                    <input type="radio" name="chk_${topic.topic_id}" value="${escapeHtml(opt)}" class="pm-val-radio" style="width:18px; height:18px; accent-color:var(--primary);">
+                    <input type="checkbox" name="chk_${topic.topic_id}" value="${escapeHtml(opt)}" class="pm-val-multi" data-tid="${topic.topic_id}" style="width:18px; height:18px; accent-color:var(--primary);">
                     ${escapeHtml(opt)}
                   </label>
                 `;
@@ -1037,7 +1035,6 @@
         modalBody.innerHTML = document.querySelector('.modal-info-grid').outerHTML + `<div class="empty-state" style="border-color:#fca5a5; background:#fef2f2; padding:40px 20px;"><div class="empty-state-icon" style="color:#ef4444;">❌</div><div class="empty-state-text" style="color:#b91c1c;">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${err.message}</div></div>`;
       }
     }
-
     async function showPMReportDetail(pmId) {
       if (!pmId) return;
     
