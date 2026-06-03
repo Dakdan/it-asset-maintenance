@@ -1192,7 +1192,12 @@
         // นำ HTML ไปแสดงผลใน Modal
         modalBody.innerHTML = html;
         if (modalFooter) {
-          modalFooter.innerHTML = `<button class="btn btn-secondary" style="background:#f1f5f9; color:var(--text-muted); padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;" onclick="closeModal()">ปิดหน้าต่าง</button>`;
+          modalFooter.innerHTML = `
+          <button class="btn btn-secondary" style="background:#f1f5f9; color:var(--text-muted); padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;" onclick="closeModal()">ปิดหน้าต่าง</button>
+          <button class="btn" style="background:var(--primary); color:#fff; font-weight:bold; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);" onclick="openEditPMForm('${pmId}', '${pmDataStr}')">
+              ✏️ แก้ไขข้อมูล PM
+          </button>
+          `;
         }
 
       } catch (err) {
