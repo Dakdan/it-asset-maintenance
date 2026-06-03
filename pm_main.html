@@ -1406,7 +1406,7 @@
     
     function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
     
-   async function submitPMForm() {
+    async function submitPMForm() {
         if (!selectedAsset) return;      
         const items = document.querySelectorAll('.checklist-item');
         let details = [];
@@ -1417,17 +1417,26 @@
           const tid = item.getAttribute('data-topic');
           const isCritical = item.getAttribute('data-critical') === 'true';
           let val = "";
+          let status = "PASS"; // 🟢 ย้ายสถานะเริ่มต้นมาไว้ตรงนี้
           
           const textInput = item.querySelector('.pm-val');
           const radioInputs = item.querySelectorAll('.pm-val-radio');
           const multiInputs = item.querySelectorAll('.pm-val-multi'); 
           
-          // ตรวจสอบและดึงค่าตามประเภท Input
+          // ตรวจสอบและดึงค่าตามประเภท Input พร้อมกำหนด Status
           if (textInput) {
             val = textInput.value.trim();
+            // 🟢 ไม่มีการเช็ค status FAIL จากช่อง Text/Number เพื่อให้กรอกเลข 0 ได้
           } else if (radioInputs.length > 0) {
             const checkedRadio = item.querySelector('.pm-val-radio:checked');
-            if (checkedRadio) val = checkedRadio.value;
+            if (checkedRadio) {
+              val = checkedRadio.value;
+              // 🟢 ตรวจสอบสถานะ FAIL เฉพาะประเภท Radio (0 = ผิดปกติ)
+              if (val === "0") { 
+                status = "FAIL"; 
+                hasFail = true; 
+              }
+            }
           } else if (multiInputs.length > 0) {
             const checkedMulti = item.querySelectorAll('.pm-val-multi:checked');
             if (checkedMulti.length > 0) {
@@ -1447,11 +1456,6 @@
             item.style.padding = "0"; 
             item.style.backgroundColor = "transparent";
           }        
-          
-          let status = "PASS";
-          // หมายเหตุ: โค้ดส่วนนี้ยังเป็นเวอร์ชันที่เช็ค val === "0" จากทุกช่องอยู่นะครับ 
-          // หากอนาคตมีการกรอกช่อง Number เป็นเลข 0 อาจทำให้ระบบมองว่า FAIL ได้ครับ
-          if (val === "0" || val === 0) { status = "FAIL"; hasFail = true; }
           
           details.push({ topic_id: tid, status: status, score: val, remark: "" });
         });      
@@ -1486,10 +1490,10 @@
             await Promise.all([loadPMHistory(), loadAbnormalList()]);
             renderDashboard();
             
-            // 2. สลับ Tab รอไว้ด้านหลัง Modal (เผื่อผู้ใช้ปิด Modal Detail จะได้เจอหน้า Tab ที่ถูกต้อง)
+            // 2. สลับ Tab รอไว้ด้านหลัง Modal
             if (hasFail) switchTab('abnormal'); else switchTab('completed');
             
-            // 3. 🟢 เรียกหน้า Detail ขึ้นมาแทนการปิด Modal 🟢
+            // 3. เรียกหน้า Detail ขึ้นมาแสดงทันที
             showPMReportDetail(res.data.pm_id);
             
           } else {
