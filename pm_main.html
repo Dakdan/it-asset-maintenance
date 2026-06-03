@@ -1319,56 +1319,104 @@
     function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
 
     async function submitPMForm() {
-      if (!selectedAsset) return;      
-      const items = document.querySelectorAll('.checklist-item');
-      let details = [];
-      let isValid = true;
-      let hasFail = false;      
-      items.forEach(item => {
-        const tid = item.getAttribute('data-topic');
-        const isCritical = item.getAttribute('data-critical') === 'true';
-        let val = "";
-        const textInput = item.querySelector('.pm-val');
-        const radioInputs = item.querySelectorAll('.pm-val-radio');        
-        if (textInput) val = textInput.value.trim();
-        else if (radioInputs.length > 0) {
-          const checkedRadio = item.querySelector('.pm-val-radio:checked');
-          if (checkedRadio) val = checkedRadio.value;
-        }        
-        if (isCritical && val === "") {
-          isValid = false;
-          item.style.border = "1px solid var(--error)"; item.style.padding = "8px"; item.style.borderRadius = "8px"; item.style.backgroundColor = "#fef2f2";
-        } else {
-          item.style.border = "none"; item.style.padding = "0"; item.style.backgroundColor = "transparent";
-        }        
-        let status = "PASS";
-        if (val === "0" || val === 0) { status = "FAIL"; hasFail = true; }
-        details.push({ topic_id: tid, status: status, score: val, remark: "" });
-      });      
-      if (!isValid) { showNotification('warning', 'กรุณากรอกข้อมูลในหัวข้อที่จำเป็น (*) ให้ครบถ้วน'); return; }
-      
-      const payload = { action: 'savePM', asset_code: selectedAsset.Asset_ID, user: "เจ้าหน้าที่ไอที", result: hasFail ? "FAIL" : "PASS", note: hasFail ? "พบความผิดปกติ" : "ปกติ", details: details };
-      
-      showLoading(true, 'กำลังบันทึกข้อมูลเข้าระบบหลัก...');
-      try {
-        const response = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
-        const res = await response.json();        
-        if (res.status) {
-          showNotification('success', 'บันทึกข้อมูลสำเร็จ! (PM_ID: ' + res.data.pm_id + ')');
-          closeModal();
-          await Promise.all([loadPMHistory(), loadAbnormalList()]);
-          renderDashboard();
-          if (hasFail) switchTab('abnormal'); else switchTab('completed');
-        } else {
-          showNotification('error', 'ข้อผิดพลาดจากเซิร์ฟเวอร์: ' + res.message);
+  if (!selectedAsset) return;      
+  const items = document.querySelectorAll('.checklist-item');
+  let details = [];
+  let isValid = true;
+  let hasFail = false;      
+  
+  items.forEach(item => {
+    const tid = item.getAttribute('data-topic');
+    const isCritical = item.getAttribute('data-critical') === 'true';
+    let val = "";
+    let status = "PASS"; // 🟢 ย้ายสถานะเริ่มต้นมาไว้ตรงนี้
+    
+    const textInput = item.querySelector('.pm-val');
+    const radioInputs = item.querySelectorAll('.pm-val-radio');
+    const multiInputs = item.querySelectorAll('.pm-val-multi'); 
+    
+    // ตรวจสอบและดึงค่าตามประเภท Input พร้อมกำหนด Status
+    if (textInput) {
+      val = textInput.value.trim();
+      // 🟢 ไม่มีการเช็ค status FAIL จากช่อง Text/Number เพื่อให้กรอกเลข 0 ได้
+    } else if (radioInputs.length > 0) {
+      const checkedRadio = item.querySelector('.pm-val-radio:checked');
+      if (checkedRadio) {
+        val = checkedRadio.value;
+        // 🟢 ตรวจสอบสถานะ FAIL เฉพาะประเภท Radio (0 = ผิดปกติ)
+        if (val === "0") { 
+          status = "FAIL"; 
+          hasFail = true; 
         }
-      } catch (err) {
-        showNotification('error', 'เกิดข้อผิดพลาดในการเชื่อมต่อเครือข่าย');
-      } finally {
-        showLoading(false);
+      }
+    } else if (multiInputs.length > 0) {
+      const checkedMulti = item.querySelectorAll('.pm-val-multi:checked');
+      if (checkedMulti.length > 0) {
+        val = Array.from(checkedMulti).map(cb => cb.value).join(',');
       }
     }
-
+    
+    // ตรวจสอบค่าว่างสำหรับหัวข้อบังคับ (Critical)
+    if (isCritical && val === "") {
+      isValid = false;
+      item.style.border = "1px solid var(--error)"; 
+      item.style.padding = "8px"; 
+      item.style.borderRadius = "8px"; 
+      item.style.backgroundColor = "#fef2f2";
+    } else {
+      item.style.border = "none"; 
+      item.style.padding = "0"; 
+      item.style.backgroundColor = "transparent";
+    }        
+    
+    details.push({ topic_id: tid, status: status, score: val, remark: "" });
+  });      
+  
+  if (!isValid) { 
+    showNotification('warning', 'กรุณากรอกข้อมูลในหัวข้อที่จำเป็น (*) ให้ครบถ้วน'); 
+    return; 
+  }
+  
+  const payload = { 
+    action: 'savePM', 
+    asset_code: selectedAsset.Asset_ID, 
+    user: "เจ้าหน้าที่ไอที", 
+    result: hasFail ? "FAIL" : "PASS", 
+    note: hasFail ? "พบความผิดปกติ" : "ปกติ", 
+    details: details 
+  };
+  
+  showLoading(true, 'กำลังบันทึกข้อมูลเข้าระบบหลัก...');
+  try {
+    const response = await fetch(SCRIPT_URL, { 
+      method: 'POST', 
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+      body: JSON.stringify(payload) 
+    });
+    const res = await response.json();        
+    
+    if (res.status) {
+      showNotification('success', 'บันทึกข้อมูลสำเร็จ! (PM_ID: ' + res.data.pm_id + ')');
+      
+      // 1. รีเฟรชข้อมูลใน Dashboard พื้นหลังให้เป็นปัจจุบัน
+      await Promise.all([loadPMHistory(), loadAbnormalList()]);
+      renderDashboard();
+      
+      // 2. สลับ Tab รอไว้ด้านหลัง Modal
+      if (hasFail) switchTab('abnormal'); else switchTab('completed');
+      
+      // 3. เรียกหน้า Detail ขึ้นมาแสดงทันที
+      showPMReportDetail(res.data.pm_id);
+      
+    } else {
+      showNotification('error', 'ข้อผิดพลาดจากเซิร์ฟเวอร์: ' + res.message);
+    }
+  } catch (err) {
+    showNotification('error', 'เกิดข้อผิดพลาดในการเชื่อมต่อเครือข่าย');
+  } finally {
+    showLoading(false);
+  }
+}
     function handleQRUpload(event) { showNotification('success', 'รับภาพถ่ายแล้ว กรุณาพิมพ์หมายเลขครุภัณฑ์ในช่องค้นหาเพื่อสืบค้น'); }
     function setConnectionStatus(isOnline, text) {
       const indicator = document.getElementById('connIndicator'); const textEl = document.getElementById('connText');
