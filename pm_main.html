@@ -1405,8 +1405,7 @@
       }
     
     function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
-    
-    async function submitPMForm() {
+  async function submitPMForm() {
         if (!selectedAsset) return;      
         const items = document.querySelectorAll('.checklist-item');
         let details = [];
@@ -1417,27 +1416,19 @@
           const tid = item.getAttribute('data-topic');
           const isCritical = item.getAttribute('data-critical') === 'true';
           let val = "";
-          let status = "PASS"; // 🟢 ย้ายสถานะเริ่มต้นมาไว้ตรงนี้
           
           const textInput = item.querySelector('.pm-val');
           const radioInputs = item.querySelectorAll('.pm-val-radio');
-          const multiInputs = item.querySelectorAll('.pm-val-multi'); 
+          const multiInputs = item.querySelectorAll('.pm-val-multi'); // เพิ่มตัวแปรเช็ค Multi Checkbox
           
-          // ตรวจสอบและดึงค่าตามประเภท Input พร้อมกำหนด Status
+          // ตรวจสอบและดึงค่าตามประเภท Input
           if (textInput) {
             val = textInput.value.trim();
-            // 🟢 ไม่มีการเช็ค status FAIL จากช่อง Text/Number เพื่อให้กรอกเลข 0 ได้
           } else if (radioInputs.length > 0) {
             const checkedRadio = item.querySelector('.pm-val-radio:checked');
-            if (checkedRadio) {
-              val = checkedRadio.value;
-              // 🟢 ตรวจสอบสถานะ FAIL เฉพาะประเภท Radio (0 = ผิดปกติ)
-              if (val === "0") { 
-                status = "FAIL"; 
-                hasFail = true; 
-              }
-            }
+            if (checkedRadio) val = checkedRadio.value;
           } else if (multiInputs.length > 0) {
+            // ส่วนที่เพิ่มใหม่: ดึงค่าจาก Checkbox ที่ถูกเลือกหลายอันมาต่อกันด้วย ,
             const checkedMulti = item.querySelectorAll('.pm-val-multi:checked');
             if (checkedMulti.length > 0) {
               val = Array.from(checkedMulti).map(cb => cb.value).join(',');
@@ -1456,6 +1447,9 @@
             item.style.padding = "0"; 
             item.style.backgroundColor = "transparent";
           }        
+          
+          let status = "PASS";
+          if (val === "0" || val === 0) { status = "FAIL"; hasFail = true; }
           
           details.push({ topic_id: tid, status: status, score: val, remark: "" });
         });      
@@ -1485,17 +1479,10 @@
           
           if (res.status) {
             showNotification('success', 'บันทึกข้อมูลสำเร็จ! (PM_ID: ' + res.data.pm_id + ')');
-            
-            // 1. รีเฟรชข้อมูลใน Dashboard พื้นหลังให้เป็นปัจจุบัน
+            closeModal();
             await Promise.all([loadPMHistory(), loadAbnormalList()]);
             renderDashboard();
-            
-            // 2. สลับ Tab รอไว้ด้านหลัง Modal
             if (hasFail) switchTab('abnormal'); else switchTab('completed');
-            
-            // 3. เรียกหน้า Detail ขึ้นมาแสดงทันที
-            showPMReportDetail(res.data.pm_id);
-            
           } else {
             showNotification('error', 'ข้อผิดพลาดจากเซิร์ฟเวอร์: ' + res.message);
           }
@@ -1505,6 +1492,7 @@
           showLoading(false);
         }
       }
+
     function handleQRUpload(event) { showNotification('success', 'รับภาพถ่ายแล้ว กรุณาพิมพ์หมายเลขครุภัณฑ์ในช่องค้นหาเพื่อสืบค้น'); }
     function setConnectionStatus(isOnline, text) {
       const indicator = document.getElementById('connIndicator'); const textEl = document.getElementById('connText');
