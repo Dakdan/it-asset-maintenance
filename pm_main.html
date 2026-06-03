@@ -618,7 +618,7 @@
       });
     }
 
-   function renderCompletedList() {
+  function renderCompletedList() {
       const container = document.getElementById('completedContainer');
       if (pmHistory.length === 0) {
         container.innerHTML = `<div class="empty-state" style="grid-column: 1/-1;"><div class="empty-state-icon">✅</div><div class="empty-state-text">ยังไม่พบบันทึกที่ผ่านการ PM</div></div>`;
@@ -626,18 +626,19 @@
       }
       
       container.innerHTML = pmHistory.map(pm => `
-        <div class="asset-card completed" onclick="showPMReportDetail('${pm.PM_No || pm.Asset_ID}')" style="cursor:pointer; transition: transform 0.2s;">
+        <div class="asset-card completed" onclick="showPMReportDetail('${pm.pmId}')" style="cursor:pointer; transition: transform 0.2s;">
           <div class="asset-header">
             <div class="asset-id" style="color: var(--success);">${escapeHtml(pm.Asset_ID)}</div>
             <div class="dept-badge" style="background: #d1fae5; color: #047857;">ผ่านเกณฑ์ปกติ</div>
           </div>
           <div class="asset-details">
+            <p><span class="detail-label">รหัสบันทึก</span><span class="detail-value">${escapeHtml(pm.PM_No || '-')}</span></p>
             <p><span class="detail-label">ผู้รับผิดชอบ</span><span class="detail-value">${escapeHtml(pm.Checker_Name || 'เจ้าหน้าที่ไอที')}</span></p>
             <p><span class="detail-label">วันที่ตรวจ</span><span class="detail-value">${escapeHtml(pm.Check_Date || 'N/A')}</span></p>
             <p><span class="detail-label">รายละเอียด</span><span class="detail-value">${escapeHtml(truncateText(pm.Note || '-', 50))}</span></p>
           </div>
-          <div style="text-align:right; margin-top:8px; font-size:11px; color:var(--primary);">
-            คลิกเพื่อดูรายละเอียดรายการเช็คลิสต์ 🔍
+          <div style="text-align:right; margin-top:8px; font-size:11px; color:var(--primary); font-weight: bold;">
+            คลิกเพื่อดูรายละเอียดเช็คลิสต์ 🔍
           </div>
         </div>
       `).join('');
