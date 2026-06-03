@@ -1021,29 +1021,24 @@
       }
     }
 
- async function showPMReportDetail(pmId) {
-    if (!pmId) return;
-  
-    const modal = document.getElementById('modalOverlay');
-    const modalBody = document.getElementById('modalBody');
-    modal.classList.add('show');
-  
-    // แสดงสถานะกำลังโหลดด้วยสีบานเย็น
-    modalBody.innerHTML = `
-      <div style="text-align:center; padding:40px;">
-        <div class="spinner" style="margin: 0 auto 15px; border: 4px solid #fce7f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite;"></div>
-        <p style="color:var(--text-muted); font-size:14px;">กำลังดึงรายละเอียดบันทึก...</p>
-      </div>`;
-  
-    try {
-      const response = await fetch(`${SCRIPT_URL}?action=getPMFullDetails&pmId=${encodeURIComponent(pmId)}`);
-      const res = await response.json();
-      if (!res.status) throw new Error(res.message);
-  
-      const { record, asset, checklists } = res.data;
+async function showPMReportDetail(pmId) {
+  if (!pmId) return;
+
+  const modal = document.getElementById('modalOverlay');
+  const modalBody = document.getElementById('modalBody');
+  modal.classList.add('show');
+
+  modalBody.innerHTML = `<div style="text-align:center; padding:30px;"><p>กำลังโหลดรายละเอียด...</p></div>`;
+
+  try {
+    const response = await fetch(`${SCRIPT_URL}?action=getPMFullDetails&pmId=${encodeURIComponent(pmId)}`);
+    const res = await response.json();
+    if (!res.status) throw new Error(res.message);
+
+    const { record, asset, checklists } = res.data;
   
       // --- 1. ส่วนหัว: ข้อมูลครุภัณฑ์ (สไตล์ viewAssetHistory) ---
-     let html = `
+    let html = `
       <div style="background: #fff; border: 1px solid #eef2f6; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
           
@@ -1061,12 +1056,12 @@
 
           <div style="grid-column: span 2;">
             <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">แผนก/หน่วยงาน</label>
-            <div style="font-weight: 700; color: var(--text-main); font-size: 14px;">${escapeHtml(asset.Dept_Name || asset.Dept_ID || '-')}</div>
+            <div style="font-weight: 700; color: var(--text-main); font-size: 14px;">${escapeHtml(asset.Dept_Name || '-')}</div>
           </div>
 
           <div style="grid-column: span 2;">
-            <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">รายละเอียดครุภัณฑ์</label>
-            <div style="color: #64748b; font-size: 13px; line-height: 1.5;">${escapeHtml(asset.Asset_DB_Details || 'เลขครุภัณฑ์: ' + asset.Asset_ID)}</div>
+            <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">รายละเอียดครุภัณฑ์ (รหัส: ${escapeHtml(asset.Asset_ID)})</label>
+            <div style="color: #64748b; font-size: 13px; line-height: 1.5;">${escapeHtml(asset.Asset_DB_Details || '-')}</div>
           </div>
           
         </div>
@@ -1076,71 +1071,59 @@
         <span style="font-size: 14px; font-weight: 700; color: var(--text-main);">📋 รายการตรวจสอบและผลการตรวจ</span>
       </div>
     `;
-  
-      // --- 2. จัดกลุ่ม Checklist ตาม Category ---
-      const grouped = checklists.reduce((acc, item) => {
-        const cat = item.Category_Name || "รายการตรวจสอบ";
-        if (!acc[cat]) acc[cat] = [];
-        acc[cat].push(item);
-        return acc;
-      }, {});
-  
-      // --- 3. แสดงรายการจัดกลุ่มพร้อมเลขลำดับ ---
-      for (const category in grouped) {
+     const grouped = checklists.reduce((acc, item) => {
+      const cat = item.Category_Name || "รายการตรวจสอบ";
+      if (!acc[cat]) acc[cat] = [];
+      acc[cat].push(item);
+      return acc;
+    }, {});
+
+    let globalIndex = 1; // ตัวแปรสำหรับรันเลขข้อต่อเนื่อง
+
+    for (const category in grouped) {
+      html += `
+        <div style="margin-bottom: 15px;">
+          <div style="background: #fdf2f8; color: var(--primary); padding: 8px 12px; border-radius: 6px; font-weight: bold; font-size: 13px; border-left: 4px solid var(--primary); margin-bottom: 8px;">
+            ${category}
+          </div>
+          <div style="background: white; border: 1px solid #f1f5f9; border-radius: 8px; overflow: hidden;">
+      `;
+
+      grouped[category].forEach(item => {
+        const isPass = (item.Status == "1" || item.Status == "PASS");
+        const statusText = isPass ? "✅ ปกติ" : "❌ ไม่ปกติ";
+        const statusColor = isPass ? "var(--success)" : "var(--error)";
+
         html += `
-          <div style="margin-bottom: 18px;">
-            <div style="background: #fdf2f8; color: var(--primary); padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 14px; border-left: 5px solid var(--primary); margin-bottom: 10px;">
-              ${category}
+          <div style="padding: 10px 15px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+            <div style="font-size: 13px; flex: 1;">
+              <span style="font-weight: bold; color: var(--primary); margin-right: 5px;">${globalIndex}.</span> ${item.Topic_Name}
+              ${item.Remark ? `<div style="font-size: 11px; color: #64748b; margin-top: 2px; padding-left: 20px;">หมายเหตุ: ${escapeHtml(item.Remark)}</div>` : ''}
             </div>
-            <div style="background: white; border: 1px solid #f1f5f9; border-radius: 8px; overflow: hidden;">
-        `;
-  
-        // ใช้ index ในการรันเลขหน้าหัวข้อ
-        grouped[category].forEach((item, index) => {
-          const isPass = (item.Status == "1" || item.Status == "PASS");
-          const statusText = isPass ? "✅ ปกติ" : "❌ ไม่ปกติ";
-          const statusColor = isPass ? "var(--success)" : "var(--error)";
-  
-          html += `
-            <div style="padding: 12px 15px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
-              <div style="flex: 1;">
-                <div style="font-size: 13.5px; color: var(--text-main);">
-                  <span style="font-weight: 700; margin-right: 5px;">${index + 1}.</span> ${item.Topic_Name}
-                </div>
-                ${item.Remark ? `<div style="font-size: 11px; color: #64748b; margin-top: 3px; padding-left: 20px;">หมายเหตุ: ${escapeHtml(item.Remark)}</div>` : ''}
-              </div>
-              <div style="text-align: right; min-width: 75px;">
-                <span style="font-weight: 700; font-size: 12px; color: ${statusColor}">${statusText}</span>
-              </div>
-            </div>
-          `;
-        });
-  
-        html += `</div></div>`;
-      }
-  
-      // --- 4. ส่วนบันทึกเพิ่มเติม (Footer) ---
-      if (record.Note && record.Note !== "-") {
-        html += `
-          <div style="margin-top: 10px; padding: 15px; background: #f8fafc; border-radius: 8px; font-size: 13px; border: 1px dashed #cbd5e1; line-height: 1.5;">
-            <strong style="color: var(--primary);">บันทึกเพิ่มเติมจากเจ้าหน้าที่:</strong><br>
-            <span style="color: #475569;">${escapeHtml(record.Note)}</span>
+            <div style="font-weight: bold; font-size: 12px; color: ${statusColor}; min-width: 70px; text-align: right;">${statusText}</div>
           </div>
         `;
-      }
-  
-      modalBody.innerHTML = html;
-  
-    } catch (err) {
-      console.error(err);
-      modalBody.innerHTML = `
-        <div style="text-align:center; padding:30px;">
-          <div style="font-size:40px; margin-bottom:10px;">⚠️</div>
-          <p style="color:var(--error); font-weight:bold;">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
-          <p style="font-size:12px; color:#666;">${err.message}</p>
-        </div>`;
+        globalIndex++; // เพิ่มค่าเลขข้อทีละ 1 ตลอดทั้งฟังก์ชัน
+      });
+
+      html += `</div></div>`;
     }
+
+    // --- 3. บันทึกเพิ่มเติมตอนท้าย ---
+    if (record.Note && record.Note !== "-") {
+      html += `
+        <div style="margin-top: 10px; padding: 12px; background: #f8fafc; border-radius: 8px; font-size: 13px; border: 1px dashed #cbd5e1; color: #475569;">
+          <strong>บันทึกเพิ่มเติม:</strong> ${escapeHtml(record.Note)}
+        </div>
+      `;
+    }
+
+    modalBody.innerHTML = html;
+
+  } catch (err) {
+    modalBody.innerHTML = `<div style="color:var(--error); padding:20px; text-align:center;">❌ ไม่สามารถโหลดข้อมูลได้: ${err.message}</div>`;
   }
+}
     function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
 
     async function submitPMForm() {
