@@ -1035,16 +1035,17 @@
         modalBody.innerHTML = document.querySelector('.modal-info-grid').outerHTML + `<div class="empty-state" style="border-color:#fca5a5; background:#fef2f2; padding:40px 20px;"><div class="empty-state-icon" style="color:#ef4444;">❌</div><div class="empty-state-text" style="color:#b91c1c;">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${err.message}</div></div>`;
       }
     }
+    
     async function showPMReportDetail(pmId) {
       if (!pmId) return;
-    
+      
       const modal = document.getElementById('modalOverlay');
       const modalBody = document.getElementById('modalBody');
-      const modalFooter = document.getElementById('modalFooter'); // เพิ่มการเรียกใช้ Footer
+      const modalFooter = document.getElementById('modalFooter'); 
       const titleWrapper = document.getElementById('modalTitleWrapper'); 
-    
+      
       modal.classList.add('show');
-    
+      
       // รีเซ็ต Title ตอนดูรายละเอียด (ปรับข้อความได้ตามต้องการ)
       if (titleWrapper) {
         titleWrapper.innerHTML = `
@@ -1052,18 +1053,18 @@
           <div class="modal-subtitle">ข้อมูลการตรวจสอบและบำรุงรักษา</div>
         `;
       }
-    
+      
       modalBody.innerHTML = `<div style="text-align:center; padding:30px;"><p>กำลังโหลดรายละเอียด...</p></div>`;
       if (modalFooter) modalFooter.innerHTML = ''; // ซ่อนปุ่มระหว่างโหลด
-    
+      
       try {
         const response = await fetch(`${SCRIPT_URL}?action=getPMFullDetails&pmId=${encodeURIComponent(pmId)}`);
         const res = await response.json();
         if (!res.status) throw new Error(res.message);
-    
-        const { record, asset, checklists } = res.data;
       
-        // --- 1. ส่วนหัว: ข้อมูลครุภัณฑ์ (แสดงรหัสครุภัณฑ์และ PM_No ให้เด่น) ---
+        const { record, asset, checklists } = res.data;
+        
+        // --- 1. ส่วนหัว: ข้อมูลครุภัณฑ์ ---
         let html = `
           <div style="background: #fff; border: 1px solid #eef2f6; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
             
@@ -1079,38 +1080,38 @@
                 </div>
               </div>
             </div>
-    
+      
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
               
               <div>
                 <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">ประเภทอุปกรณ์</label>
                 <div style="font-weight: 700; color: var(--text-main); font-size: 14px;">${escapeHtml(asset.Asset_Group_Name || 'ไม่ระบุประเภท')}</div>
               </div>
-    
+      
               <div>
                 <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">Serial Number</label>
                 <div style="background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 4px; display: inline-block; font-size: 13px; font-weight: 600; border: 1px solid #e2e8f0;">
                   ${escapeHtml(asset.Serial || '-')}
                 </div>
               </div>
-    
+      
               <div style="grid-column: span 2;">
                 <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">แผนก/หน่วยงาน</label>
                 <div style="font-weight: 700; color: var(--text-main); font-size: 14px;">${escapeHtml(asset.Dept_Name || '-')}</div>
               </div>
-    
+      
               <div style="grid-column: span 2;">
                 <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">รายละเอียดครุภัณฑ์</label>
                 <div style="color: #64748b; font-size: 13px; line-height: 1.5; background: #fafafa; padding: 10px; border-radius: 8px; border: 1px solid #f1f5f9;">
                   ${escapeHtml(asset.Asset_DB_Details || '-')}
                 </div>
               </div>
-    
+      
               <div>
                 <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">วันที่ตรวจสอบ</label>
                 <div style="font-weight: 600; color: #475569; font-size: 13px;">${record.Date}</div>
               </div>
-    
+      
               <div>
                 <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">ผู้ตรวจสอบ</label>
                 <div style="font-weight: 600; color: #475569; font-size: 13px;">${escapeHtml(record.Checker)}</div>
@@ -1118,12 +1119,80 @@
               
             </div>
           </div>
-    
+      
           <div style="margin-bottom: 15px; border-bottom: 2px solid #fdf2f8; padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 15px;">📋</span>
             <span style="font-size: 14px; font-weight: 700; color: var(--primary);">รายการตรวจสอบและผลการตรวจ</span>
           </div>
         `;
+
+        // --- 2. ส่วนรายการ Checklist (ประมวลผล 0, 1, Text, Number) ---
+        if (checklists && checklists.length > 0) {
+          html += `<div style="display: flex; flex-direction: column; gap: 10px;">`;
+          
+          checklists.forEach((item, index) => {
+            let displayScore = item.score !== undefined && item.score !== null ? String(item.score).trim() : '';
+            let badgeBg = '#f1f5f9';
+            let badgeColor = '#64748b';
+            let badgeText = item.status || 'N/A';
+
+            // ตรวจสอบเงื่อนไข PASS / FAIL และแปลงข้อความ
+            if (item.status === 'PASS') {
+              badgeBg = '#d1fae5'; // พื้นหลังเขียว
+              badgeColor = '#059669'; // ตัวหนังสือเขียว
+              
+              if (displayScore === '1') {
+                 badgeText = 'ปกติ';
+                 displayScore = ''; // ซ่อนเลข 1
+              } else {
+                 badgeText = 'ผ่าน';
+              }
+            } else if (item.status === 'FAIL') {
+              badgeBg = '#fee2e2'; // พื้นหลังแดง
+              badgeColor = '#dc2626'; // ตัวหนังสือแดง
+              
+              if (displayScore === '0') {
+                 badgeText = 'ผิดปกติ';
+                 displayScore = ''; // ซ่อนเลข 0
+              } else {
+                 badgeText = 'ไม่ผ่าน';
+              }
+            }
+
+            // ถ้ามีค่าอื่นๆ (Text/Number) ให้แสดงในวงเล็บ
+            const scoreHtml = displayScore !== '' ? `<span style="margin-left:6px; opacity:0.9; font-weight:500;">(${escapeHtml(displayScore)})</span>` : '';
+
+            html += `
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="flex: 1;">
+                  <div style="font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 4px;">
+                    ${index + 1}. ${escapeHtml(item.topic_name || 'หัวข้อการตรวจ')}
+                  </div>
+                  ${item.remark ? `<div style="font-size: 12px; color: #64748b;">หมายเหตุ: ${escapeHtml(item.remark)}</div>` : ''}
+                </div>
+                <div style="text-align: right; min-width: 120px;">
+                  <span style="display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; background: ${badgeBg}; color: ${badgeColor};">
+                    ${badgeText} ${scoreHtml}
+                  </span>
+                </div>
+              </div>
+            `;
+          });
+          html += `</div>`;
+        } else {
+          html += `<div style="text-align:center; padding:20px; color:#94a3b8;">ไม่พบรายการตรวจสอบ</div>`;
+        }
+
+        // นำ HTML ไปแสดงผลใน Modal
+        modalBody.innerHTML = html;
+        if (modalFooter) {
+          modalFooter.innerHTML = `<button class="btn btn-secondary" style="background:#f1f5f9; color:var(--text-muted); padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;" onclick="closeModal()">ปิดหน้าต่าง</button>`;
+        }
+
+      } catch (err) {
+        modalBody.innerHTML = `<div style="text-align:center; padding:30px; color:#ef4444;">เกิดข้อผิดพลาด: ${err.message}</div>`;
+      }
+    }
     
         // --- 2. การจัดกลุ่มและแสดงรายการตรวจสอบ ---
         const grouped = checklists.reduce((acc, item) => {
@@ -1336,57 +1405,93 @@
       }
     
     function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
-
-    async function submitPMForm() {
-      if (!selectedAsset) return;      
-      const items = document.querySelectorAll('.checklist-item');
-      let details = [];
-      let isValid = true;
-      let hasFail = false;      
-      items.forEach(item => {
-        const tid = item.getAttribute('data-topic');
-        const isCritical = item.getAttribute('data-critical') === 'true';
-        let val = "";
-        const textInput = item.querySelector('.pm-val');
-        const radioInputs = item.querySelectorAll('.pm-val-radio');        
-        if (textInput) val = textInput.value.trim();
-        else if (radioInputs.length > 0) {
-          const checkedRadio = item.querySelector('.pm-val-radio:checked');
-          if (checkedRadio) val = checkedRadio.value;
-        }        
-        if (isCritical && val === "") {
-          isValid = false;
-          item.style.border = "1px solid var(--error)"; item.style.padding = "8px"; item.style.borderRadius = "8px"; item.style.backgroundColor = "#fef2f2";
-        } else {
-          item.style.border = "none"; item.style.padding = "0"; item.style.backgroundColor = "transparent";
-        }        
-        let status = "PASS";
-        if (val === "0" || val === 0) { status = "FAIL"; hasFail = true; }
-        details.push({ topic_id: tid, status: status, score: val, remark: "" });
-      });      
-      if (!isValid) { showNotification('warning', 'กรุณากรอกข้อมูลในหัวข้อที่จำเป็น (*) ให้ครบถ้วน'); return; }
-      
-      const payload = { action: 'savePM', asset_code: selectedAsset.Asset_ID, user: "เจ้าหน้าที่ไอที", result: hasFail ? "FAIL" : "PASS", note: hasFail ? "พบความผิดปกติ" : "ปกติ", details: details };
-      
-      showLoading(true, 'กำลังบันทึกข้อมูลเข้าระบบหลัก...');
-      try {
-        const response = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
-        const res = await response.json();        
-        if (res.status) {
-          showNotification('success', 'บันทึกข้อมูลสำเร็จ! (PM_ID: ' + res.data.pm_id + ')');
-          closeModal();
-          await Promise.all([loadPMHistory(), loadAbnormalList()]);
-          renderDashboard();
-          if (hasFail) switchTab('abnormal'); else switchTab('completed');
-        } else {
-          showNotification('error', 'ข้อผิดพลาดจากเซิร์ฟเวอร์: ' + res.message);
+  async function submitPMForm() {
+        if (!selectedAsset) return;      
+        const items = document.querySelectorAll('.checklist-item');
+        let details = [];
+        let isValid = true;
+        let hasFail = false;      
+        
+        items.forEach(item => {
+          const tid = item.getAttribute('data-topic');
+          const isCritical = item.getAttribute('data-critical') === 'true';
+          let val = "";
+          
+          const textInput = item.querySelector('.pm-val');
+          const radioInputs = item.querySelectorAll('.pm-val-radio');
+          const multiInputs = item.querySelectorAll('.pm-val-multi'); // เพิ่มตัวแปรเช็ค Multi Checkbox
+          
+          // ตรวจสอบและดึงค่าตามประเภท Input
+          if (textInput) {
+            val = textInput.value.trim();
+          } else if (radioInputs.length > 0) {
+            const checkedRadio = item.querySelector('.pm-val-radio:checked');
+            if (checkedRadio) val = checkedRadio.value;
+          } else if (multiInputs.length > 0) {
+            // ส่วนที่เพิ่มใหม่: ดึงค่าจาก Checkbox ที่ถูกเลือกหลายอันมาต่อกันด้วย ,
+            const checkedMulti = item.querySelectorAll('.pm-val-multi:checked');
+            if (checkedMulti.length > 0) {
+              val = Array.from(checkedMulti).map(cb => cb.value).join(',');
+            }
+          }
+          
+          // ตรวจสอบค่าว่างสำหรับหัวข้อบังคับ (Critical)
+          if (isCritical && val === "") {
+            isValid = false;
+            item.style.border = "1px solid var(--error)"; 
+            item.style.padding = "8px"; 
+            item.style.borderRadius = "8px"; 
+            item.style.backgroundColor = "#fef2f2";
+          } else {
+            item.style.border = "none"; 
+            item.style.padding = "0"; 
+            item.style.backgroundColor = "transparent";
+          }        
+          
+          let status = "PASS";
+          if (val === "0" || val === 0) { status = "FAIL"; hasFail = true; }
+          
+          details.push({ topic_id: tid, status: status, score: val, remark: "" });
+        });      
+        
+        if (!isValid) { 
+          showNotification('warning', 'กรุณากรอกข้อมูลในหัวข้อที่จำเป็น (*) ให้ครบถ้วน'); 
+          return; 
         }
-      } catch (err) {
-        showNotification('error', 'เกิดข้อผิดพลาดในการเชื่อมต่อเครือข่าย');
-      } finally {
-        showLoading(false);
+        
+        const payload = { 
+          action: 'savePM', 
+          asset_code: selectedAsset.Asset_ID, 
+          user: "เจ้าหน้าที่ไอที", 
+          result: hasFail ? "FAIL" : "PASS", 
+          note: hasFail ? "พบความผิดปกติ" : "ปกติ", 
+          details: details 
+        };
+        
+        showLoading(true, 'กำลังบันทึกข้อมูลเข้าระบบหลัก...');
+        try {
+          const response = await fetch(SCRIPT_URL, { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+            body: JSON.stringify(payload) 
+          });
+          const res = await response.json();        
+          
+          if (res.status) {
+            showNotification('success', 'บันทึกข้อมูลสำเร็จ! (PM_ID: ' + res.data.pm_id + ')');
+            closeModal();
+            await Promise.all([loadPMHistory(), loadAbnormalList()]);
+            renderDashboard();
+            if (hasFail) switchTab('abnormal'); else switchTab('completed');
+          } else {
+            showNotification('error', 'ข้อผิดพลาดจากเซิร์ฟเวอร์: ' + res.message);
+          }
+        } catch (err) {
+          showNotification('error', 'เกิดข้อผิดพลาดในการเชื่อมต่อเครือข่าย');
+        } finally {
+          showLoading(false);
+        }
       }
-    }
 
     function handleQRUpload(event) { showNotification('success', 'รับภาพถ่ายแล้ว กรุณาพิมพ์หมายเลขครุภัณฑ์ในช่องค้นหาเพื่อสืบค้น'); }
     function setConnectionStatus(isOnline, text) {
