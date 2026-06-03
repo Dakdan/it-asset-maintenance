@@ -22,32 +22,20 @@ function logout() {
 
 // 4. ฟังก์ชันแสดงชื่อผู้ใช้ และ สลับปุ่ม Login/Logout (จุดสำคัญ)
 function updateAuthUI() {
-  const user = getCurrentUser();
-  const displayElement = document.getElementById("userNameDisplay");
-  const authBtn = document.getElementById("authBtn"); // ต้องมั่นใจว่าใน HTML ใส่ id="authBtn"
+    const user = getCurrentUser();
+    console.log("Current User Data:", user); // ดูค่าใน Console (F12)
 
-  if (user) {
-    // --- กรณี Login แล้ว ---
-    if (displayElement) {
-      displayElement.innerText = `ผู้ใช้งาน: ${user.fullname || user.username || 'Unknown'}`;
+    const displayElement = document.getElementById("userNameDisplay");
+    const authBtn = document.getElementById("authBtn");
+
+    if (user && displayElement) {
+        // ต้องมั่นใจว่า user.fullname มีค่าจริงๆ
+        displayElement.innerText = "ผู้ใช้งาน: " + (user.fullname || user.username || "ไม่มีชื่อ");
+        if (authBtn) authBtn.innerText = "ออกจากระบบ";
+    } else {
+        if (displayElement) displayElement.innerText = "";
+        if (authBtn) authBtn.innerText = "เข้าสู่ระบบ";
     }
-    if (authBtn) {
-      authBtn.innerText = "ออกจากระบบ";
-      authBtn.onclick = logout; // คลิกแล้ว Logout
-      // authBtn.classList.add('btn-logout'); // ถ้าอยากเปลี่ยนสีปุ่มผ่าน CSS
-    }
-  } else {
-    // --- กรณี Guest (ยังไม่ Login) ---
-    if (displayElement) {
-      displayElement.innerText = "";
-    }
-    if (authBtn) {
-      authBtn.innerText = "เข้าสู่ระบบ";
-      authBtn.onclick = function() {
-        window.location.href = "login.html"; // คลิกแล้วไปหน้า Login
-      };
-    }
-  }
 }
 
 // 5. รวมการทำงานเมื่อโหลดหน้าเว็บ
