@@ -1035,7 +1035,7 @@
         modalBody.innerHTML = document.querySelector('.modal-info-grid').outerHTML + `<div class="empty-state" style="border-color:#fca5a5; background:#fef2f2; padding:40px 20px;"><div class="empty-state-icon" style="color:#ef4444;">❌</div><div class="empty-state-text" style="color:#b91c1c;">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${err.message}</div></div>`;
       }
     }
-   async function showPMReportDetail(pmId) {
+  async function showPMReportDetail(pmId) {
       if (!pmId) return;
       
       const modal = document.getElementById('modalOverlay');
