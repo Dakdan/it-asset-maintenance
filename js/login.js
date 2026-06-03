@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (result.success) {
         App.Auth.set(result.user);
-        window.location.href = "pm_main.html";
+        window.location.href = "index.html";
       } else {
         App.Modal("เข้าสู่ระบบไม่สำเร็จ", result.message);
       }
