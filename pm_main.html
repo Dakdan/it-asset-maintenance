@@ -1021,137 +1021,306 @@
       }
     }
 
-async function showPMReportDetail(pmId) {
-  if (!pmId) return;
-
-  const modal = document.getElementById('modalOverlay');
-  const modalBody = document.getElementById('modalBody');
-  modal.classList.add('show');
-
-  modalBody.innerHTML = `<div style="text-align:center; padding:30px;"><p>กำลังโหลดรายละเอียด...</p></div>`;
-
-  try {
-    const response = await fetch(`${SCRIPT_URL}?action=getPMFullDetails&pmId=${encodeURIComponent(pmId)}`);
-    const res = await response.json();
-    if (!res.status) throw new Error(res.message);
-
-    const { record, asset, checklists } = res.data;
-  
-      // --- 1. ส่วนหัว: ข้อมูลครุภัณฑ์ (สไตล์ viewAssetHistory) ---
-   // --- 1. ส่วนหัว: ข้อมูลครุภัณฑ์ (แสดงรหัสครุภัณฑ์และ PM_No ให้เด่น) ---
-    let html = `
-      <div style="background: #fff; border: 1px solid #eef2f6; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-        
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 15px;">
-          <div>
-            <label style="color: #94a3b8; font-size: 11px; display: block; text-transform: uppercase; letter-spacing: 0.5px;">รหัสครุภัณฑ์ (Asset ID)</label>
-            <div style="color: var(--primary); font-size: 18px; font-weight: 800;">${escapeHtml(asset.Asset_ID)}</div>
-          </div>
-          <div style="text-align: right;">
-            <label style="color: #94a3b8; font-size: 11px; display: block; text-transform: uppercase; letter-spacing: 0.5px;">เลขที่บันทึก (PM No.)</label>
-            <div style="background: var(--primary); color: white; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 14px; margin-top: 2px;">
-              ${escapeHtml(record.PM_No)}
+    async function showPMReportDetail(pmId) {
+      if (!pmId) return;
+    
+      const modal = document.getElementById('modalOverlay');
+      const modalBody = document.getElementById('modalBody');
+      const modalFooter = document.getElementById('modalFooter'); // เพิ่มการเรียกใช้ Footer
+      const titleWrapper = document.getElementById('modalTitleWrapper'); 
+    
+      modal.classList.add('show');
+    
+      // รีเซ็ต Title ตอนดูรายละเอียด (ปรับข้อความได้ตามต้องการ)
+      if (titleWrapper) {
+        titleWrapper.innerHTML = `
+          <h2 class="modal-title">📄 รายละเอียดบันทึกงาน PM</h2>
+          <div class="modal-subtitle">ข้อมูลการตรวจสอบและบำรุงรักษา</div>
+        `;
+      }
+    
+      modalBody.innerHTML = `<div style="text-align:center; padding:30px;"><p>กำลังโหลดรายละเอียด...</p></div>`;
+      if (modalFooter) modalFooter.innerHTML = ''; // ซ่อนปุ่มระหว่างโหลด
+    
+      try {
+        const response = await fetch(`${SCRIPT_URL}?action=getPMFullDetails&pmId=${encodeURIComponent(pmId)}`);
+        const res = await response.json();
+        if (!res.status) throw new Error(res.message);
+    
+        const { record, asset, checklists } = res.data;
+      
+        // --- 1. ส่วนหัว: ข้อมูลครุภัณฑ์ (แสดงรหัสครุภัณฑ์และ PM_No ให้เด่น) ---
+        let html = `
+          <div style="background: #fff; border: 1px solid #eef2f6; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 15px;">
+              <div>
+                <label style="color: #94a3b8; font-size: 11px; display: block; text-transform: uppercase; letter-spacing: 0.5px;">รหัสครุภัณฑ์ (Asset ID)</label>
+                <div style="color: var(--primary); font-size: 18px; font-weight: 800;">${escapeHtml(asset.Asset_ID)}</div>
+              </div>
+              <div style="text-align: right;">
+                <label style="color: #94a3b8; font-size: 11px; display: block; text-transform: uppercase; letter-spacing: 0.5px;">เลขที่บันทึก (PM No.)</label>
+                <div style="background: var(--primary); color: white; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 14px; margin-top: 2px;">
+                  ${escapeHtml(record.PM_No)}
+                </div>
+              </div>
+            </div>
+    
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+              
+              <div>
+                <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">ประเภทอุปกรณ์</label>
+                <div style="font-weight: 700; color: var(--text-main); font-size: 14px;">${escapeHtml(asset.Asset_Group_Name || 'ไม่ระบุประเภท')}</div>
+              </div>
+    
+              <div>
+                <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">Serial Number</label>
+                <div style="background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 4px; display: inline-block; font-size: 13px; font-weight: 600; border: 1px solid #e2e8f0;">
+                  ${escapeHtml(asset.Serial || '-')}
+                </div>
+              </div>
+    
+              <div style="grid-column: span 2;">
+                <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">แผนก/หน่วยงาน</label>
+                <div style="font-weight: 700; color: var(--text-main); font-size: 14px;">${escapeHtml(asset.Dept_Name || '-')}</div>
+              </div>
+    
+              <div style="grid-column: span 2;">
+                <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">รายละเอียดครุภัณฑ์</label>
+                <div style="color: #64748b; font-size: 13px; line-height: 1.5; background: #fafafa; padding: 10px; border-radius: 8px; border: 1px solid #f1f5f9;">
+                  ${escapeHtml(asset.Asset_DB_Details || '-')}
+                </div>
+              </div>
+    
+              <div>
+                <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">วันที่ตรวจสอบ</label>
+                <div style="font-weight: 600; color: #475569; font-size: 13px;">${record.Date}</div>
+              </div>
+    
+              <div>
+                <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">ผู้ตรวจสอบ</label>
+                <div style="font-weight: 600; color: #475569; font-size: 13px;">${escapeHtml(record.Checker)}</div>
+              </div>
+              
             </div>
           </div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-          
-          <div>
-            <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">ประเภทอุปกรณ์</label>
-            <div style="font-weight: 700; color: var(--text-main); font-size: 14px;">${escapeHtml(asset.Asset_Group_Name || 'ไม่ระบุประเภท')}</div>
-          </div>
-
-          <div>
-            <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">Serial Number</label>
-            <div style="background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 4px; display: inline-block; font-size: 13px; font-weight: 600; border: 1px solid #e2e8f0;">
-              ${escapeHtml(asset.Serial || '-')}
-            </div>
-          </div>
-
-          <div style="grid-column: span 2;">
-            <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">แผนก/หน่วยงาน</label>
-            <div style="font-weight: 700; color: var(--text-main); font-size: 14px;">${escapeHtml(asset.Dept_Name || '-')}</div>
-          </div>
-
-          <div style="grid-column: span 2;">
-            <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">รายละเอียดครุภัณฑ์</label>
-            <div style="color: #64748b; font-size: 13px; line-height: 1.5; background: #fafafa; padding: 10px; border-radius: 8px; border: 1px solid #f1f5f9;">
-              ${escapeHtml(asset.Asset_DB_Details || '-')}
-            </div>
-          </div>
-
-          <div>
-            <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">วันที่ตรวจสอบ</label>
-            <div style="font-weight: 600; color: #475569; font-size: 13px;">${record.Date}</div>
-          </div>
-
-          <div>
-            <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">ผู้ตรวจสอบ</label>
-            <div style="font-weight: 600; color: #475569; font-size: 13px;">${escapeHtml(record.Checker)}</div>
-          </div>
-          
-        </div>
-      </div>
-
-      <div style="margin-bottom: 15px; border-bottom: 2px solid #fdf2f8; padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 15px;">📋</span>
-        <span style="font-size: 14px; font-weight: 700; color: var(--primary);">รายการตรวจสอบและผลการตรวจ</span>
-      </div>
-    `;
-     const grouped = checklists.reduce((acc, item) => {
-      const cat = item.Category_Name || "รายการตรวจสอบ";
-      if (!acc[cat]) acc[cat] = [];
-      acc[cat].push(item);
-      return acc;
-    }, {});
-
-    let globalIndex = 1; // ตัวแปรสำหรับรันเลขข้อต่อเนื่อง
-
-    for (const category in grouped) {
-      html += `
-        <div style="margin-bottom: 15px;">
-          <div style="background: #fdf2f8; color: var(--primary); padding: 8px 12px; border-radius: 6px; font-weight: bold; font-size: 13px; border-left: 4px solid var(--primary); margin-bottom: 8px;">
-            ${category}
-          </div>
-          <div style="background: white; border: 1px solid #f1f5f9; border-radius: 8px; overflow: hidden;">
-      `;
-
-      grouped[category].forEach(item => {
-        const isPass = (item.Status == "1" || item.Status == "PASS");
-        const statusText = isPass ? "✅ ปกติ" : "❌ ไม่ปกติ";
-        const statusColor = isPass ? "var(--success)" : "var(--error)";
-
-        html += `
-          <div style="padding: 10px 15px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
-            <div style="font-size: 13px; flex: 1;">
-              <span style="font-weight: bold; color: var(--primary); margin-right: 5px;">${globalIndex}.</span> ${item.Topic_Name}
-              ${item.Remark ? `<div style="font-size: 11px; color: #64748b; margin-top: 2px; padding-left: 20px;">หมายเหตุ: ${escapeHtml(item.Remark)}</div>` : ''}
-            </div>
-            <div style="font-weight: bold; font-size: 12px; color: ${statusColor}; min-width: 70px; text-align: right;">${statusText}</div>
+    
+          <div style="margin-bottom: 15px; border-bottom: 2px solid #fdf2f8; padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 15px;">📋</span>
+            <span style="font-size: 14px; font-weight: 700; color: var(--primary);">รายการตรวจสอบและผลการตรวจ</span>
           </div>
         `;
-        globalIndex++; // เพิ่มค่าเลขข้อทีละ 1 ตลอดทั้งฟังก์ชัน
-      });
-
-      html += `</div></div>`;
+    
+        // --- 2. การจัดกลุ่มและแสดงรายการตรวจสอบ ---
+        const grouped = checklists.reduce((acc, item) => {
+          const cat = item.Category_Name || "การประเมินและตรวจสภาพทั่วไป";
+          if (!acc[cat]) acc[cat] = [];
+          acc[cat].push(item);
+          return acc;
+        }, {});
+    
+        let categoryIndex = 0;
+    
+        for (const category in grouped) {
+          categoryIndex++;
+          
+          html += `
+            <div class="pm-category" style="margin-bottom: 15px;">
+              <div class="category-name" style="font-size:16px; font-weight:700; color:var(--primary); margin:18px 0 14px; padding:10px 14px; background:#f8fafc; border-radius:10px; border-left:4px solid var(--primary);">
+                📁 หมวด ${categoryIndex} : ${escapeHtml(category)}
+              </div>
+              <div style="background: white; border: 1px solid #f1f5f9; border-radius: 8px; overflow: hidden;">
+          `;
+    
+          let topicIndex = 0;
+    
+          grouped[category].forEach(item => {
+            topicIndex++;
+            const isPass = (item.Status == "1" || item.Status == "PASS");
+            const statusText = isPass ? "✅ ปกติ" : "❌ ไม่ปกติ";
+            const statusColor = isPass ? "var(--success)" : "var(--error)";
+    
+            html += `
+              <div class="checklist-item" style="padding: 12px 15px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+                
+                <label style="display:flex; align-items:flex-start; gap:10px; font-size:14px; font-weight:500; color:var(--text-main); word-break:break-word; flex:1;">
+                  <span style="min-width:30px; width:30px; height:30px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0;">
+                    ${categoryIndex}.${topicIndex}
+                  </span>
+                  
+                  <div style="flex:1; padding-top: 5px;">
+                    ${item.Topic_Name}
+                    ${item.Remark ? `<div style="font-size: 12px; color: #64748b; margin-top: 4px;">หมายเหตุ: ${escapeHtml(item.Remark)}</div>` : ''}
+                  </div>
+                </label>
+                
+                <div style="font-weight: bold; font-size: 13px; color: ${statusColor}; min-width: 75px; text-align: right; padding-top: 5px;">
+                  ${statusText}
+                </div>
+                
+              </div>
+            `;
+          });
+    
+          html += `</div></div>`;
+        }
+    
+        // --- 3. บันทึกเพิ่มเติมตอนท้าย ---
+        if (record.Note && record.Note !== "-") {
+          html += `
+            <div style="margin-top: 15px; padding: 15px; background: #f8fafc; border-radius: 8px; font-size: 13px; border: 1px dashed #cbd5e1; color: #475569;">
+              <strong style="color: var(--primary);">บันทึกเพิ่มเติม:</strong><br>
+              <div style="margin-top: 6px;">${escapeHtml(record.Note)}</div>
+            </div>
+          `;
+        }
+    
+        modalBody.innerHTML = html;
+    
+        // --- 4. สร้างปุ่มแก้ไขใน Footer ---
+        if (modalFooter) {
+          // แปลงข้อมูล Object ทั้งหมดเป็น String เพื่อส่งไปให้ฟังก์ชันเปิดฟอร์มแก้ไข
+          const pmDataStr = encodeURIComponent(JSON.stringify(res.data));
+          
+          modalFooter.innerHTML = `
+            <button class="btn btn-secondary" style="background:#f1f5f9; color:var(--text-muted);" onclick="closeModal()">ปิดหน้าต่าง</button>
+            <button class="btn" style="background:var(--primary); color:#fff; font-weight:bold; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);" onclick="openEditPMForm('${pmId}', '${pmDataStr}')">
+              ✏️ แก้ไขข้อมูล PM
+            </button>
+          `;
+        }
+    
+      } catch (err) {
+        modalBody.innerHTML = `<div style="color:var(--error); padding:20px; text-align:center;">❌ ไม่สามารถโหลดข้อมูลได้: ${err.message}</div>`;
+        if (modalFooter) {
+          modalFooter.innerHTML = `<button class="btn btn-secondary" onclick="closeModal()">ปิด</button>`;
+        }
+      }
     }
 
-    // --- 3. บันทึกเพิ่มเติมตอนท้าย ---
-    if (record.Note && record.Note !== "-") {
-      html += `
-        <div style="margin-top: 10px; padding: 12px; background: #f8fafc; border-radius: 8px; font-size: 13px; border: 1px dashed #cbd5e1; color: #475569;">
-          <strong>บันทึกเพิ่มเติม:</strong> ${escapeHtml(record.Note)}
-        </div>
-      `;
-    }
-
-    modalBody.innerHTML = html;
-
-  } catch (err) {
-    modalBody.innerHTML = `<div style="color:var(--error); padding:20px; text-align:center;">❌ ไม่สามารถโหลดข้อมูลได้: ${err.message}</div>`;
-  }
-}
+    async function openEditPMForm(pmId, encodedData) {
+        // ถอดรหัสและแปลงข้อมูลกลับเป็น Object
+        const pmData = JSON.parse(decodeURIComponent(encodedData));
+        const { asset, record, checklists } = pmData;
+      
+        const modalBody = document.getElementById('modalBody');
+        const titleWrapper = document.getElementById('modalTitleWrapper');
+        const modalFooter = document.getElementById('modalFooter');
+      
+        // เปลี่ยน Title เป็นโหมดแก้ไข
+        titleWrapper.innerHTML = `
+          <h2 class="modal-title">✏️ แก้ไขบันทึกงาน PM: <span style="color: var(--primary);">${escapeHtml(asset.Asset_ID || '')}</span></h2>
+          <div class="modal-subtitle">รหัสใบงาน: ${escapeHtml(record.PM_No)} | วันที่เดิม: ${record.Date}</div>
+        `;
+      
+        // สร้างส่วนแสดงข้อมูลครุภัณฑ์เหมือน openPMPanel
+        const infoGridHtml = `
+          <div class="modal-info-grid">
+            <div class="info-block"><span class="info-label">ประเภทอุปกรณ์</span><span class="info-val">${escapeHtml(asset.Asset_Group_Name || 'N/A')}</span></div>
+            <div class="info-block"><span class="info-label">Serial Number</span><span class="info-val" style="font-family:monospace; background:#f1f5f9; padding:2px 6px; border-radius:4px; width:fit-content;">${escapeHtml(asset.Serial || '-')}</span></div>
+            <div class="info-block"><span class="info-label">แผนก/หน่วยงาน</span><span class="info-val">${escapeHtml(asset.Dept_Name || 'ไม่ระบุ')}</span></div>
+          </div>
+        `;
+      
+        modalBody.innerHTML = infoGridHtml + `<p style="text-align:center; padding:20px; color:var(--text-muted);">กำลังโหลดฟอร์มแก้ไข...</p>`;
+        
+        // เปลี่ยน Footer เป็นโหมด "บันทึกการแก้ไข" และปุ่ม "ย้อนกลับ"
+        modalFooter.innerHTML = `
+          <button class="btn btn-secondary" style="background:#f1f5f9; color:var(--text-muted);" onclick="showPMReportDetail('${pmId}')">⬅️ ย้อนกลับ</button>
+          <button class="btn btn-search" id="btnUpdatePM" onclick="submitUpdatePM('${pmId}')">💾 บันทึกการแก้ไขข้อมูล</button>
+        `;
+      
+        try {
+          // ต้องตรวจสอบให้แน่ใจว่าใน asset มี Asset_Type_ID เพื่อไปดึงหัวข้อมาสร้างฟอร์ม
+          const response = await fetch(`${SCRIPT_URL}?action=getPMTopics&assetType=${encodeURIComponent(asset.Asset_Type_ID)}`);
+          const res = await response.json();        
+          
+          if (res.status && res.data && res.data.length > 0) {
+            let html = infoGridHtml;
+            let lastCategory = "";
+            let categoryIndex = 0;
+            let topicIndex = 0;
+      
+            res.data.forEach(topic => {
+              const categoryName = topic.category_name || 'การประเมินและตรวจสภาพทั่วไป';
+              const topicName = topic.topic_name || '';
+              const inputType = String(topic.input_type || "").toLowerCase().trim();
+              const isCritical = topic.critical === true || String(topic.critical).toUpperCase() === 'TRUE';
+              
+              // ค้นหาข้อมูลเดิมจากเช็คลิสต์ที่เคยบันทึกไว้
+              const oldItem = checklists.find(c => String(c.Topic_ID) === String(topic.topic_id)) || {};
+              const oldStatus = oldItem.Status !== undefined ? String(oldItem.Status) : "";
+      
+              if (categoryName !== lastCategory) {
+                if (lastCategory !== "") html += `</div>`;
+                categoryIndex++;
+                topicIndex = 0;
+                html += `<div class="pm-category"><div class="category-name" style="font-size:16px; font-weight:700; color:var(--primary); margin:18px 0 14px; padding:10px 14px; background:#f8fafc; border-radius:10px; border-left:4px solid var(--primary);">📁 หมวด ${categoryIndex} : ${escapeHtml(categoryName)}</div>`;
+                lastCategory = categoryName;
+              }
+              topicIndex++;
+      
+              let inputHtml = "";
+      
+              // จัดการ Input แต่ละประเภท และใส่ค่าเดิม (Pre-fill)
+              if (inputType === 'score') {
+                const rawMin = topic.min_score || 1;
+                const rawMax = topic.max_score || 5;
+                inputHtml = `<select class="form-input pm-val" data-tid="${topic.topic_id}">`;
+                for (let i = rawMin; i <= rawMax; i++) {
+                  const selected = (oldStatus == i) ? "selected" : "";
+                  inputHtml += `<option value="${i}" ${selected}>${i} คะแนน</option>`;
+                }
+                inputHtml += `</select>`;
+                
+              } else if (inputType === 'checkbox') {
+                const isPass = (oldStatus == "1" || oldStatus == "PASS") ? "checked" : "";
+                const isFail = (oldStatus == "0" || oldStatus == "FAIL") ? "checked" : "";
+                
+                inputHtml = `
+                  <div style="display:flex; gap:16px; align-items:center; padding:4px 0;">
+                    <label style="cursor:pointer; display:flex; align-items:center; gap:6px; color:var(--success); font-weight:600;">
+                      <input type="radio" name="chk_${topic.topic_id}" value="1" class="pm-val-radio" style="width:18px; height:18px; accent-color:var(--success);" ${isPass}>ปกติ
+                    </label>
+                    <label style="cursor:pointer; display:flex; align-items:center; gap:6px; color:var(--error); font-weight:600;">
+                      <input type="radio" name="chk_${topic.topic_id}" value="0" class="pm-val-radio" style="width:18px; height:18px; accent-color:var(--error);" ${isFail}>ไม่ปกติ
+                    </label>
+                  </div>`;
+                  
+              } else {
+                // สำหรับ Input ประเภท Text หรือ Number ดึง Remark/Status เดิมมาใส่ใน value
+                inputHtml = `<input type="${inputType === 'number' ? 'number' : 'text'}" class="form-input pm-val" data-tid="${topic.topic_id}" value="${escapeHtml(oldItem.Remark || oldStatus || '')}" placeholder="ระบุรายละเอียด">`;
+              }
+      
+              html += `
+                <div class="checklist-item" data-topic="${topic.topic_id}" data-critical="${isCritical}">
+                  <label style="display:flex; align-items:flex-start; gap:10px; font-size:14px; font-weight:500; color:var(--text-main); word-break:break-word;">
+                    <span style="min-width:30px; width:30px; height:30px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0;">${categoryIndex}.${topicIndex}</span>
+                    <span style="flex:1;">${escapeHtml(topicName)}${isCritical ? `<span style="color:var(--error); font-size:11px; font-weight:700; background:#fee2e2; padding:2px 6px; border-radius:4px; margin-left:6px; white-space:nowrap;">* จำเป็น</span>` : ''}</span>
+                  </label>
+                  <div class="checklist-control">${inputHtml}</div>
+                </div>
+              `;
+            });
+            
+            html += `</div>`;
+            
+            // เพิ่มกล่องสำหรับแก้ "บันทึกเพิ่มเติม" 
+            const currentNote = record.Note !== "-" ? record.Note : "";
+            html += `
+              <div style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <label style="font-weight: bold; color: var(--text-main); display: block; margin-bottom: 8px;">📋 บันทึกเพิ่มเติม:</label>
+                <textarea id="editPMNote" class="form-input" style="width: 100%; height: 80px; resize: vertical;">${escapeHtml(currentNote)}</textarea>
+              </div>
+            `;
+      
+            modalBody.innerHTML = html;
+          }
+        } catch (err) {
+          modalBody.innerHTML = infoGridHtml + `<div class="empty-state" style="border-color:#fca5a5; background:#fef2f2; padding:40px 20px;"><div class="empty-state-icon" style="color:#ef4444;">❌</div><div class="empty-state-text" style="color:#b91c1c;">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${err.message}</div></div>`;
+        }
+      }
+    
     function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
 
     async function submitPMForm() {
