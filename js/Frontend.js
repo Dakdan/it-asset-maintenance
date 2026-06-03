@@ -30,11 +30,14 @@ function updateAuthUI() {
     const displayElement = document.getElementById("userNameDisplay");
     const authBtn = document.getElementById("authBtn");
 
-    if (user) {
-        if (displayElement) {
-            // ดึง fullname หรือ username มาแสดง
-            displayElement.innerText = `ผู้ใช้งาน: ${user.fullname || user.username || "Unknown"}`;
-        }
+    if (user && displayElement) {
+        // --- จุดที่ต้องแก้ไข ---
+        // ลองเปลี่ยนให้ตรงกับ Key ที่ GAS ส่งมา เช่น user.name หรือ user.displayName
+        // โค้ดด้านล่างนี้จะช่วยดักหลายๆ ชื่อ ถ้าเจอตัวไหนก่อนจะเอาตัวนั้นมาแสดง
+        const nameToShow = user.fullname || user.name || user.username || "ไม่พบชื่อ";
+        
+        displayElement.innerText = `ผู้ใช้งาน: ${nameToShow}`;
+        
         if (authBtn) {
             authBtn.innerText = "ออกจากระบบ";
             authBtn.onclick = logout;
