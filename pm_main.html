@@ -7,7 +7,6 @@
   <title>IT Preventive Maintenance - Udon Thani Hospital</title>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="./js/Frontend.js"></script>
-  <!-- เพิ่มไลบรารี jsQR สำหรับถอดรหัส QR Code จากไฟล์ภาพถ่าย -->
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
  
   <style>
@@ -326,7 +325,6 @@
 </head>
 <body>
   <div class="app-wrapper">
-    <!-- HEADER -->
     <div class="header">
       <div class="header-content">
         <div class="header-left">
@@ -349,7 +347,6 @@
         </div>
       </div>
     </div>
-    <!-- TABS -->
     <div class="nav-tabs" id="navTabs">
       <button class="tab-btn active" data-tab="dashboard" onclick="switchTab('dashboard')">📊 Dashboard</button>
       <button class="tab-btn" data-tab="assets" onclick="switchTab('assets')">📦 ค้นหา & บันทึก PM</button>
@@ -357,10 +354,8 @@
       <button class="tab-btn" data-tab="abnormal" onclick="switchTab('abnormal')">⚠️ Abnormal</button>
       <button class="tab-btn" data-tab="report" onclick="switchTab('report')">📄 รายงาน PM</button>
     </div>
-    <!-- MAIN CONTENT -->
     <div class="main-content">
       <div class="container">        
-        <!-- DASHBOARD VIEW -->
         <div class="tab-panel active" id="tab-dashboard">
           <div class="dashboard-grid" id="dashboardGrid"></div>
           <div class="chart-container">
@@ -368,7 +363,6 @@
             <div id="chartContainer"></div>
           </div>
         </div>
-        <!-- ASSETS VIEW -->
         <div class="tab-panel" id="tab-assets">
           <div class="search-section">
             <div class="search-container">
@@ -376,7 +370,7 @@
                 <input type="text" class="search-input" id="searchInput" placeholder="พิมพ์เลขรหัสครุภัณฑ์, Serial Number หรือชื่อแผนก..." autocomplete="off">
               </div>
               <div class="search-buttons">
-                <button class="btn btn-qr" id="btnQR" title="สแกน QR Code">📷 QR Scan</button>
+                <button class="btn btn-qr" id="btnQR" title="สแกน QR Code" onclick="document.getElementById('qrFileInput').click()">📷 QR Scan</button>
                 <button class="btn btn-search" id="btnSearch" title="ค้นหา">🔍 ค้นหา</button>
                 <button class="btn btn-clear" id="btnClear" title="ล้างการค้นหา">✕ ล้าง</button>
               </div>
@@ -384,27 +378,22 @@
           </div>
           <div class="assets-grid" id="assetsGrid"></div>
         </div>
-        <!-- COMPLETED VIEW -->
         <div class="tab-panel" id="tab-completed">
           <div class="assets-grid" id="completedContainer"></div>
         </div>
-        <!-- ABNORMAL VIEW -->
         <div class="tab-panel" id="tab-abnormal">
           <div class="assets-grid" id="abnormalContainer"></div>
         </div>
-        <!-- REPORT VIEW -->
         <div class="tab-panel" id="tab-report">
           <div id="reportContainer">กำลังโหลดข้อมูล...</div>
         </div>
       </div>
     </div>
   </div>
-  <!-- LOADING OVERLAY -->
   <div class="loading-overlay" id="loadingOverlay">
     <div class="spinner"></div>
     <div class="loading-text" id="loadingText">กำลังดึงข้อมูลงานจริง...</div>
   </div>
-  <!-- MODAL -->
   <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-header">
@@ -414,8 +403,7 @@
         <button class="modal-close" onclick="closeModal()">✕</button>
       </div>
       <div class="modal-body" id="modalBody">
-        <!-- ฟอร์ม Checklist จะถูกโหลดที่นี่ -->
-      </div>
+        </div>
       <div class="modal-footer" id="modalFooter">
         <button class="btn btn-secondary" style="background:#f1f5f9; color:var(--text-muted);" onclick="closeModal()">ยกเลิก</button>
         <button class="btn btn-search" id="btnSubmitPM" onclick="submitPMForm()">บันทึกข้อมูลเข้าระบบหลัก</button>
@@ -423,7 +411,8 @@
     </div>
   </div>
   <div id="notificationContainer"></div>
-  <input type="file" id="qrFileInput" accept="image/*" style="display: none;" onchange="handleQRUpload(event)">
+  <input type="file" id="qrFileInput" accept="image/*" capture="environment" style="display: none;" onchange="handleQRUpload(event)">
+
   <script>    
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw8UHJAO4hBK9kYX_tZ1JrZSPtujTOAuFtVvHrjiHzk6O7D3ZUDQv5cMbEs8hEl8TqR3g/exec";    
     let allAssets = [];
