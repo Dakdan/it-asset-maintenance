@@ -618,28 +618,50 @@
       });
     }
 
-  function renderCompletedList() {
+function renderCompletedList() {
       const container = document.getElementById('completedContainer');
+      
       if (pmHistory.length === 0) {
-        container.innerHTML = `<div class="empty-state" style="grid-column: 1/-1;"><div class="empty-state-icon">✅</div><div class="empty-state-text">ยังไม่พบบันทึกที่ผ่านการ PM</div></div>`;
+        container.innerHTML = `<div class="empty-state" style="grid-column: 1/-1;"><div class="empty-state-icon">📋</div><div class="empty-state-text">ยังไม่พบประวัติการทำ PM</div></div>`;
         return;
       }
       
-      container.innerHTML = pmHistory.map(pm => `
-        <div class="asset-card completed" onclick="showPMReportDetail('${pm.pmId}')" style="cursor:pointer; transition: transform 0.2s;">
-          <div class="asset-header">
-            <div class="asset-id" style="color: var(--success);">${escapeHtml(pm.Asset_ID)}</div>
-            <div class="dept-badge" style="background: #d1fae5; color: #047857;">ผ่านเกณฑ์ปกติ</div>
+      const sortedHistory = [...pmHistory].reverse();
+      
+      container.innerHTML = sortedHistory.map(pm => `
+        <div class="asset-card completed" onclick="showPMReportDetail('${pm.pmId}')" style="cursor:pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; background: linear-gradient(135deg, #fce7f3 0%, #ffffff 80%); border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 10px; height: 100%;">
+          
+          <div class="asset-header" style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+            <div>
+              <div style="font-size: 10px; color: #64748b; margin-bottom: 2px;">รหัสครุภัณฑ์</div>
+              <div class="asset-id" style="color: #0f172a; font-size: 14px; font-weight: 700;">${pm.Asset_ID ? escapeHtml(pm.Asset_ID) : ''}</div>
+            </div>
+            <div class="dept-badge" style="background: #f0fdf4; color: #166534; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; border: 1px solid #bbf7d0;">
+              📝 บันทึกแล้ว
+            </div>
+          </div>          
+          <div class="asset-details" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: #64748b; display: flex; align-items: center; gap: 6px;">📁 <span>ประเภท</span></span>
+              <span style="font-weight: 600; color: #334155; text-align: right;">${pm.Asset_Group_Name ? escapeHtml(pm.Asset_Group_Name) : ''}</span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: #64748b; display: flex; align-items: center; gap: 6px;">🔢 <span>Serial No.</span></span>
+              <span style="font-family: monospace; background: #f8fafc; padding: 2px 6px; border-radius: 4px; color: #475569; border: 1px solid #e2e8f0; font-size: 11px;">${pm.Serial_Number ? escapeHtml(pm.Serial_Number) : ''}</span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: #64748b; display: flex; align-items: center; gap: 6px;">📅 <span>วันที่ทำ PM</span></span>
+              <span style="font-weight: 600; color: #0f172a;">${pm.Check_Date ? escapeHtml(pm.Check_Date) : ''}</span>
+            </div>            
+            
           </div>
-          <div class="asset-details">
-            <p><span class="detail-label">รหัสบันทึก</span><span class="detail-value">${escapeHtml(pm.PM_No || '-')}</span></p>
-            <p><span class="detail-label">ผู้รับผิดชอบ</span><span class="detail-value">${escapeHtml(pm.Checker_Name || 'เจ้าหน้าที่ไอที')}</span></p>
-            <p><span class="detail-label">วันที่ตรวจ</span><span class="detail-value">${escapeHtml(pm.Check_Date || 'N/A')}</span></p>
-            <p><span class="detail-label">รายละเอียด</span><span class="detail-value">${escapeHtml(truncateText(pm.Note || '-', 50))}</span></p>
+          
+          <div style="margin-top: auto; padding-top: 8px; text-align: right; font-size: 11px; color: #3b82f6; font-weight: 600; display: flex; justify-content: flex-end; align-items: center; gap: 4px;">
+            ดูฉบับเต็ม <span>➔</span>
           </div>
-          <div style="text-align:right; margin-top:8px; font-size:11px; color:var(--primary); font-weight: bold;">
-            คลิกเพื่อดูรายละเอียดเช็คลิสต์ 🔍
-          </div>
+          
         </div>
       `).join('');
     }
