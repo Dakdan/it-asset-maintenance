@@ -6,9 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IT Preventive Maintenance - Udon Thani Hospital</title>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script src="./js/Frontend.js"></script>
+  <script src="./js/Frontend.js"defer></script>
   <!-- ไลบรารี jsQR สำหรับถอดรหัส QR Code แบบ Live -->
-  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"defer></script>
  
   <style>
     /* ==================== DESIGN TOKENS & RESET ==================== */
@@ -948,6 +948,17 @@
               const tech = rec.Checker_Name || '-';
               const note = rec.Note || rec.Issue_Details || 'ไม่มีรายละเอียดเพิ่มเติม';
 
+              // แสดงรูปถ่ายในรายงานรายละเอียดสรุปถ้าหากมีเก็บไว้
+              let imageHtml = '';
+              if (rec.Photo_Base64 && rec.Photo_Base64 !== '') {
+                imageHtml = `
+                  <div style="margin-top:10px;">
+                    <span style="color:var(--text-muted); font-size:12px; display:block; margin-bottom:4px;">📸 รูปภาพอ้างอิง:</span>
+                    <img src="${rec.Photo_Base64}" style="max-width:100%; max-height:200px; border-radius:8px; border:1px solid var(--border-light); object-fit:contain;" />
+                  </div>
+                `;
+              }
+
               return `
                   <div style="background: ${bg}; border: 1px solid ${color}; border-radius: 8px; padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow-sm);">
                       <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 12px; border-bottom: 1px dashed ${color}; padding-bottom: 8px;">
@@ -962,6 +973,7 @@
                           <span style="color:var(--text-muted); width:80px; flex-shrink:0;">ผลการตรวจ:</span> 
                           <span style="color:var(--text-main);">${escapeHtml(note)}</span>
                       </div>
+                      ${imageHtml}
                   </div>
               `;
           }).join('');
@@ -1042,6 +1054,7 @@
             const isCritical = topic.critical === true || String(topic.critical).toUpperCase() === 'TRUE';
             const rawMin = String(topic.min_score !== undefined && topic.min_score !== null ? topic.min_score : "").trim();
             const rawMax = String(topic.max_score !== undefined && topic.max_score !== null ? topic.max_score : "").trim();
+            const isPhotoRequired = topic.photo_required === true || String(topic.photo_required).toUpperCase() === 'TRUE';
     
             if (categoryName !== lastCategory) {
               if (lastCategory !== "") html += `</div>`;
@@ -1088,14 +1101,40 @@
             } else {
               inputHtml = `<input type="text" class="form-input pm-val" data-tid="${topic.topic_id}" placeholder="ระบุรายละเอียด">`;
             }
+
+            // 📸 ตรวจสอบเงื่อนไข photo_required เพื่อเพิ่มส่วนอัปโหลดและแสดงตัวอย่างภาพถ่าย
+            let photoInputHtml = "";
+            if (isPhotoRequired) {
+              photoInputHtml = `
+                <div class="photo-uploader-container" style="margin-top:10px; padding:10px; background:#f1f5f9; border-radius:8px; border:1px dashed #cbd5e1; display:flex; flex-direction:column; gap:8px;">
+                  <span style="font-size:12px; color:var(--text-muted); font-weight:600; display:flex; align-items:center; gap:4px;">
+                    📸 จำเป็นต้องถ่ายรูปยืนยัน
+                  </span>
+                  <div style="display:flex; gap:8px; align-items:center;">
+                    <button class="btn" type="button" style="background:#3b82f6; color:#fff; font-size:11px; padding:6px 12px; border-radius:6px; font-weight:bold;" onclick="triggerPhotoUpload('${topic.topic_id}')">
+                      📷 ถ่ายรูป / อัปโหลด
+                    </button>
+                    <input type="file" id="file_${topic.topic_id}" accept="image/*" style="display:none;" onchange="previewPhoto(event, '${topic.topic_id}')" />
+                    <span id="label_${topic.topic_id}" style="font-size:11px; color:var(--text-muted);">ยังไม่ได้เลือกไฟล์</span>
+                  </div>
+                  <div id="preview_container_${topic.topic_id}" style="display:none; position:relative; max-width:150px;">
+                    <img id="img_preview_${topic.topic_id}" style="width:100%; border-radius:6px; border:1px solid #e2e8f0; object-fit:cover; max-height:100px;" />
+                    <button type="button" style="position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; border:none; border-radius:50%; width:18px; height:18px; font-size:10px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="removePhoto('${topic.topic_id}')">✕</button>
+                  </div>
+                  <!-- ซ่อนค่า Base64 เพื่อส่งไปกับแบบฟอร์ม -->
+                  <input type="hidden" class="pm-photo-base64" data-tid="${topic.topic_id}" id="base64_${topic.topic_id}" value="" />
+                </div>
+              `;
+            }
             
             html += `
-              <div class="checklist-item" data-topic="${topic.topic_id}" data-critical="${isCritical}">
+              <div class="checklist-item" data-topic="${topic.topic_id}" data-critical="${isCritical}" data-photo-required="${isPhotoRequired}">
                 <label style="display:flex; align-items:flex-start; gap:10px; font-size:14px; font-weight:500; color:var(--text-main); word-break:break-word;">
                   <span style="min-width:30px; width:30px; height:30px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0;">${categoryIndex}.${topicIndex}</span>
                   <span style="flex:1;">${escapeHtml(topicName)}${isCritical ? `<span style="color:var(--error); font-size:11px; font-weight:700; background:#fee2e2; padding:2px 6px; border-radius:4px; margin-left:6px; white-space:nowrap;">* จำเป็น</span>` : ''}</span>
                 </label>
                 <div class="checklist-control">${inputHtml}</div>
+                ${photoInputHtml}
               </div>
             `;
           });
@@ -1108,7 +1147,51 @@
         modalBody.innerHTML = document.querySelector('.modal-info-grid').outerHTML + `<div class="empty-state" style="border-color:#fca5a5; background:#fef2f2; padding:40px 20px;"><div class="empty-state-icon" style="color:#ef4444;">❌</div><div class="empty-state-text" style="color:#b91c1c;">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${err.message}</div></div>`;
       }
     }
-    async function showPMReportDetail(pmId) {
+
+    // 📸 ฟังก์ชันกระตุ้นการกดปุ่มอัปโหลดรูปภาพ
+    function triggerPhotoUpload(topicId) {
+      const fileInput = document.getElementById(`file_${topicId}`);
+      if (fileInput) fileInput.click();
+    }
+
+    // 📸 ฟังก์ชันสำหรับแสดงภาพตัวอย่างและแปลงรูปภาพเป็น Base64
+    function previewPhoto(event, topicId) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const label = document.getElementById(`label_${topicId}`);
+      if (label) label.innerText = truncateText(file.name, 18);
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        // อัปโหลดเข้าสู่พาร์ทพรีวิวภาพและเก็บค่า Base64 ลง Hidden Input
+        const previewContainer = document.getElementById(`preview_container_${topicId}`);
+        const previewImg = document.getElementById(`img_preview_${topicId}`);
+        const base64Input = document.getElementById(`base64_${topicId}`);
+
+        if (previewImg) previewImg.src = e.target.result;
+        if (previewContainer) previewContainer.style.display = 'block';
+        if (base64Input) base64Input.value = e.target.result; // เก็บ Base64 String
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // 📸 ฟังก์ชันสำหรับยกเลิกหรือลบรูปภาพที่เลือก
+    function removePhoto(topicId) {
+      const fileInput = document.getElementById(`file_${topicId}`);
+      const label = document.getElementById(`label_${topicId}`);
+      const previewContainer = document.getElementById(`preview_container_${topicId}`);
+      const previewImg = document.getElementById(`img_preview_${topicId}`);
+      const base64Input = document.getElementById(`base64_${topicId}`);
+
+      if (fileInput) fileInput.value = '';
+      if (label) label.innerText = 'ยังไม่ได้เลือกไฟล์';
+      if (previewContainer) previewContainer.style.display = 'none';
+      if (previewImg) previewImg.src = '';
+      if (base64Input) base64Input.value = '';
+    }
+
+   async function showPMReportDetail(pmId) {
         if (!pmId) return;
         
         const modal = document.getElementById('modalOverlay');
@@ -1236,20 +1319,34 @@
               }
   
               const scoreHtml = displayScore !== '' ? `<span style="margin-left:6px; opacity:0.9; font-weight:500;">(${escapeHtml(displayScore)})</span>` : '';
+
+              // 📸 ดึงรูปอ้างอิงของแต่ละ Checklist ไอเทมมาแสดงผลในหน้าจอสรุป (ถ้ามี)
+              let itemPhotoHtml = "";
+              if (item.photo_base64 && item.photo_base64 !== "") {
+                itemPhotoHtml = `
+                  <div style="margin-top:10px; padding:6px; background:#fff; border-radius:6px; border:1px solid #cbd5e1;">
+                    <span style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">📷 รูปภาพตรวจเช็ค:</span>
+                    <img src="${item.photo_base64}" style="max-height:120px; max-width:100%; object-fit:contain; border-radius:4px;" />
+                  </div>
+                `;
+              }
   
               html += `
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center;">
-                  <div style="flex: 1;">
-                    <div style="font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 4px;">
-                      ${itemNumber} ${escapeHtml(item.topic_name || 'หัวข้อการตรวจ')}
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; display: flex; flex-direction:column; gap:8px;">
+                  <div style="display:flex; justify-content: space-between; align-items: center; width:100%;">
+                    <div style="flex: 1;">
+                      <div style="font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 4px;">
+                        ${itemNumber} ${escapeHtml(item.topic_name || 'หัวข้อการตรวจ')}
+                      </div>
+                      ${item.remark ? `<div style="font-size: 12px; color: #64748b;">หมายเหตุ: ${escapeHtml(item.remark)}</div>` : ''}
                     </div>
-                    ${item.remark ? `<div style="font-size: 12px; color: #64748b;">หมายเหตุ: ${escapeHtml(item.remark)}</div>` : ''}
+                    <div style="text-align: right; min-width: 120px;">
+                      <span style="display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; background: ${badgeBg}; color: ${badgeColor};">
+                        ${badgeText} ${scoreHtml}
+                      </span>
+                    </div>
                   </div>
-                  <div style="text-align: right; min-width: 120px;">
-                    <span style="display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; background: ${badgeBg}; color: ${badgeColor};">
-                      ${badgeText} ${scoreHtml}
-                    </span>
-                  </div>
+                  ${itemPhotoHtml}
                 </div>
               `;
             });
@@ -1323,14 +1420,14 @@
             const topicName = topic.topic_name || '';
             const inputType = String(topic.input_type || "").toLowerCase().trim();
             const isCritical = topic.critical === true || String(topic.critical).toUpperCase() === 'TRUE';
+            const isPhotoRequired = topic.photo_required === true || String(topic.photo_required).toUpperCase() === 'TRUE';
             
-            // อ่านค่า Min/Max ตามโครงสร้างหลัก
             const rawMin = String(topic.min_score !== undefined && topic.min_score !== null ? topic.min_score : "").trim();
             const rawMax = String(topic.max_score !== undefined && topic.max_score !== null ? topic.max_score : "").trim();
 
-            // ดึงค่าเก่าที่บันทึกไว้
             const oldItem = checklists.find(c => String(c.Topic_ID) === String(topic.topic_id)) || {};
             const oldStatus = oldItem.Status !== undefined ? String(oldItem.Status) : "";
+            const oldPhotoBase64 = oldItem.photo_base64 || "";
 
             if (categoryName !== lastCategory) {
               if (lastCategory !== "") html += `</div>`;
@@ -1370,7 +1467,6 @@
               const optionsString = rawMin !== "" ? rawMin : rawMax;
               const options = optionsString.split(',').map(v => v.trim()).filter(v => v !== "");
               
-              // แยกค่าเก่ากรณีที่เลือกมาหลายข้อ
               const oldValues = oldStatus.split(',').map(v => v.trim());
               
               inputHtml = `<div style="display:flex; flex-wrap:wrap; gap:16px; align-items:center; padding:4px 0;">`;
@@ -1389,13 +1485,39 @@
               inputHtml = `<input type="text" class="form-input pm-val" data-tid="${topic.topic_id}" value="${escapeHtml(oldItem.Remark || oldStatus || '')}" placeholder="ระบุรายละเอียด">`;
             }
 
+            // 📸 ส่วนแสดงภาพถ่ายพร้อม Base64 เดิม ในโหมดแก้ไข
+            let photoInputHtml = "";
+            if (isPhotoRequired) {
+              const hasOldPhoto = oldPhotoBase64 !== "";
+              photoInputHtml = `
+                <div class="photo-uploader-container" style="margin-top:10px; padding:10px; background:#f1f5f9; border-radius:8px; border:1px dashed #cbd5e1; display:flex; flex-direction:column; gap:8px;">
+                  <span style="font-size:12px; color:var(--text-muted); font-weight:600; display:flex; align-items:center; gap:4px;">
+                    📸 จำเป็นต้องถ่ายรูปยืนยัน (โหมดแก้ไข)
+                  </span>
+                  <div style="display:flex; gap:8px; align-items:center;">
+                    <button class="btn" type="button" style="background:#3b82f6; color:#fff; font-size:11px; padding:6px 12px; border-radius:6px; font-weight:bold;" onclick="triggerPhotoUpload('${topic.topic_id}')">
+                      📷 เปลี่ยนรูปถ่าย / อัปโหลดใหม่
+                    </button>
+                    <input type="file" id="file_${topic.topic_id}" accept="image/*" style="display:none;" onchange="previewPhoto(event, '${topic.topic_id}')" />
+                    <span id="label_${topic.topic_id}" style="font-size:11px; color:var(--text-muted);">${hasOldPhoto ? "มีรูปภาพเดิมบันทึกไว้แล้ว" : "ยังไม่ได้เลือกไฟล์"}</span>
+                  </div>
+                  <div id="preview_container_${topic.topic_id}" style="display:${hasOldPhoto ? 'block' : 'none'}; position:relative; max-width:150px;">
+                    <img id="img_preview_${topic.topic_id}" src="${oldPhotoBase64}" style="width:100%; border-radius:6px; border:1px solid #e2e8f0; object-fit:cover; max-height:100px;" />
+                    <button type="button" style="position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; border:none; border-radius:50%; width:18px; height:18px; font-size:10px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="removePhoto('${topic.topic_id}')">✕</button>
+                  </div>
+                  <input type="hidden" class="pm-photo-base64" data-tid="${topic.topic_id}" id="base64_${topic.topic_id}" value="${oldPhotoBase64}" />
+                </div>
+              `;
+            }
+
             html += `
-              <div class="checklist-item" data-topic="${topic.topic_id}" data-critical="${isCritical}">
+              <div class="checklist-item" data-topic="${topic.topic_id}" data-critical="${isCritical}" data-photo-required="${isPhotoRequired}">
                 <label style="display:flex; align-items:flex-start; gap:10px; font-size:14px; font-weight:500; color:var(--text-main); word-break:break-word;">
                   <span style="min-width:30px; width:30px; height:30px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0;">${categoryIndex}.${topicIndex}</span>
                   <span style="flex:1;">${escapeHtml(topicName)}${isCritical ? `<span style="color:var(--error); font-size:11px; font-weight:700; background:#fee2e2; padding:2px 6px; border-radius:4px; margin-left:6px; white-space:nowrap;">* จำเป็น</span>` : ''}</span>
                 </label>
                 <div class="checklist-control">${inputHtml}</div>
+                ${photoInputHtml}
               </div>
             `;
           });
@@ -1431,11 +1553,14 @@
       items.forEach(item => {
         const tid = item.getAttribute('data-topic');
         const isCritical = item.getAttribute('data-critical') === 'true';
+        const isPhotoRequired = item.getAttribute('data-photo-required') === 'true';
+
         let val = "";
         let status = "PASS";
+        let photoBase64 = "";
         
         const textInput = item.querySelector('.pm-val');
-        const radioInputs = item.querySelectorAll('.pm-val-radio');
+        const radioInputs = item.querySelectorAll('.pm-val-radio'); 
         const multiInputs = item.querySelectorAll('.pm-val-multi'); 
         
         if (textInput) {
@@ -1455,31 +1580,44 @@
             val = Array.from(checkedMulti).map(cb => cb.value).join(',');
           }
         }
+
+        const base64Input = document.getElementById(`base64_${tid}`);
+        if (base64Input) {
+          photoBase64 = base64Input.value;
+        }
         
-        if (isCritical && val === "") {
+        if (isCritical && (val === "" || (isPhotoRequired && photoBase64 === ""))) {
           isValid = false;
           item.style.border = "1px solid var(--error)"; 
           item.style.padding = "8px"; 
           item.style.borderRadius = "8px"; 
           item.style.backgroundColor = "#fef2f2";
+          
+          if (isPhotoRequired && photoBase64 === "") {
+            showNotification('warning', 'จำเป็นต้องถ่ายภาพยืนยันในหัวข้อที่กำหนด');
+          }
         } else {
           item.style.border = "none"; 
           item.style.padding = "0"; 
           item.style.backgroundColor = "transparent";
         }        
         
-        details.push({ topic_id: tid, status: status, score: val, remark: "" });
+        details.push({ topic_id: tid, status: status, score: val, remark: "", photo_base64: photoBase64 });
       });      
       
       if (!isValid) { 
-        showNotification('warning', 'กรุณากรอกข้อมูลในหัวข้อที่จำเป็น (*) ให้ครบถ้วน'); 
+        showNotification('warning', 'กรุณากรอกข้อมูลและแนบรูปถ่ายในหัวข้อที่จำเป็น (*) ให้ครบถ้วน'); 
         return; 
       }
+      
+      // 🟢 ดึงชื่อจากหน้าจอโดยตรง (ตัดคำว่า "ผู้ใช้งาน: " ออก)
+      const nameDisplay = document.getElementById('userNameDisplay');
+      const loginUser = nameDisplay ? nameDisplay.innerText.replace('ผู้ใช้งาน:', '').trim() : "เจ้าหน้าที่ไอที";
       
       const payload = { 
         action: 'savePM', 
         asset_code: selectedAsset.Asset_ID, 
-        user: "เจ้าหน้าที่ไอที", 
+        user: loginUser || "เจ้าหน้าที่ไอที",
         result: hasFail ? "FAIL" : "PASS", 
         note: hasFail ? "พบความผิดปกติ" : "ปกติ", 
         details: details 
@@ -1496,14 +1634,10 @@
         
         if (res.status) {
           showNotification('success', 'บันทึกข้อมูลสำเร็จ! (PM_ID: ' + res.data.pm_id + ')');
-          
           await Promise.all([loadPMHistory(), loadAbnormalList()]);
           renderDashboard();
-          
           if (hasFail) switchTab('abnormal'); else switchTab('completed');
-          
           showPMReportDetail(res.data.pm_id);
-          
         } else {
           showNotification('error', 'ข้อผิดพลาดจากเซิร์ฟเวอร์: ' + res.message);
         }
@@ -1516,11 +1650,7 @@
 
     async function submitUpdatePM(pmId) {
       if (!pmId) return;
-      
-      // แจ้งเตือนยืนยันก่อนบันทึก
-      if (!confirm('คุณต้องการบันทึกการแก้ไขข้อมูล PM นี้ใช่หรือไม่?')) {
-        return;
-      }
+      if (!confirm('คุณต้องการบันทึกการแก้ไขข้อมูล PM นี้ใช่หรือไม่?')) return;
 
       const items = document.querySelectorAll('.checklist-item');
       let details = [];
@@ -1530,34 +1660,33 @@
       items.forEach(item => {
         const tid = item.getAttribute('data-topic');
         const isCritical = item.getAttribute('data-critical') === 'true';
+        const isPhotoRequired = item.getAttribute('data-photo-required') === 'true';
+
         let val = "";
         let status = "PASS";
+        let photoBase64 = "";
         
         const textInput = item.querySelector('.pm-val');
-        const radioInputs = item.querySelectorAll('.pm-val-radio');
+        const radioInputs = item.querySelectorAll('.pm-val-radio'); 
         const multiInputs = item.querySelectorAll('.pm-val-multi'); 
         
-        // Logic การดึงค่าเหมือน submitPMForm
         if (textInput) {
           val = textInput.value.trim();
         } else if (radioInputs.length > 0) {
           const checkedRadio = item.querySelector('.pm-val-radio:checked');
           if (checkedRadio) {
             val = checkedRadio.value;
-            if (val === "0") { 
-              status = "FAIL"; 
-              hasFail = true; 
-            }
+            if (val === "0") { status = "FAIL"; hasFail = true; }
           }
         } else if (multiInputs.length > 0) {
           const checkedMulti = item.querySelectorAll('.pm-val-multi:checked');
-          if (checkedMulti.length > 0) {
-            val = Array.from(checkedMulti).map(cb => cb.value).join(',');
-          }
+          if (checkedMulti.length > 0) val = Array.from(checkedMulti).map(cb => cb.value).join(',');
         }
+
+        const base64Input = document.getElementById(`base64_${tid}`);
+        if (base64Input) photoBase64 = base64Input.value;
         
-        // ตรวจสอบหัวข้อบังคับ (*)
-        if (isCritical && val === "") {
+        if (isCritical && (val === "" || (isPhotoRequired && photoBase64 === ""))) {
           isValid = false;
           item.style.border = "1px solid var(--error)"; 
           item.style.padding = "8px"; 
@@ -1568,23 +1697,25 @@
           item.style.padding = "0"; 
           item.style.backgroundColor = "transparent";
         }        
-        
-        details.push({ topic_id: tid, status: status, score: val, remark: "" });
+        details.push({ topic_id: tid, status: status, score: val, remark: "", photo_base64: photoBase64 });
       });      
       
       if (!isValid) { 
-        showNotification('warning', 'กรุณากรอกข้อมูลในหัวข้อที่จำเป็น (*) ให้ครบถ้วน'); 
+        showNotification('warning', 'กรุณากรอกข้อมูลและแนบภาพถ่ายยืนยันในหัวข้อที่จำเป็น (*) ให้ครบถ้วน'); 
         return; 
       }
       
-      // ดึงค่าหมายเหตุจาก Textarea ถ้าไม่มีให้ใช้ค่า Default ตามผลการประเมิน
       const noteInput = document.getElementById('editPMNote');
       const noteValue = noteInput ? noteInput.value.trim() : (hasFail ? "พบความผิดปกติ" : "ปกติ");
 
+      // 🟢 ดึงชื่อจากหน้าจอโดยตรง
+      const nameDisplay = document.getElementById('userNameDisplay');
+      const loginUser = nameDisplay ? nameDisplay.innerText.replace('ผู้ใช้งาน:', '').trim() : "เจ้าหน้าที่ไอที";
+
       const payload = { 
-        action: 'updatePM', // ⚠️ ตรวจสอบว่า Backend ใช้ชื่อ action นี้หรือไม่
+        action: 'updatePM',
         pm_id: pmId, 
-        user: "เจ้าหน้าที่ไอที", 
+        user: loginUser || "เจ้าหน้าที่ไอที", 
         result: hasFail ? "FAIL" : "PASS", 
         note: noteValue, 
         details: details 
@@ -1601,15 +1732,10 @@
         
         if (res.status) {
           showNotification('success', 'แก้ไขข้อมูลสำเร็จ! (PM_ID: ' + pmId + ')');
-          
-          // รีเฟรชข้อมูลตามโครงสร้างเดิม
           await Promise.all([loadPMHistory(), loadAbnormalList()]);
           renderDashboard();
-          
-          // สลับหน้าจอและแสดงข้อมูลที่แก้ไขแล้ว
           if (hasFail) switchTab('abnormal'); else switchTab('completed');
           showPMReportDetail(pmId);
-          
         } else {
           showNotification('error', 'ข้อผิดพลาดจากเซิร์ฟเวอร์: ' + res.message);
         }
@@ -1623,7 +1749,6 @@
     // LIVE QR SCANNER LOGIC
     // =====================================
     
-    // ฟังก์ชันสำหรับสกัดเฉพาะ "รหัสครุภัณฑ์" จาก QR Code (รองรับกรณีรหัสอยู่ตรงกลาง URL)
     function extractAssetIdFromQR(rawData) {
       let result = rawData.trim();
       
@@ -1631,7 +1756,6 @@
         if (result.startsWith('http://') || result.startsWith('https://')) {
           const url = new URL(result);
           
-          // 1. ลองหาจาก Parameter ก่อน (เช่น ?id=1234 หรือ ?AssetID=1234)
           const params = ['id', 'asset_id', 'code', 'asset', 'sn', 'AssetID'];
           for (let p of params) {
             if (url.searchParams.has(p)) {
@@ -1639,23 +1763,18 @@
             }
           }
           
-          // 2. ถ้าไม่มี Parameter ให้แยก Path ของ URL ออกมาหาส่วนที่เป็นรหัสครุภัณฑ์
           const segments = url.pathname.split('/').filter(Boolean);
           
           if (segments.length > 0) {
-              // 2.1 หาส่วนที่มีขีด (-) และมีตัวเลข เช่น COMP-001 หรือ 1234-567
               let found = segments.find(s => s.includes('-') && /\d/.test(s));
               if (found) return decodeURIComponent(found).toUpperCase();
               
-              // 2.2 หาส่วนที่มีทั้งตัวอักษรและตัวเลขผสมกัน เช่น PC0123
               found = segments.find(s => /[a-zA-Z]/.test(s) && /\d/.test(s));
               if (found) return decodeURIComponent(found).toUpperCase();
               
-              // 2.3 หาส่วนที่เป็นตัวเลขล้วน 4 หลักขึ้นไป (ป้องกันการจับตัวเลขสั้นๆ)
               found = segments.find(s => /^\d{4,}$/.test(s));
               if (found) return decodeURIComponent(found).toUpperCase();
               
-              // 2.4 ถ้าหาแพทเทิร์นไม่เจอ ให้ตัดคำทั่วไปทิ้ง แล้วเอาคำที่เหลือที่ยาวที่สุด
               const ignoreWords = ['view', 'detail', 'details', 'edit', 'show', 'asset', 'item', 'info'];
               const validSegments = segments.filter(s => !ignoreWords.includes(s.toLowerCase()));
               if (validSegments.length > 0) {
@@ -1668,7 +1787,6 @@
         console.warn("URL Parsing Error", e);
       }
 
-      // 3. ถ้าเป็นข้อความธรรมดา ให้ลองสกัดรูปแบบรหัสออกมาก่อน
       const directPatterns = [
         /([a-zA-Z0-9ก-๙]+-\d+)/,
         /([0-9]{4}-[0-9]{3}-[0-9]{4}(?:\/[0-9]+)?)/
@@ -1678,7 +1796,6 @@
         if (match && match[0]) return match[0].toUpperCase();
       }
 
-      // 4. กรณีมีพิมพ์คำว่า "รหัส" แทรกอยู่ เช่น "รหัสครุภัณฑ์: COMP-012"
       if (result.includes('รหัส')) {
          let stripped = result.replace(/.*รหัส(?:ครุภัณฑ์)?\s*[:=]?\s*/i, '').trim();
          if (stripped) {
@@ -1686,7 +1803,6 @@
          }
       }
       
-      // 5. ถ้าไม่มีอะไรเข้าเงื่อนไขเลย คืนค่าทั้งหมดแบบตัวพิมพ์ใหญ่
       return result.toUpperCase();
     }
 
@@ -1700,10 +1816,9 @@
       qrScanActive = true;
 
       try {
-        // ขอเปิดกล้องหลัง (Environment Camera) แบบ Live
         qrStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
         video.srcObject = qrStream;
-        video.setAttribute("playsinline", true); // สำหรับ iOS
+        video.setAttribute("playsinline", true); 
         video.play();
         
         requestAnimationFrame(tick);
@@ -1716,20 +1831,17 @@
         if (!qrScanActive) return;
 
         if (video.readyState === video.HAVE_ENOUGH_DATA) {
-          // ดึงพิกเซลจากวิดีโอไปวาดลงบน Canvas ที่ซ่อนไว้
           canvasElement.height = video.videoHeight;
           canvasElement.width = video.videoWidth;
           canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
           
           var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
           
-          // ส่งให้ jsQR สแกนค้นหาบาร์โค้ด
           var code = jsQR(imageData.data, imageData.width, imageData.height, {
             inversionAttempts: "dontInvert",
           });
           
           if (code) {
-            // สแกนเจอแล้ว! นำข้อความดิบมาสกัดเฉพาะรหัส
             const rawData = code.data;
             const qrResult = extractAssetIdFromQR(rawData);
             
@@ -1739,11 +1851,9 @@
             showNotification('success', `สแกนพบรหัส: ${qrResult}`);
             switchTab('assets');
             performSearch(qrResult);
-            return; // หยุดลูป
+            return; 
           }
         }
-        
-        // ถ้ายังไม่เจอ ให้วนลูปสแกนเฟรมต่อไปเรื่อยๆ อย่างต่อเนื่อง
         requestAnimationFrame(tick);
       }
     }
@@ -1751,7 +1861,6 @@
     function stopLiveQRScan() {
       qrScanActive = false;
       if (qrStream) {
-        // ปิดกล้องให้เรียบร้อย
         qrStream.getTracks().forEach(track => track.stop());
         qrStream = null;
       }
