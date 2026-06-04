@@ -1472,30 +1472,45 @@
     // LIVE QR SCANNER LOGIC
     // =====================================
     
-    // ฟังก์ชันสำหรับตัดค่าจาก QR Code เอาเฉพาะรหัสครุภัณฑ์ (รองรับกรณีเป็น URL)
+    // ฟังก์ชันสำหรับสกัดเฉพาะ "รหัสครุภัณฑ์" จาก QR Code โดยใช้ Regex ค้นหารูปแบบ
     function extractAssetIdFromQR(rawData) {
       let result = rawData.trim();
+      
+      // 1. ลองหาจาก Parameter ก่อน (เผื่อเป็น URL ที่ตั้งค่าไว้ เช่น ?id=1234)
       try {
         if (result.startsWith('http://') || result.startsWith('https://')) {
           const url = new URL(result);
-          // 1. ลองหาจาก Parameter ก่อน (เช่น ?id=1234 หรือ ?asset_id=1234)
           const params = ['id', 'asset_id', 'code', 'asset', 'sn'];
           for (let p of params) {
             if (url.searchParams.has(p)) {
               return url.searchParams.get(p);
             }
           }
-          // 2. ถ้าไม่มี parameter ให้เอาส่วนท้ายสุดของ URL (เช่น /asset/1234)
-          const pathSegments = url.pathname.split('/').filter(segment => segment.length > 0);
-          if (pathSegments.length > 0) {
-            return decodeURIComponent(pathSegments[pathSegments.length - 1]);
-          }
         }
       } catch (e) {
-        // หากมี error ในการแปลง URL ให้ข้ามไปใช้ค่าดิบ
-        console.warn("QR Parsing Warn:", e);
+        console.warn("URL Parsing Warn:", e);
       }
-      // ถ้าไม่ใช่ URL หรือถอดค่าพิเศษไม่ได้ ให้คืนค่าเดิมกลับไป
+
+      // 2. ใช้ Regex "ดึงเฉพาะส่วนที่เป็นรหัส" ออกมาจากข้อความหรือ URL ยาวๆ
+      // - รูปแบบที่ 1: ตัวอักษรภาษาอังกฤษ ตามด้วยขีดและตัวเลข (เช่น COMP-001, IT-1234)
+      // - รูปแบบที่ 2: รหัสครุภัณฑ์มาตรฐานราชการ (เช่น 1234-567-8900 หรือ 1234-567-8900/1)
+      const assetPattern = /([a-zA-Z]+-\d+|[0-9]{4}-[0-9]{3}-[0-9]{4}(?:\/[0-9]+)?)/;
+      const match = result.match(assetPattern);
+      
+      if (match && match[0]) {
+        return match[0].toUpperCase(); // คืนค่าเฉพาะตัวรหัสที่เจอ และทำเป็นพิมพ์ใหญ่
+      }
+
+      // 3. กรณีเป็นข้อความพิมพ์มาตรงๆ เช่น "รหัสครุภัณฑ์: COMP-005"
+      if (result.includes('รหัส')) {
+         result = result.replace(/.*รหัส(?:ครุภัณฑ์)?\s*[:=]?\s*/i, '').trim();
+      } else if (result.startsWith('http://') || result.startsWith('https://')) {
+         // 4. ถ้ายังเป็น URL อยู่แต่หา pattern ขีด (-) ไม่เจอ ให้ดึงคำที่มีความยาวพอที่จะเป็นรหัส
+         const fallbackMatch = result.match(/([a-zA-Z0-9]{4,})/);
+         if (fallbackMatch) return fallbackMatch[0].toUpperCase();
+      }
+      
+      // ถ้าไม่มีอะไรตรงเลย ให้คืนค่าเดิมกลับไป
       return result;
     }
 
