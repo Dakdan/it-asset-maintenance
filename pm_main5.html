@@ -1487,14 +1487,15 @@
     // LIVE QR SCANNER LOGIC
     // =====================================
     
-    // ฟังก์ชันสำหรับสกัดเฉพาะ "รหัสครุภัณฑ์" จาก QR Code โดยใช้ Regex ค้นหารูปแบบ
+    // ฟังก์ชันสำหรับสกัดเฉพาะ "รหัสครุภัณฑ์" จาก QR Code (รองรับกรณีรหัสอยู่ตรงกลาง URL)
     function extractAssetIdFromQR(rawData) {
       let result = rawData.trim();
       
-      // 1. ลองหาจาก Parameter ก่อน (เผื่อเป็น URL ที่ตั้งค่าไว้ เช่น ?id=1234 หรือ ?AssetID=1234)
       try {
         if (result.startsWith('http://') || result.startsWith('https://')) {
           const url = new URL(result);
+          
+          // 1. ลองหาจาก Parameter ก่อน (เช่น ?id=1234 หรือ ?AssetID=1234)
           const params = ['id', 'asset_id', 'code', 'asset', 'sn', 'AssetID'];
           for (let p of params) {
             if (url.searchParams.has(p)) {
@@ -1502,31 +1503,38 @@
             }
           }
           
-          // 2. ถ้าไม่มี Parameter ให้ใช้ Regex สกัดรหัสออกมาจาก Path หรือ Query String ทิ้ง Domain
-          const pathAndQuery = url.pathname + url.search + url.hash;
-          const patterns = [
-            /([a-zA-Z]+-\d+)/,                           // รูปแบบที่ 1: COMP-001, IT-1234
-            /([0-9]{4}-[0-9]{3}-[0-9]{4}(?:\/[0-9]+)?)/, // รูปแบบที่ 2: 1234-567-8900
-            /([a-zA-Z]+\d{2,})/                          // รูปแบบที่ 3: PC01, COMP123
-          ];
-          for (let regex of patterns) {
-            const match = pathAndQuery.match(regex);
-            if (match && match[0]) return match[0].toUpperCase();
-          }
-          
-          // 3. ถ้าไม่ตรง pattern เลย ดึงส่วนสุดท้ายของ url มาใช้เพื่อป้องกันการได้คำว่า http:// มาเปล่าๆ
+          // 2. ถ้าไม่มี Parameter ให้แยก Path ของ URL ออกมาหาส่วนที่เป็นรหัสครุภัณฑ์
           const segments = url.pathname.split('/').filter(Boolean);
+          
           if (segments.length > 0) {
-              return decodeURIComponent(segments[segments.length - 1]).toUpperCase();
+              // 2.1 หาส่วนที่มีขีด (-) และมีตัวเลข เช่น COMP-001 หรือ 1234-567
+              let found = segments.find(s => s.includes('-') && /\d/.test(s));
+              if (found) return decodeURIComponent(found).toUpperCase();
+              
+              // 2.2 หาส่วนที่มีทั้งตัวอักษรและตัวเลขผสมกัน เช่น PC0123
+              found = segments.find(s => /[a-zA-Z]/.test(s) && /\d/.test(s));
+              if (found) return decodeURIComponent(found).toUpperCase();
+              
+              // 2.3 หาส่วนที่เป็นตัวเลขล้วน 4 หลักขึ้นไป (ป้องกันการจับตัวเลขสั้นๆ)
+              found = segments.find(s => /^\d{4,}$/.test(s));
+              if (found) return decodeURIComponent(found).toUpperCase();
+              
+              // 2.4 ถ้าหาแพทเทิร์นไม่เจอ ให้ตัดคำทั่วไปทิ้ง แล้วเอาคำที่เหลือที่ยาวที่สุด
+              const ignoreWords = ['view', 'detail', 'details', 'edit', 'show', 'asset', 'item', 'info'];
+              const validSegments = segments.filter(s => !ignoreWords.includes(s.toLowerCase()));
+              if (validSegments.length > 0) {
+                  let longest = validSegments.sort((a, b) => b.length - a.length)[0];
+                  return decodeURIComponent(longest).toUpperCase();
+              }
           }
         }
       } catch (e) {
         console.warn("URL Parsing Error", e);
       }
 
-      // 4. ถ้าเป็นข้อความธรรมดา ให้ลองสกัดรูปแบบรหัสออกมาก่อน
+      // 3. ถ้าเป็นข้อความธรรมดา ให้ลองสกัดรูปแบบรหัสออกมาก่อน
       const directPatterns = [
-        /([a-zA-Z]+-\d+)/,
+        /([a-zA-Z0-9ก-๙]+-\d+)/,
         /([0-9]{4}-[0-9]{3}-[0-9]{4}(?:\/[0-9]+)?)/
       ];
       for (let regex of directPatterns) {
@@ -1534,7 +1542,7 @@
         if (match && match[0]) return match[0].toUpperCase();
       }
 
-      // 5. กรณีมีพิมพ์คำว่า "รหัส" แทรกอยู่ เช่น "รหัสครุภัณฑ์: COMP-012"
+      // 4. กรณีมีพิมพ์คำว่า "รหัส" แทรกอยู่ เช่น "รหัสครุภัณฑ์: COMP-012"
       if (result.includes('รหัส')) {
          let stripped = result.replace(/.*รหัส(?:ครุภัณฑ์)?\s*[:=]?\s*/i, '').trim();
          if (stripped) {
@@ -1542,7 +1550,7 @@
          }
       }
       
-      // 6. ถ้าไม่มีอะไรเข้าเงื่อนไขเลย คืนค่าทั้งหมดแบบตัวพิมพ์ใหญ่
+      // 5. ถ้าไม่มีอะไรเข้าเงื่อนไขเลย คืนค่าทั้งหมดแบบตัวพิมพ์ใหญ่
       return result.toUpperCase();
     }
 
