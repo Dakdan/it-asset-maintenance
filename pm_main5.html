@@ -395,7 +395,7 @@
                 <input type="text" class="search-input" id="searchInput" placeholder="พิมพ์เลขรหัสครุภัณฑ์, Serial Number หรือชื่อแผนก..." autocomplete="off">
               </div>
               <div class="search-buttons">
-                <!-- เปลี่ยนจากการเรียก File Input เป็นเรียกฟังก์ชันเปิดกล้องสด -->
+                <!-- สแกนผ่านกล้องสด -->
                 <button class="btn btn-qr" id="btnQR" title="สแกน QR Code" onclick="startLiveQRScan()">📷 สแกน QR Live</button>
                 <button class="btn btn-search" id="btnSearch" title="ค้นหา">🔍 ค้นหา</button>
                 <button class="btn btn-clear" id="btnClear" title="ล้างการค้นหา">✕ ล้าง</button>
@@ -524,7 +524,6 @@
       const searchInput = document.getElementById('searchInput');
       searchInput.addEventListener('input', (e) => performSearch(e.target.value));
       document.getElementById('btnSearch').addEventListener('click', () => performSearch(searchInput.value));
-      // ปุ่มสแกน QR ถูกผูก Event ด้วย onclick=startLiveQRScan() ไว้ที่ HTML แล้ว
       document.getElementById('btnClear').addEventListener('click', () => {
         searchInput.value = '';
         currentSearchQuery = '';
@@ -611,6 +610,7 @@
         </div>`;
         return;
       }
+      
       const query = currentSearchQuery.toLowerCase();
       let matchedAssets = allAssets.filter(asset => {
         const id = String(asset.Asset_ID || "").toLowerCase();
@@ -618,34 +618,49 @@
         const sn = String(asset.Serial_Number || "").toLowerCase();
         return id.includes(query) || dept.includes(query) || sn.includes(query);
       });
+      
+      // ✅ เรียงลำดับเน้นเลขท้าย อ้างอิงจากตัวอย่างที่คุณให้มา
       matchedAssets.sort((a, b) => {
-        const getScore = (asset) => {
-          const id = String(asset.Asset_ID || "").toLowerCase();
-          const dept = String(asset.Dept_Name || "").toLowerCase();
-          if (id === query) return 100;
-          if (id.endsWith(query)) return 90;
-          if (id.lastIndexOf(query) !== -1) return 10 + (id.lastIndexOf(query) / id.length) * 50;
-          if (dept.includes(query)) return 5;
-          return 0;
+        const idA = String(a.Asset_ID || "").toLowerCase();
+        const idB = String(b.Asset_ID || "").toLowerCase();
+        
+        const getSuffix = (id, searchStr) => {
+            let count = 0;
+            const revId = id.split('').reverse();
+            const revQ = searchStr.split('').reverse();
+            for (let i = 0; i < Math.min(revId.length, revQ.length); i++) {
+                if (revId[i] === revQ[i]) count++; else break;
+            }
+            return count;
         };
-        return getScore(b) - getScore(a);
+        
+        const scoreA = getSuffix(idA, query);
+        const scoreB = getSuffix(idB, query);
+        
+        if (scoreB !== scoreA) return scoreB - scoreA;
+        return idA.length - idB.length;
       });
+
       if (matchedAssets.length === 0) {
         grid.innerHTML = `<div class="empty-state" style="grid-column: 1/-1;"><div class="empty-state-icon">📦</div><div class="empty-state-text">ไม่พบข้อมูลครุภัณฑ์ที่ตรงกับการค้นหา</div></div>`;
         return;
       }
       grid.innerHTML = '';
+      
       matchedAssets.forEach(asset => {
         const typeName = asset.Asset_Group_Name || 'ไม่ระบุประเภท';
         const detail = asset.Asset_DB_Col8 || 'ไม่มีบันทึก';
         let nameHtml = (asset.Asset_Name && asset.Asset_Name.trim() !== asset.Asset_ID.trim()) 
           ? `<p><span class="detail-label">ชื่ออุปกรณ์</span><span class="detail-value">${escapeHtml(truncateText(asset.Asset_Name, 40))}</span></p>` : '';
 
+        // ✅ ไฮไลท์เฉพาะ Asset_ID แบบเดียวกับในตัวอย่าง
+        const highlightedID = highlightText(asset.Asset_ID || '', currentSearchQuery);
+
         const card = document.createElement('div');
         card.className = 'asset-card';
         card.innerHTML = `
           <div class="asset-header">
-            <div class="asset-id">${highlightText(asset.Asset_ID || '', currentSearchQuery)}</div>
+            <div class="asset-id">${highlightedID}</div>
             <div class="dept-badge">${escapeHtml(asset.Dept_Name || 'ไม่พบคลังหน่วยงาน')}</div>
           </div>
           <div class="asset-serial">SN: ${highlightText(asset.Serial_Number || '-', currentSearchQuery)}</div>
@@ -1476,56 +1491,59 @@
     function extractAssetIdFromQR(rawData) {
       let result = rawData.trim();
       
-      // 1. ลองหาจาก Parameter ก่อน (เผื่อเป็น URL ที่ตั้งค่าไว้ เช่น ?id=1234)
+      // 1. ลองหาจาก Parameter ก่อน (เผื่อเป็น URL ที่ตั้งค่าไว้ เช่น ?id=1234 หรือ ?AssetID=1234)
       try {
         if (result.startsWith('http://') || result.startsWith('https://')) {
           const url = new URL(result);
-          const params = ['id', 'asset_id', 'code', 'asset', 'sn'];
+          const params = ['id', 'asset_id', 'code', 'asset', 'sn', 'AssetID'];
           for (let p of params) {
             if (url.searchParams.has(p)) {
               return url.searchParams.get(p).toUpperCase();
             }
           }
+          
+          // 2. ถ้าไม่มี Parameter ให้ใช้ Regex สกัดรหัสออกมาจาก Path หรือ Query String ทิ้ง Domain
+          const pathAndQuery = url.pathname + url.search + url.hash;
+          const patterns = [
+            /([a-zA-Z]+-\d+)/,                           // รูปแบบที่ 1: COMP-001, IT-1234
+            /([0-9]{4}-[0-9]{3}-[0-9]{4}(?:\/[0-9]+)?)/, // รูปแบบที่ 2: 1234-567-8900
+            /([a-zA-Z]+\d{2,})/                          // รูปแบบที่ 3: PC01, COMP123
+          ];
+          for (let regex of patterns) {
+            const match = pathAndQuery.match(regex);
+            if (match && match[0]) return match[0].toUpperCase();
+          }
+          
+          // 3. ถ้าไม่ตรง pattern เลย ดึงส่วนสุดท้ายของ url มาใช้เพื่อป้องกันการได้คำว่า http:// มาเปล่าๆ
+          const segments = url.pathname.split('/').filter(Boolean);
+          if (segments.length > 0) {
+              return decodeURIComponent(segments[segments.length - 1]).toUpperCase();
+          }
         }
       } catch (e) {
-        console.warn("URL Parsing Warn:", e);
+        console.warn("URL Parsing Error", e);
       }
 
-      // 2. ลบส่วนที่เป็น http:// และโดเมนออก เพื่อป้องกันการสกัดโดเมนหรือคำว่า http
-      let textToSearch = result;
-      if (textToSearch.startsWith('http://') || textToSearch.startsWith('https://')) {
-          try {
-              let urlObj = new URL(result);
-              // ค้นหาเฉพาะส่วนที่เป็น Path หรือ Parameter ด้านหลัง
-              textToSearch = urlObj.pathname + urlObj.search + urlObj.hash;
-          } catch(e) {
-              textToSearch = textToSearch.replace(/^https?:\/\//i, '');
-          }
-      }
-
-      // 3. ใช้ Regex ค้นหารูปแบบรหัสครุภัณฑ์จากข้อความที่เหลือ
-      const patterns = [
-        /([a-zA-Z]+-\d+)/,                           // รูปแบบที่ 1: COMP-001, IT-1234
-        /([0-9]{4}-[0-9]{3}-[0-9]{4}(?:\/[0-9]+)?)/, // รูปแบบที่ 2: 1234-567-8900 (รหัสมาตรฐาน)
-        /([a-zA-Z]+\d{2,})/,                         // รูปแบบที่ 3: ตัวอักษรติดตัวเลข เช่น PC01, COMP123
-        /([0-9]{4,})/                                // รูปแบบที่ 4: ตัวเลขล้วน 4 หลักขึ้นไป
+      // 4. ถ้าเป็นข้อความธรรมดา ให้ลองสกัดรูปแบบรหัสออกมาก่อน
+      const directPatterns = [
+        /([a-zA-Z]+-\d+)/,
+        /([0-9]{4}-[0-9]{3}-[0-9]{4}(?:\/[0-9]+)?)/
       ];
-
-      for (let regex of patterns) {
-        const match = textToSearch.match(regex);
-        if (match && match[0]) {
-          return match[0].toUpperCase();
-        }
+      for (let regex of directPatterns) {
+        const match = result.match(regex);
+        if (match && match[0]) return match[0].toUpperCase();
       }
-      
-      // กรณีเป็นข้อความพิมพ์มาตรงๆ เช่น "รหัสครุภัณฑ์: 1234" แล้วไม่ตรง Pattern ด้านบน
+
+      // 5. กรณีมีพิมพ์คำว่า "รหัส" แทรกอยู่ เช่น "รหัสครุภัณฑ์: COMP-012"
       if (result.includes('รหัส')) {
          let stripped = result.replace(/.*รหัส(?:ครุภัณฑ์)?\s*[:=]?\s*/i, '').trim();
-         if (stripped) return stripped.toUpperCase();
+         if (stripped) {
+             return stripped.split(/\s+/)[0].toUpperCase();
+         }
       }
       
-      // ถ้าหาไม่เจอจริงๆ คืนค่าเดิม
-      return result;
+      // 6. ถ้าไม่มีอะไรเข้าเงื่อนไขเลย คืนค่าทั้งหมดแบบตัวพิมพ์ใหญ่
+      return result.toUpperCase();
     }
 
     async function startLiveQRScan() {
