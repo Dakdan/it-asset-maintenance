@@ -7,6 +7,7 @@
   <title>IT Preventive Maintenance - Udon Thani Hospital</title>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="./js/Frontend.js"></script>
+  <!-- ไลบรารี jsQR สำหรับถอดรหัส QR Code แบบ Live -->
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
  
   <style>
@@ -275,6 +276,35 @@
     .form-check { width: 20px; height: 20px; cursor: pointer; accent-color: var(--primary); }
     .form-file { font-family: 'Prompt'; font-size: 12px; }
 
+    /* ==================== LIVE QR SCANNER UI ==================== */
+    .qr-scanner-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px); z-index: 3000;
+      justify-content: center; align-items: center; padding: 16px;
+    }
+    .qr-scanner-overlay.show { display: flex; animation: fadeInOverlay 0.3s ease; }
+    .qr-scanner-modal {
+      background: white; border-radius: var(--radius-xl); width: 100%; max-width: 480px;
+      overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); display: flex; flex-direction: column;
+    }
+    .qr-scanner-header {
+      padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid var(--border-light); background: #f8fafc;
+    }
+    .qr-scanner-header h3 { margin: 0; font-size: 16px; font-weight: 700; color: var(--text-main); }
+    .qr-video-container {
+      position: relative; width: 100%; background: #000; aspect-ratio: 1; overflow: hidden;
+    }
+    #qrVideo { width: 100%; height: 100%; object-fit: cover; }
+    .qr-scan-region {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 65%; height: 65%; border: 3px solid var(--primary); border-radius: 16px;
+      box-shadow: 0 0 0 1000px rgba(0,0,0,0.5); pointer-events: none;
+    }
+    .qr-scan-region::before, .qr-scan-region::after {
+      content: ''; position: absolute; width: 30px; height: 30px; border-color: var(--primary);
+    }
+
     /* ==================== MISC ==================== */
     .notification-toast { position: fixed; top: 24px; right: 24px; background: white; padding: 12px 16px; border-radius: var(--radius-md); box-shadow: var(--shadow-lg); z-index: 2000; animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; gap: 10px; align-items: center; border-left: 4px solid var(--primary); max-width: 90vw; word-break: break-word; }
     @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
@@ -315,11 +345,6 @@
       .pm-category { padding: 16px; margin-bottom: 16px; }
       .chart-container { padding: 16px; margin-bottom: 16px; }
       .chart-label { min-width: 90px; max-width: 90px; font-size: 11px; }
-
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
     }
   </style>
 </head>
@@ -370,7 +395,8 @@
                 <input type="text" class="search-input" id="searchInput" placeholder="พิมพ์เลขรหัสครุภัณฑ์, Serial Number หรือชื่อแผนก..." autocomplete="off">
               </div>
               <div class="search-buttons">
-                <button class="btn btn-qr" id="btnQR" title="สแกน QR Code" onclick="document.getElementById('qrFileInput').click()">📷 QR Scan</button>
+                <!-- เปลี่ยนจากการเรียก File Input เป็นเรียกฟังก์ชันเปิดกล้องสด -->
+                <button class="btn btn-qr" id="btnQR" title="สแกน QR Code" onclick="startLiveQRScan()">📷 สแกน QR Live</button>
                 <button class="btn btn-search" id="btnSearch" title="ค้นหา">🔍 ค้นหา</button>
                 <button class="btn btn-clear" id="btnClear" title="ล้างการค้นหา">✕ ล้าง</button>
               </div>
@@ -394,6 +420,28 @@
     <div class="spinner"></div>
     <div class="loading-text" id="loadingText">กำลังดึงข้อมูลงานจริง...</div>
   </div>
+
+  <!-- เพิ่ม UI สำหรับ Live QR Scanner -->
+  <div class="qr-scanner-overlay" id="qrScannerOverlay">
+    <div class="qr-scanner-modal">
+      <div class="qr-scanner-header">
+        <h3>สแกนรหัสครุภัณฑ์ (QR Code)</h3>
+        <button onclick="stopLiveQRScan()" style="background:none; border:none; font-size:18px; color:var(--text-muted); cursor:pointer;">✕</button>
+      </div>
+      <div class="qr-video-container">
+        <!-- แสดงภาพสดจากกล้อง -->
+        <video id="qrVideo" playsinline></video>
+        <!-- กรอบโฟกัส QR -->
+        <div class="qr-scan-region"></div>
+      </div>
+      <div style="padding: 16px; text-align: center; color: var(--text-muted); font-size: 14px; background: #f8fafc;">
+        หันกล้องไปที่ QR Code ระบบจะค้นหาให้อัตโนมัติ
+      </div>
+    </div>
+  </div>
+  <!-- Canvas ซ่อนไว้ใช้สำหรับอ่านพิกเซลส่งให้ jsQR -->
+  <canvas id="qrCanvas" style="display:none;"></canvas>
+
   <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-header">
@@ -411,7 +459,6 @@
     </div>
   </div>
   <div id="notificationContainer"></div>
-  <input type="file" id="qrFileInput" accept="image/*" capture="environment" style="display: none;" onchange="handleQRUpload(event)">
 
   <script>    
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw8UHJAO4hBK9kYX_tZ1JrZSPtujTOAuFtVvHrjiHzk6O7D3ZUDQv5cMbEs8hEl8TqR3g/exec";    
@@ -420,9 +467,15 @@
     let abnormalList = [];
     let currentSearchQuery = '';
     let selectedAsset = null;
+
+    // ตัวแปรสำหรับ Live Scanner
+    let qrStream = null;
+    let qrScanActive = false;
+
     document.addEventListener('DOMContentLoaded', async () => {
       await initializeApp();
     });
+    
     async function initializeApp() {
       showLoading(true, 'กำลังโหลดข้อมูล ...');
       setConnectionStatus(true, 'กำลังโหลดข้อมูล...');
@@ -471,7 +524,7 @@
       const searchInput = document.getElementById('searchInput');
       searchInput.addEventListener('input', (e) => performSearch(e.target.value));
       document.getElementById('btnSearch').addEventListener('click', () => performSearch(searchInput.value));
-      document.getElementById('btnQR').addEventListener('click', () => document.getElementById('qrFileInput').click());
+      // ปุ่มสแกน QR ถูกผูก Event ด้วย onclick=startLiveQRScan() ไว้ที่ HTML แล้ว
       document.getElementById('btnClear').addEventListener('click', () => {
         searchInput.value = '';
         currentSearchQuery = '';
@@ -495,7 +548,7 @@
       if (tabName === 'assets') renderAssets();
       if (tabName === 'completed') renderCompletedList();
       if (tabName === 'abnormal') renderAbnormalListPanel();
-      if (tabName === 'report') renderReport(); // โหลดหน้ารายงาน
+      if (tabName === 'report') renderReport(); 
     }
 
     function renderDashboard() {
@@ -524,6 +577,7 @@
       });
       renderAssetChart();
     }
+
     function renderAssetChart() {
       const container = document.getElementById('chartContainer');
       const types = {};
@@ -547,6 +601,7 @@
       });
       container.innerHTML = html || '<p class="empty-state-text py-4">ไม่พบโครงสร้างกลุ่มประเภทครุภัณฑ์</p>';
     }
+
     function renderAssets() {
       const grid = document.getElementById('assetsGrid');
       if (!currentSearchQuery) {
@@ -600,13 +655,12 @@
             <p><span class="detail-label">รายละเอียด</span><span class="detail-value">${escapeHtml(truncateText(detail, 50))}</span></p>
           </div>
         `;
-        // ยังให้ค้นหาแบบเดิม กดแล้วขึ้นฟอร์มกรอก PM
         card.onclick = () => openPMPanel(asset);
         grid.appendChild(card);
       });
     }
 
-function renderCompletedList() {
+    function renderCompletedList() {
       const container = document.getElementById('completedContainer');
       
       if (pmHistory.length === 0) {
@@ -653,6 +707,7 @@ function renderCompletedList() {
         </div>
       `).join('');
     }
+
     function renderAbnormalListPanel() {
       const container = document.getElementById('abnormalContainer');
       if (abnormalList.length === 0) {
@@ -680,7 +735,7 @@ function renderCompletedList() {
         `;
       }).join('');
     }
-     // ระบบรายงาน PM
+
     function renderReport() {
       const container = document.getElementById('reportContainer');
       container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-muted);">กำลังรวบรวมและจัดกลุ่มรายงาน...</div>';
@@ -691,7 +746,7 @@ function renderCompletedList() {
           return asset && asset.Dept_Name ? asset.Dept_Name : "ไม่ระบุหน่วยงาน";
         };
         const combinedData = [];        
-        // 1. ดึงข้อมูล PM ที่ปกติ
+        
         pmHistory.forEach(pm => {
           combinedData.push({
             Asset_ID: pm.Asset_ID,
@@ -701,7 +756,7 @@ function renderCompletedList() {
             Dept: getDept(pm.Asset_ID)
           });
         });
-        // 2. ดึงข้อมูล PM ที่ผิดปกติ
+        
         abnormalList.forEach(ab => {
           combinedData.push({
             Asset_ID: ab.Asset_ID,
@@ -715,12 +770,13 @@ function renderCompletedList() {
            container.innerHTML = '<div class="empty-state" style="margin:20px;"><div class="empty-state-icon">📄</div><div class="empty-state-text">ยังไม่มีประวัติการทำ PM ในระบบ</div></div>';
            return;
         }
-        // จัดกลุ่มตามแผนก
+        
         combinedData.forEach(item => {
           if (!reportData[item.Dept]) reportData[item.Dept] = [];
           reportData[item.Dept].push(item);
         });
-        window.currentReportData = reportData; // เก็บสำหรับดึงไปพิมพ์
+        window.currentReportData = reportData; 
+        
         let html = '<div style="padding:10px;">';
         for (let dept in reportData) {
           html += `
@@ -743,7 +799,6 @@ function renderCompletedList() {
                   </thead>
                   <tbody>
                     ${reportData[dept].map(item => `
-                      <!-- แก้ไข: เมื่อกดแถวให้เปิดหน้าจอแสดงประวัติแทนฟอร์มบันทึกข้อมูล -->
                       <tr onclick="viewAssetHistory('${item.Asset_ID}')" style="border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: 0.2s;" onmouseover="this.style.backgroundColor='#fff1f2'" onmouseout="this.style.backgroundColor='transparent'">
                         <td style="padding: 12px; font-weight: 600; color:var(--primary-hover);">${item.Asset_ID}</td>
                         <td style="padding: 12px;">${item.PM_Date}</td>
@@ -768,6 +823,7 @@ function renderCompletedList() {
         container.innerHTML = `<div style="color: var(--error); padding: 20px;">เกิดข้อผิดพลาดในการประมวลผล: ${err.message}</div>`;
       }
     }
+
     function printCertificate(dept) {
       const data = window.currentReportData[dept];
       if (!data) return;
@@ -843,9 +899,6 @@ function renderCompletedList() {
       printWindow.document.close();
     }
 
-    // =====================================
-    // ฟังก์ชันใหม่: แสดงหน้าประวัติการทำ PM
-    // =====================================
     function viewAssetHistory(assetId) {
       const asset = allAssets.find(a => a.Asset_ID === assetId);
       if (!asset) {
@@ -863,7 +916,6 @@ function renderCompletedList() {
         <div class="modal-subtitle">ข้อมูลสรุปผลการตรวจสอบและสภาวะล่าสุด</div>
       `;
 
-      // รวบรวมข้อมูลประวัติจากที่โหลดมาแล้ว (ไม่มี Mock Data)
       const normalRecs = pmHistory.filter(pm => pm.Asset_ID === assetId).map(pm => ({...pm, Status: 'PASS'}));
       const abRecs = abnormalList.filter(ab => ab.Asset_ID === assetId).map(ab => ({...ab, Status: 'FAIL'}));
       const allRecs = [...normalRecs, ...abRecs];
@@ -879,7 +931,6 @@ function renderCompletedList() {
               const icon = isPass ? '✅ ผ่านเกณฑ์ปกติ' : '⚠️ ตรวจพบชำรุด';
               const date = rec.Check_Date || '-';
               const tech = rec.Checker_Name || '-';
-              // ใช้ Note จากประวัติปกติ หรือ Issue_Details จากประวัติผิดปกติ
               const note = rec.Note || rec.Issue_Details || 'ไม่มีรายละเอียดเพิ่มเติม';
 
               return `
@@ -912,14 +963,13 @@ function renderCompletedList() {
         </h3>
         ${historyHtml}
       `;
-      // เปลี่ยน Footer เป็นปุ่มปิด และปุ่มไปหน้าฟอร์มบันทึก PM ใหม่
       modalFooter.innerHTML = `
         <button class="btn btn-secondary" style="background:#f1f5f9; color:var(--text-muted);" onclick="closeModal()">ปิดหน้าต่าง</button>
         <button class="btn btn-search" onclick="openPMPanelById('${asset.Asset_ID}')">➕ บันทึก PM ใหม่</button>
       `;
       modal.classList.add('show');
     }
-     // Helper: ค้นหา Asset และเปิด Modal บันทึกข้อมูล
+
     function openPMPanelById(assetId) {
       const asset = allAssets.find(a => a.Asset_ID === assetId);
       if (asset) {
@@ -1005,7 +1055,6 @@ function renderCompletedList() {
             } else if (inputType === 'number') {
               inputHtml = `<input type="number" ${rawMin!==""?`min="${rawMin}"`:""} ${rawMax!==""?`max="${rawMax}"`:""} class="form-input pm-val" data-tid="${topic.topic_id}" placeholder="${(rawMin!==""&&rawMax!=="")?`ระบุตัวเลข (${rawMin}-${rawMax})`:"ระบุตัวเลข"}">`;
               
-            // --- อัปเดตส่วน text retio เป็น Checkbox ให้เลือกได้หลายรายการ ---
             } else if (inputType === 'text retio' || inputType === 'text radio') {
               const optionsString = rawMin !== "" ? rawMin : rawMax;
               const options = optionsString.split(',').map(v => v.trim()).filter(v => v !== "");
@@ -1020,7 +1069,6 @@ function renderCompletedList() {
                 `;
               });
               inputHtml += `</div>`;
-            // ----------------------------------------------------
               
             } else {
               inputHtml = `<input type="text" class="form-input pm-val" data-tid="${topic.topic_id}" placeholder="ระบุรายละเอียด">`;
@@ -1072,11 +1120,8 @@ function renderCompletedList() {
         
           const { record, asset, checklists } = res.data;
           
-          // 🟢 เตรียมตัวแปร pmDataStr เพื่อส่งต่อไปยังฟังก์ชัน openEditPMForm
-          // ทำการ Stringify, Encode และแทนที่เครื่องหมาย ' ด้วย %27 เพื่อไม่ให้ HTML Attribute พัง
           const pmDataStr = encodeURIComponent(JSON.stringify(res.data)).replace(/'/g, "%27");
           
-          // --- 1. ส่วนหัว: ข้อมูลครุภัณฑ์ ---
           let html = `
             <div style="background: #fff; border: 1px solid #eef2f6; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
               
@@ -1133,7 +1178,6 @@ function renderCompletedList() {
             </div>
           `;
   
-          // --- 2. ส่วนรายการ Checklist (แยก Group, ใส่เลขหน้า, โชว์ Score) ---
           if (checklists && checklists.length > 0) {
             html += `<div style="display: flex; flex-direction: column; gap: 10px;">`;
             
@@ -1216,7 +1260,6 @@ function renderCompletedList() {
   }
 
     async function openEditPMForm(pmId, encodedData) {
-        // ถอดรหัสและแปลงข้อมูลกลับเป็น Object
         const pmData = JSON.parse(decodeURIComponent(encodedData));
         const { asset, record, checklists } = pmData;
       
@@ -1224,13 +1267,11 @@ function renderCompletedList() {
         const titleWrapper = document.getElementById('modalTitleWrapper');
         const modalFooter = document.getElementById('modalFooter');
       
-        // เปลี่ยน Title เป็นโหมดแก้ไข
         titleWrapper.innerHTML = `
           <h2 class="modal-title">✏️ แก้ไขบันทึกงาน PM: <span style="color: var(--primary);">${escapeHtml(asset.Asset_ID || '')}</span></h2>
           <div class="modal-subtitle">รหัสใบงาน: ${escapeHtml(record.PM_No)} | วันที่เดิม: ${record.Date}</div>
         `;
       
-        // สร้างส่วนแสดงข้อมูลครุภัณฑ์เหมือน openPMPanel
         const infoGridHtml = `
           <div class="modal-info-grid">
             <div class="info-block"><span class="info-label">ประเภทอุปกรณ์</span><span class="info-val">${escapeHtml(asset.Asset_Group_Name || 'N/A')}</span></div>
@@ -1241,14 +1282,12 @@ function renderCompletedList() {
       
         modalBody.innerHTML = infoGridHtml + `<p style="text-align:center; padding:20px; color:var(--text-muted);">กำลังโหลดฟอร์มแก้ไข...</p>`;
         
-        // เปลี่ยน Footer เป็นโหมด "บันทึกการแก้ไข" และปุ่ม "ย้อนกลับ"
         modalFooter.innerHTML = `
           <button class="btn btn-secondary" style="background:#f1f5f9; color:var(--text-muted);" onclick="showPMReportDetail('${pmId}')">⬅️ ย้อนกลับ</button>
           <button class="btn btn-search" id="btnUpdatePM" onclick="submitUpdatePM('${pmId}')">💾 บันทึกการแก้ไขข้อมูล</button>
         `;
       
         try {
-          // ต้องตรวจสอบให้แน่ใจว่าใน asset มี Asset_Type_ID เพื่อไปดึงหัวข้อมาสร้างฟอร์ม
           const response = await fetch(`${SCRIPT_URL}?action=getPMTopics&assetType=${encodeURIComponent(asset.Asset_Type_ID)}`);
           const res = await response.json();        
           
@@ -1264,7 +1303,6 @@ function renderCompletedList() {
               const inputType = String(topic.input_type || "").toLowerCase().trim();
               const isCritical = topic.critical === true || String(topic.critical).toUpperCase() === 'TRUE';
               
-              // ค้นหาข้อมูลเดิมจากเช็คลิสต์ที่เคยบันทึกไว้
               const oldItem = checklists.find(c => String(c.Topic_ID) === String(topic.topic_id)) || {};
               const oldStatus = oldItem.Status !== undefined ? String(oldItem.Status) : "";
       
@@ -1279,7 +1317,6 @@ function renderCompletedList() {
       
               let inputHtml = "";
       
-              // จัดการ Input แต่ละประเภท และใส่ค่าเดิม (Pre-fill)
               if (inputType === 'score') {
                 const rawMin = topic.min_score || 1;
                 const rawMax = topic.max_score || 5;
@@ -1305,7 +1342,6 @@ function renderCompletedList() {
                   </div>`;
                   
               } else {
-                // สำหรับ Input ประเภท Text หรือ Number ดึง Remark/Status เดิมมาใส่ใน value
                 inputHtml = `<input type="${inputType === 'number' ? 'number' : 'text'}" class="form-input pm-val" data-tid="${topic.topic_id}" value="${escapeHtml(oldItem.Remark || oldStatus || '')}" placeholder="ระบุรายละเอียด">`;
               }
       
@@ -1322,7 +1358,6 @@ function renderCompletedList() {
             
             html += `</div>`;
             
-            // เพิ่มกล่องสำหรับแก้ "บันทึกเพิ่มเติม" 
             const currentNote = record.Note !== "-" ? record.Note : "";
             html += `
               <div style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
@@ -1341,156 +1376,195 @@ function renderCompletedList() {
     function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
 
     async function submitPMForm() {
-  if (!selectedAsset) return;      
-  const items = document.querySelectorAll('.checklist-item');
-  let details = [];
-  let isValid = true;
-  let hasFail = false;      
-  
-  items.forEach(item => {
-    const tid = item.getAttribute('data-topic');
-    const isCritical = item.getAttribute('data-critical') === 'true';
-    let val = "";
-    let status = "PASS"; // 🟢 ย้ายสถานะเริ่มต้นมาไว้ตรงนี้
-    
-    const textInput = item.querySelector('.pm-val');
-    const radioInputs = item.querySelectorAll('.pm-val-radio');
-    const multiInputs = item.querySelectorAll('.pm-val-multi'); 
-    
-    // ตรวจสอบและดึงค่าตามประเภท Input พร้อมกำหนด Status
-    if (textInput) {
-      val = textInput.value.trim();
-      // 🟢 ไม่มีการเช็ค status FAIL จากช่อง Text/Number เพื่อให้กรอกเลข 0 ได้
-    } else if (radioInputs.length > 0) {
-      const checkedRadio = item.querySelector('.pm-val-radio:checked');
-      if (checkedRadio) {
-        val = checkedRadio.value;
-        // 🟢 ตรวจสอบสถานะ FAIL เฉพาะประเภท Radio (0 = ผิดปกติ)
-        if (val === "0") { 
-          status = "FAIL"; 
-          hasFail = true; 
-        }
-      }
-    } else if (multiInputs.length > 0) {
-      const checkedMulti = item.querySelectorAll('.pm-val-multi:checked');
-      if (checkedMulti.length > 0) {
-        val = Array.from(checkedMulti).map(cb => cb.value).join(',');
-      }
-    }
-    
-    // ตรวจสอบค่าว่างสำหรับหัวข้อบังคับ (Critical)
-    if (isCritical && val === "") {
-      isValid = false;
-      item.style.border = "1px solid var(--error)"; 
-      item.style.padding = "8px"; 
-      item.style.borderRadius = "8px"; 
-      item.style.backgroundColor = "#fef2f2";
-    } else {
-      item.style.border = "none"; 
-      item.style.padding = "0"; 
-      item.style.backgroundColor = "transparent";
-    }        
-    
-    details.push({ topic_id: tid, status: status, score: val, remark: "" });
-  });      
-  
-  if (!isValid) { 
-    showNotification('warning', 'กรุณากรอกข้อมูลในหัวข้อที่จำเป็น (*) ให้ครบถ้วน'); 
-    return; 
-  }
-  
-  const payload = { 
-    action: 'savePM', 
-    asset_code: selectedAsset.Asset_ID, 
-    user: "เจ้าหน้าที่ไอที", 
-    result: hasFail ? "FAIL" : "PASS", 
-    note: hasFail ? "พบความผิดปกติ" : "ปกติ", 
-    details: details 
-  };
-  
-  showLoading(true, 'กำลังบันทึกข้อมูลเข้าระบบหลัก...');
-  try {
-    const response = await fetch(SCRIPT_URL, { 
-      method: 'POST', 
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
-      body: JSON.stringify(payload) 
-    });
-    const res = await response.json();        
-    
-    if (res.status) {
-      showNotification('success', 'บันทึกข้อมูลสำเร็จ! (PM_ID: ' + res.data.pm_id + ')');
+      if (!selectedAsset) return;      
+      const items = document.querySelectorAll('.checklist-item');
+      let details = [];
+      let isValid = true;
+      let hasFail = false;      
       
-      // 1. รีเฟรชข้อมูลใน Dashboard พื้นหลังให้เป็นปัจจุบัน
-      await Promise.all([loadPMHistory(), loadAbnormalList()]);
-      renderDashboard();
-      
-      // 2. สลับ Tab รอไว้ด้านหลัง Modal
-      if (hasFail) switchTab('abnormal'); else switchTab('completed');
-      
-      // 3. เรียกหน้า Detail ขึ้นมาแสดงทันที
-      showPMReportDetail(res.data.pm_id);
-      
-    } else {
-      showNotification('error', 'ข้อผิดพลาดจากเซิร์ฟเวอร์: ' + res.message);
-    }
-  } catch (err) {
-    showNotification('error', 'เกิดข้อผิดพลาดในการเชื่อมต่อเครือข่าย');
-  } finally {
-    showLoading(false);
-  }
-}
-
-    // =====================================
-    // ฟังก์ชันใหม่: อัปเดตและทำสแกน QR Code จริงจากรูปภาพที่อัปโหลด/ถ่ายภาพ
-    // =====================================
-    function handleQRUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      showLoading(true, 'กำลังประมวลผลและสแกนรูปภาพ QR Code...');
-      const reader = new FileReader();
-      
-      reader.onload = function(e) {
-        const image = new Image();
-        image.onload = function() {
-          // สร้าง virtual canvas เพื่อใช้วาดรูปและวิเคราะห์พิกเซลภาพ
-          const canvas = document.createElement('canvas');
-          const context = canvas.getContext('2d');
-          canvas.width = image.width;
-          canvas.height = image.height;
-          context.drawImage(image, 0, 0, image.width, image.height);
-          
-          try {
-            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-            // เรียกฟังก์ชัน jsQR เพื่อสแกนหาจุดตัดมุมมองและแกะค่า QR Code
-            const code = jsQR(imageData.data, imageData.width, imageData.height, {
-              inversionAttempts: "dontInvert"
-            });
-
-            showLoading(false);
-            if (code && code.data) {
-              const qrResult = code.data.trim();
-              // ตั้งค่าให้กับ Input ช่องค้นหาและทำรายการค้นหาทันที
-              document.getElementById('searchInput').value = qrResult;
-              showNotification('success', `สแกนพบข้อมูล: ${qrResult}`);
-              
-              // สลับแท็บไปที่การสืบค้นเพื่อความมั่นใจ
-              switchTab('assets');
-              performSearch(qrResult);
-            } else {
-              showNotification('error', 'ไม่สามารถอ่านค่า QR Code ได้ กรุณาถ่ายภาพให้เห็นรหัสที่ชัดเจนขึ้นและลองอีกครั้ง');
+      items.forEach(item => {
+        const tid = item.getAttribute('data-topic');
+        const isCritical = item.getAttribute('data-critical') === 'true';
+        let val = "";
+        let status = "PASS";
+        
+        const textInput = item.querySelector('.pm-val');
+        const radioInputs = item.querySelectorAll('.pm-val-radio');
+        const multiInputs = item.querySelectorAll('.pm-val-multi'); 
+        
+        if (textInput) {
+          val = textInput.value.trim();
+        } else if (radioInputs.length > 0) {
+          const checkedRadio = item.querySelector('.pm-val-radio:checked');
+          if (checkedRadio) {
+            val = checkedRadio.value;
+            if (val === "0") { 
+              status = "FAIL"; 
+              hasFail = true; 
             }
-          } catch (err) {
-            showLoading(false);
-            showNotification('error', 'เกิดข้อผิดพลาดขณะวิเคราะห์ภาพ: ' + err.message);
           }
-        };
-        image.src = e.target.result;
+        } else if (multiInputs.length > 0) {
+          const checkedMulti = item.querySelectorAll('.pm-val-multi:checked');
+          if (checkedMulti.length > 0) {
+            val = Array.from(checkedMulti).map(cb => cb.value).join(',');
+          }
+        }
+        
+        if (isCritical && val === "") {
+          isValid = false;
+          item.style.border = "1px solid var(--error)"; 
+          item.style.padding = "8px"; 
+          item.style.borderRadius = "8px"; 
+          item.style.backgroundColor = "#fef2f2";
+        } else {
+          item.style.border = "none"; 
+          item.style.padding = "0"; 
+          item.style.backgroundColor = "transparent";
+        }        
+        
+        details.push({ topic_id: tid, status: status, score: val, remark: "" });
+      });      
+      
+      if (!isValid) { 
+        showNotification('warning', 'กรุณากรอกข้อมูลในหัวข้อที่จำเป็น (*) ให้ครบถ้วน'); 
+        return; 
+      }
+      
+      const payload = { 
+        action: 'savePM', 
+        asset_code: selectedAsset.Asset_ID, 
+        user: "เจ้าหน้าที่ไอที", 
+        result: hasFail ? "FAIL" : "PASS", 
+        note: hasFail ? "พบความผิดปกติ" : "ปกติ", 
+        details: details 
       };
       
-      reader.readAsDataURL(file);
-      // เคลียร์ค่า input เผื่อต้องการอัปโหลดรูปเดิมอีกครั้ง
-      event.target.value = '';
+      showLoading(true, 'กำลังบันทึกข้อมูลเข้าระบบหลัก...');
+      try {
+        const response = await fetch(SCRIPT_URL, { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+          body: JSON.stringify(payload) 
+        });
+        const res = await response.json();        
+        
+        if (res.status) {
+          showNotification('success', 'บันทึกข้อมูลสำเร็จ! (PM_ID: ' + res.data.pm_id + ')');
+          
+          await Promise.all([loadPMHistory(), loadAbnormalList()]);
+          renderDashboard();
+          
+          if (hasFail) switchTab('abnormal'); else switchTab('completed');
+          
+          showPMReportDetail(res.data.pm_id);
+          
+        } else {
+          showNotification('error', 'ข้อผิดพลาดจากเซิร์ฟเวอร์: ' + res.message);
+        }
+      } catch (err) {
+        showNotification('error', 'เกิดข้อผิดพลาดในการเชื่อมต่อเครือข่าย');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // =====================================
+    // LIVE QR SCANNER LOGIC
+    // =====================================
+    
+    // ฟังก์ชันสำหรับตัดค่าจาก QR Code เอาเฉพาะรหัสครุภัณฑ์ (รองรับกรณีเป็น URL)
+    function extractAssetIdFromQR(rawData) {
+      let result = rawData.trim();
+      try {
+        if (result.startsWith('http://') || result.startsWith('https://')) {
+          const url = new URL(result);
+          // 1. ลองหาจาก Parameter ก่อน (เช่น ?id=1234 หรือ ?asset_id=1234)
+          const params = ['id', 'asset_id', 'code', 'asset', 'sn'];
+          for (let p of params) {
+            if (url.searchParams.has(p)) {
+              return url.searchParams.get(p);
+            }
+          }
+          // 2. ถ้าไม่มี parameter ให้เอาส่วนท้ายสุดของ URL (เช่น /asset/1234)
+          const pathSegments = url.pathname.split('/').filter(segment => segment.length > 0);
+          if (pathSegments.length > 0) {
+            return decodeURIComponent(pathSegments[pathSegments.length - 1]);
+          }
+        }
+      } catch (e) {
+        // หากมี error ในการแปลง URL ให้ข้ามไปใช้ค่าดิบ
+        console.warn("QR Parsing Warn:", e);
+      }
+      // ถ้าไม่ใช่ URL หรือถอดค่าพิเศษไม่ได้ ให้คืนค่าเดิมกลับไป
+      return result;
+    }
+
+    async function startLiveQRScan() {
+      const overlay = document.getElementById('qrScannerOverlay');
+      const video = document.getElementById('qrVideo');
+      const canvasElement = document.getElementById('qrCanvas');
+      const canvas = canvasElement.getContext("2d", { willReadFrequently: true });
+      
+      overlay.classList.add('show');
+      qrScanActive = true;
+
+      try {
+        // ขอเปิดกล้องหลัง (Environment Camera) แบบ Live
+        qrStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        video.srcObject = qrStream;
+        video.setAttribute("playsinline", true); // สำหรับ iOS
+        video.play();
+        
+        requestAnimationFrame(tick);
+      } catch (err) {
+        showNotification('error', 'ไม่สามารถเปิดกล้องได้ กรุณาให้สิทธิ์การเข้าถึงกล้องถ่ายรูป');
+        stopLiveQRScan();
+      }
+
+      function tick() {
+        if (!qrScanActive) return;
+
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+          // ดึงพิกเซลจากวิดีโอไปวาดลงบน Canvas ที่ซ่อนไว้
+          canvasElement.height = video.videoHeight;
+          canvasElement.width = video.videoWidth;
+          canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+          
+          var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+          
+          // ส่งให้ jsQR สแกนค้นหาบาร์โค้ด
+          var code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: "dontInvert",
+          });
+          
+          if (code) {
+            // สแกนเจอแล้ว! นำข้อความดิบมาสกัดเฉพาะรหัส
+            const rawData = code.data;
+            const qrResult = extractAssetIdFromQR(rawData);
+            
+            stopLiveQRScan();
+            
+            document.getElementById('searchInput').value = qrResult;
+            showNotification('success', `สแกนพบรหัส: ${qrResult}`);
+            switchTab('assets');
+            performSearch(qrResult);
+            return; // หยุดลูป
+          }
+        }
+        
+        // ถ้ายังไม่เจอ ให้วนลูปสแกนเฟรมต่อไปเรื่อยๆ อย่างต่อเนื่อง
+        requestAnimationFrame(tick);
+      }
+    }
+
+    function stopLiveQRScan() {
+      qrScanActive = false;
+      if (qrStream) {
+        // ปิดกล้องให้เรียบร้อย
+        qrStream.getTracks().forEach(track => track.stop());
+        qrStream = null;
+      }
+      document.getElementById('qrScannerOverlay').classList.remove('show');
     }
 
     function setConnectionStatus(isOnline, text) {
@@ -1524,9 +1598,9 @@ function renderCompletedList() {
       if (!text) return ''; return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
     }
     function logout() {
-  localStorage.removeItem("it_session");
-  location.href = "./login.html";
-}
+      localStorage.removeItem("it_session");
+      location.href = "./login.html";
+    }
   </script>
 </body>
 </html>
