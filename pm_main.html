@@ -1,16 +1,15 @@
 <!doctype html>
 <html lang="th">
 <head>
-  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="icon" type="image/png" href="/favicon.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IT Preventive Maintenance - Udon Thani Hospital</title>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="./js/Frontend.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
-  <script src="https://unpkg.com/html5-qrcode"></script>
+  <!-- เพิ่มไลบรารี jsQR สำหรับถอดรหัส QR Code จากไฟล์ภาพถ่าย -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+ 
   <style>
     /* ==================== DESIGN TOKENS & RESET ==================== */
     :root {
@@ -150,9 +149,6 @@
       display: flex; flex-direction: column; position: relative; overflow: hidden;
     }
     .dashboard-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: transparent; }    
-    .dashboard-card::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--border-light);
-    }
     .dashboard-card.info::before { background: #3b82f6; }
     .dashboard-card.success::before { background: var(--success); }
     .dashboard-card.warning::before { background: var(--warning); }
@@ -1454,7 +1450,60 @@ function renderCompletedList() {
     showLoading(false);
   }
 }
-    function handleQRUpload(event) { showNotification('success', 'รับภาพถ่ายแล้ว กรุณาพิมพ์หมายเลขครุภัณฑ์ในช่องค้นหาเพื่อสืบค้น'); }
+
+    // =====================================
+    // ฟังก์ชันใหม่: อัปเดตและทำสแกน QR Code จริงจากรูปภาพที่อัปโหลด/ถ่ายภาพ
+    // =====================================
+    function handleQRUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      showLoading(true, 'กำลังประมวลผลและสแกนรูปภาพ QR Code...');
+      const reader = new FileReader();
+      
+      reader.onload = function(e) {
+        const image = new Image();
+        image.onload = function() {
+          // สร้าง virtual canvas เพื่อใช้วาดรูปและวิเคราะห์พิกเซลภาพ
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+          canvas.width = image.width;
+          canvas.height = image.height;
+          context.drawImage(image, 0, 0, image.width, image.height);
+          
+          try {
+            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            // เรียกฟังก์ชัน jsQR เพื่อสแกนหาจุดตัดมุมมองและแกะค่า QR Code
+            const code = jsQR(imageData.data, imageData.width, imageData.height, {
+              inversionAttempts: "dontInvert"
+            });
+
+            showLoading(false);
+            if (code && code.data) {
+              const qrResult = code.data.trim();
+              // ตั้งค่าให้กับ Input ช่องค้นหาและทำรายการค้นหาทันที
+              document.getElementById('searchInput').value = qrResult;
+              showNotification('success', `สแกนพบข้อมูล: ${qrResult}`);
+              
+              // สลับแท็บไปที่การสืบค้นเพื่อความมั่นใจ
+              switchTab('assets');
+              performSearch(qrResult);
+            } else {
+              showNotification('error', 'ไม่สามารถอ่านค่า QR Code ได้ กรุณาถ่ายภาพให้เห็นรหัสที่ชัดเจนขึ้นและลองอีกครั้ง');
+            }
+          } catch (err) {
+            showLoading(false);
+            showNotification('error', 'เกิดข้อผิดพลาดขณะวิเคราะห์ภาพ: ' + err.message);
+          }
+        };
+        image.src = e.target.result;
+      };
+      
+      reader.readAsDataURL(file);
+      // เคลียร์ค่า input เผื่อต้องการอัปโหลดรูปเดิมอีกครั้ง
+      event.target.value = '';
+    }
+
     function setConnectionStatus(isOnline, text) {
       const indicator = document.getElementById('connIndicator'); const textEl = document.getElementById('connText');
       if (isOnline) { indicator.className = 'status-indicator'; textEl.innerText = text || 'เชื่อมต่อระบบหลัก'; } 
