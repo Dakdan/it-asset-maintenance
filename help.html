@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IT PM Framework - โรงพยาบาลอุดรธานี</title>
+  <!-- Google Fonts: Kanit สำหรับฟอนต์ภาษาไทยที่อ่านง่ายและทันสมัย -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons สำหรับไอคอนประกอบทั้งหมดในระบบ -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#d81b60',
+            pink: {
+              50: '#fce4ec',
+              100: '#f8bbd0',
+              200: '#f48fb1',
+              500: '#d81b60',
+              600: '#c2185b',
+              700: '#ad1457',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --primary: #d81b60;
+    }
+    body {
+      font-family: 'Kanit', sans-serif;
+      background: linear-gradient(135deg, #fce4ec 0%, #ffffff 100%);
+      background-attachment: fixed;
+      min-height: 100vh;
+      color: #374151;
+    }
+    /* ลายน้ำโปร่งแสงแสดงอัตลักษณ์องค์กร */
+    .watermark {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-15deg);
+      opacity: 0.02;
+      font-size: 8vw;
+      font-weight: 700;
+      color: var(--primary);
+      white-space: nowrap;
+      z-index: 0;
+      pointer-events: none;
+      user-select: none;
+    }
+    /* การ์ดความโค้งมนระดับ 1.75rem ตามที่ผู้ใช้ระบุ */
+    .card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 1.75rem;
+      box-shadow: 0 10px 30px -5px rgba(216, 27, 96, 0.05), 0 20px 40px -15px rgba(0, 0, 0, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    .btn {
+      border-radius: 9999px;
+      transition: all 0.2s ease-in-out;
+    }
+    .btn:active {
+      transform: scale(0.96);
+    }
+    /* สไตล์สำหรับการพิมพ์กระดาษ */
+    @media print {
+      @page { size: portrait; margin: 1.5cm; }
+      body { background: white !important; color: #000 !important; }
+      .no-print { display: none !important; }
+      .print-area { display: block !important; width: 100% !important; }
+      .card { box-shadow: none !important; border: 1px solid #e5e7eb !important; background: white !important; backdrop-filter: none !important; }
+    }
+  </style>
+</head>
+<body class="relative min-h-screen pb-12">
+  
+  <div class="watermark">UDONTHANI HOSPITAL IT</div>
+
+  <!-- ส่วนหัวเว็บ (Header) ไล่เฉดสีจากซ้ายบนทะแยงขวาล่าง โทน ชมพู-ขาว -->
+  <div class="max-w-7xl mx-auto px-4 pt-6 no-print">
+    <header id="mainHeader" class="py-6 mb-6 border-b border-pink-200/50 flex flex-col md:flex-row justify-between items-center gap-4 bg-gradient-to-br from-pink-100 via-pink-50/50 to-white p-6 rounded-2xl shadow-sm">
+      <div class="flex items-center gap-4">
+        <!-- โลโก้กลม (ใช้รูปภาพ logo1.png พร้อมเงื่อนไขดักจับข้อผิดพลาด) -->
+        <div class="w-14 h-14 rounded-full flex items-center justify-center shadow-sm border border-pink-200 overflow-hidden bg-white">
+          <img src="logo1.png" alt="Logo" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://placehold.co/100/d81b60/ffffff?text=IT'">
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800 leading-tight">โรงพยาบาลอุดรธานี</h1>
+          <p class="text-sm text-pink-600 font-medium tracking-wide">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-4 bg-white/70 px-5 py-2.5 rounded-full shadow-sm border border-pink-50">
+        <div class="flex flex-col text-right">
+          <span class="text-sm font-bold text-gray-800">IT PM Framework</span>
+          <span class="text-[10px] text-pink-600 bg-pink-50 px-2.5 py-0.5 rounded-full w-fit ml-auto">ระบบจัดการเชิงรุก</span>
+        </div>
+        <div class="h-8 w-px bg-pink-200"></div>
+        <button onclick="window.print()" class="btn bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 text-sm font-medium flex items-center shadow-sm shadow-pink-100">
+          <i class="fas fa-print mr-1.5"></i> พิมพ์คู่มือนี้
+        </button>
+      </div>
+    </header>
+  </div>
+
+  <!-- โครงสร้างหลัก (Main Layout) -->
+  <main class="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
+    
+    <!-- เมนูนำทางด้านซ้าย (Sidebar) -->
+    <aside class="lg:col-span-3 no-print">
+      <div class="card p-4 sticky top-6 space-y-1">
+        <div class="px-3 py-2 text-xs font-extrabold text-gray-400 uppercase tracking-wider">สารบัญบทเรียน PM</div>
+        
+        <button onclick="scrollToSection('sec1')" class="sidebar-btn w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-3 text-pink-600 bg-pink-50/70 border-l-4 border-pink-500">
+          <i class="fas fa-question-circle w-5 text-center text-pink-500"></i> 1. PM คืออะไร
+        </button>
+        
+        <button onclick="scrollToSection('sec2')" class="sidebar-btn w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-3 text-gray-600 hover:text-pink-600 hover:bg-pink-50/50">
+          <i class="fas fa-balance-scale w-5 text-center"></i> 2. PM และ MA ต่างกันอย่างไร
+        </button>
+        
+        <button onclick="scrollToSection('sec3')" class="sidebar-btn w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-3 text-gray-600 hover:text-pink-600 hover:bg-pink-50/50">
+          <i class="fas fa-clipboard-list w-5 text-center"></i> 3. แนวทางการตรวจสอบ
+        </button>
+        
+        <button onclick="scrollToSection('sec4')" class="sidebar-btn w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-3 text-gray-600 hover:text-pink-600 hover:bg-pink-50/50">
+          <i class="fas fa-layer-group w-5 text-center"></i> 4. โครงสร้างระบบ 2 ชั้น
+        </button>
+        
+        <button onclick="scrollToSection('sec5')" class="sidebar-btn w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-3 text-gray-600 hover:text-pink-600 hover:bg-pink-50/50">
+          <i class="fas fa-chart-line w-5 text-center"></i> 5. การวิเคราะห์ระดับผลกระทบ
+        </button>
+        
+        <button onclick="scrollToSection('sec11')" class="sidebar-btn w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-3 text-gray-600 hover:text-pink-600 hover:bg-pink-50/50">
+          <i class="fas fa-comments w-5 text-center"></i> 6. PM ด้วยภาษาคำถาม
+        </button>
+        
+        <div class="my-4 border-t border-pink-100"></div>
+        
+        <button onclick="scrollToSection('simulator')" class="w-full text-left px-3 py-3 rounded-xl text-sm font-bold transition-all flex items-center gap-3 text-white bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 shadow-md shadow-pink-100">
+          <i class="fas fa-gamepad w-5 text-center"></i> ทดสอบเครื่องมือจำลอง PM
+        </button>
+      </div>
+    </aside>
+
+    <!-- พื้นที่แสดงเนื้อหาเอกสาร (Content Area) -->
+    <div class="lg:col-span-9 space-y-8 print-area">
+      
+      <!-- หน้าปกเอกสาร (สำหรับเวอร์ชันพิมพ์กระดาษ) -->
+      <div class="hidden print:block text-center py-12 border-b-2 border-gray-300 mb-8">
+        <h1 class="text-4xl font-bold text-gray-900">Preventive Maintenance (PM) Framework</h1>
+        <p class="text-lg text-gray-600 mt-2">คู่มือกรอบการดำเนินงานบำรุงรักษาเชิงป้องกันระบบอุปกรณ์เทคโนโลยีสารสนเทศ</p>
+        <p class="text-sm text-gray-400 mt-6">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์ โรงพยาบาลอุดรธานี</p>
+      </div>
+
+      <!-- Section 1: PM คืออะไร -->
+      <section id="sec1" class="scroll-mt-6">
+        <div class="card p-6 lg:p-8">
+          <div class="flex items-center gap-3 mb-6">
+            <span class="w-10 h-10 bg-pink-100 rounded-xl flex items-center justify-center text-pink-600 font-bold text-lg">01</span>
+            <h2 class="text-2xl font-bold text-gray-800">PM คืออะไร (Preventive Maintenance)</h2>
+          </div>
+          
+          <p class="text-gray-600 leading-relaxed mb-6">
+            <strong class="text-pink-600">PM (Preventive Maintenance)</strong> คือ การบำรุงรักษาเชิงป้องกัน เพื่อให้ระบบและอุปกรณ์ IT สามารถทำงานได้อย่างต่อเนื่อง ลดโอกาสการเสียหาย และลด Downtime ของหน่วยงานการแพทย์ในโรงพยาบาลอุดรธานี
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-4 rounded-xl bg-pink-50/30 border border-pink-100/50 flex items-start gap-3">
+              <i class="fas fa-search-plus text-pink-500 mt-1 text-lg"></i>
+              <div>
+                <h4 class="font-bold text-gray-800 text-sm">ตรวจสอบก่อนเกิดปัญหา</h4>
+                <p class="text-xs text-gray-500 mt-0.5">ค้นหาสัญญาณเตือนล่วงหน้า ก่อนอุปกรณ์จะหยุดตอบสนอง</p>
+              </div>
+            </div>
+            <div class="p-4 rounded-xl bg-pink-50/30 border border-pink-100/50 flex items-start gap-3">
+              <i class="fas fa-shield-halved text-pink-500 mt-1 text-lg"></i>
+              <div>
+                <h4 class="font-bold text-gray-800 text-sm">ป้องกันการเสียหายเชิงรุก</h4>
+                <p class="text-xs text-gray-500 mt-0.5">ลดอัตราการพังเสียหายและป้องกันการสูญเสียข้อมูลผู้ป่วย</p>
+              </div>
+            </div>
+            <div class="p-4 rounded-xl bg-pink-50/30 border border-pink-100/50 flex items-start gap-3">
+              <i class="fas fa-calendar-check text-pink-500 mt-1 text-lg"></i>
+              <div>
+                <h4 class="font-bold text-gray-800 text-sm">วางแผนเป็นรอบวงรอบ</h4>
+                <p class="text-xs text-gray-500 mt-0.5">จัดตารางการดำเนินงานที่ชัดเจน เพื่อไม่ให้กระทบการทำงานหลัก</p>
+              </div>
+            </div>
+            <div class="p-4 rounded-xl bg-pink-50/30 border border-pink-100/50 flex items-start gap-3">
+              <i class="fas fa-network-wired text-pink-500 mt-1 text-lg"></i>
+              <div>
+                <h4 class="font-bold text-gray-800 text-sm">ลดความเสี่ยงระบบโครงข่ายล่ม</h4>
+                <p class="text-xs text-gray-500 mt-0.5">รับประกันประสิทธิภาพความต่อเนื่องของห้องฉุกเฉินและหอผู้ป่วย</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: PM และ MA ต่างกันอย่างไร -->
+      <section id="sec2" class="scroll-mt-6">
+        <div class="card p-6 lg:p-8">
+          <div class="flex items-center gap-3 mb-6">
+            <span class="w-10 h-10 bg-pink-100 rounded-xl flex items-center justify-center text-pink-600 font-bold text-lg">02</span>
+            <h2 class="text-2xl font-bold text-gray-800">PM และ MA ต่างกันอย่างไร</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <!-- คอลัมน์ PM -->
+            <div class="border border-pink-200 rounded-2xl p-5 bg-pink-50/10">
+              <div class="flex items-center gap-2 mb-3">
+                <i class="fas fa-heart-pulse text-pink-500 text-lg"></i>
+                <h3 class="font-bold text-lg text-pink-700">PM (Preventive Maintenance)</h3>
+              </div>
+              <p class="text-xs text-gray-500 mb-4">ทำงานในจังหวะ <strong>“ก่อนที่ระบบจะพัง”</strong> เพื่อตัดไฟตั้งแต่ต้นลม</p>
+              <ul class="space-y-2 text-sm text-gray-600">
+                <li class="flex items-center gap-2"><i class="fas fa-circle-check text-green-500 text-xs"></i> ตรวจสุขภาพหน่วยความจำและ CPU</li>
+                <li class="flex items-center gap-2"><i class="fas fa-circle-check text-green-500 text-xs"></i> ดูดฝุ่น ทำความสะอาดช่องระบายความร้อน</li>
+                <li class="flex items-center gap-2"><i class="fas fa-circle-check text-green-500 text-xs"></i> ตรวจสายแพ ยางเชื่อมต่อสัญญาณ และแบตสำรอง</li>
+              </ul>
+            </div>
+            <!-- คอลัมน์ MA -->
+            <div class="border border-gray-200 rounded-2xl p-5 bg-gray-50/50">
+              <div class="flex items-center gap-2 mb-3">
+                <i class="fas fa-tools text-gray-500 text-lg"></i>
+                <h3 class="font-bold text-lg text-gray-700">MA (Corrective / Reactive Maintenance)</h3>
+              </div>
+              <p class="text-xs text-gray-500 mb-4">ดำเนินงานในจังหวะ <strong>“พังเสียหายแล้ว”</strong> เพื่อซ่อมแซมให้ฟื้นตัว</p>
+              <ul class="space-y-2 text-sm text-gray-600">
+                <li class="flex items-center gap-2"><i class="fas fa-circle-xmark text-rose-500 text-xs"></i> เปลี่ยนฮาร์ดดิสก์ที่เกิด Bad Sector</li>
+                <li class="flex items-center gap-2"><i class="fas fa-circle-xmark text-rose-500 text-xs"></i> เปลี่ยนตลับหมึกและลูกยางเครื่องพิมพ์เมื่อจาง</li>
+                <li class="flex items-center gap-2"><i class="fas fa-circle-xmark text-rose-500 text-xs"></i> ลงวินโดวส์ใหม่เนื่องจากเครื่องโดนไวรัสทำลาย</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- ตารางเปรียบเทียบมาตรฐาน PM vs MA -->
+          <div class="overflow-hidden border border-gray-200 rounded-2xl shadow-sm">
+            <table class="w-full text-left text-sm text-gray-600">
+              <thead class="bg-pink-500 text-white font-bold">
+                <tr>
+                  <th class="p-3 text-center w-1/4">คุณลักษณะ</th>
+                  <th class="p-3 bg-pink-600">PM (เชิงป้องกัน)</th>
+                  <th class="p-3">MA (เชิงแก้ไขปัญหา)</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100 bg-white">
+                <tr>
+                  <td class="p-3 font-semibold text-gray-700 text-center bg-gray-50/50">วิสัยทัศน์</td>
+                  <td class="p-3 text-pink-600 font-medium">เน้นการป้องกันความเสี่ยง</td>
+                  <td class="p-3">เน้นแก้ปัญหาเฉพาะหน้าตามเหตุการณ์</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold text-gray-700 text-center bg-gray-50/50">ช่วงเวลา</td>
+                  <td class="p-3 text-pink-600 font-medium">ทำเมื่ออุปกรณ์ยังทำงานปกติ (ก่อนเสีย)</td>
+                  <td class="p-3">ทำเมื่ออุปกรณ์หยุดทำงานไปแล้ว (หลังเสีย)</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold text-gray-700 text-center bg-gray-50/50">เป้าหมายสูงสุด</td>
+                  <td class="p-3 text-pink-600 font-medium">ลด Downtime และเพิ่มอายุการใช้งาน</td>
+                  <td class="p-3">กู้คืนระบบคอมพิวเตอร์ให้กลับมาทำงานเร็วที่สุด</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: การทำ PM (แนวปฏิบัติ) -->
+      <section id="sec3" class="scroll-mt-6">
+        <div class="card p-6 lg:p-8">
+          <div class="flex items-center gap-3 mb-6">
+            <span class="w-10 h-10 bg-pink-100 rounded-xl flex items-center justify-center text-pink-600 font-bold text-lg">03</span>
+            <h2 class="text-2xl font-bold text-gray-800">การทำ PM รูปแบบเดิม vs รูปแบบใหม่</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="p-5 border border-gray-200 rounded-2xl bg-white">
+              <h4 class="font-bold text-lg text-gray-700 mb-3 flex items-center gap-2">
+                <i class="fas fa-times-circle text-rose-500"></i> รูปแบบเดิม (Checklist Based)
+              </h4>
+              <p class="text-xs text-gray-400 mb-4">เหมาะกับจุดประสงค์เล็กๆ แต่มีปัญหาเมื่อนำไปใช้กับองค์กรใหญ่</p>
+              <ul class="space-y-2.5 text-sm text-gray-600">
+                <li class="flex items-start gap-2"><i class="fas fa-triangle-exclamation text-amber-500 mt-1 text-xs"></i> <span>ใช้ความเห็นส่วนตัวของช่างตัดสิน (Subjective)</span></li>
+                <li class="flex items-start gap-2"><i class="fas fa-triangle-exclamation text-amber-500 mt-1 text-xs"></i> <span>ประเมินเพียงแค่คำว่า "ปกติ / ผิดปกติ"</span></li>
+                <li class="flex items-start gap-2"><i class="fas fa-triangle-exclamation text-amber-500 mt-1 text-xs"></i> <span>ไม่สามารถจัดทำสเกลตัวเลขเทียบงบจัดซื้อได้</span></li>
+              </ul>
+            </div>
+
+            <div class="p-5 border border-pink-200 rounded-2xl bg-pink-50/20">
+              <h4 class="font-bold text-lg text-pink-700 mb-3 flex items-center gap-2">
+                <i class="fas fa-check-circle text-green-500"></i> รูปแบบใหม่ (Metric Based)
+              </h4>
+              <p class="text-xs text-pink-600 font-medium mb-4">ออกแบบมาเพื่อเพิ่มมาตรฐานข้อมูลโรงพยาบาลระดับจังหวัด</p>
+              <ul class="space-y-2.5 text-sm text-gray-600">
+                <li class="flex items-start gap-2"><i class="fas fa-arrow-right text-pink-500 mt-1 text-xs"></i> <span>วัดผลด้วยค่าสถิติหรือดัชนีชี้วัดชัดเจน (Metric)</span></li>
+                <li class="flex items-start gap-2"><i class="fas fa-arrow-right text-pink-500 mt-1 text-xs"></i> <span>มีเกณฑ์ Threshold ควบคุมการประเมิน</span></li>
+                <li class="flex items-start gap-2"><i class="fas fa-arrow-right text-pink-500 mt-1 text-xs"></i> <span>ระบบเป็นผู้ตัดสินลอจิกแทนการคาดเดาของคน</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: แนวคิดระบบ PM แบบใหม่ (2 ชั้น) -->
+      <section id="sec4" class="scroll-mt-6">
+        <div class="card p-6 lg:p-8">
+          <div class="flex items-center gap-3 mb-6">
+            <span class="w-10 h-10 bg-pink-100 rounded-xl flex items-center justify-center text-pink-600 font-bold text-lg">04</span>
+            <h2 class="text-2xl font-bold text-gray-800">โครงสร้างระบบกรอบงาน PM แบบใหม่ (2 ชั้น)</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="p-6 border border-gray-200 rounded-2xl bg-white flex flex-col justify-between">
+              <div>
+                <span class="text-[10px] font-extrabold tracking-wider text-pink-500 uppercase block mb-1">ชั้นที่ 1</span>
+                <h3 class="font-bold text-xl text-gray-800 mb-3 flex items-center gap-2">
+                  <i class="fas fa-user-tie text-pink-500"></i> Management Layer (ระดับบริหาร)
+                </h3>
+                <p class="text-xs text-gray-500 mb-4">เครื่องมือสำหรับการวิเคราะห์แผนภาพรวมระดับโรงพยาบาลเพื่อวางแผนนโยบาย</p>
+                <ul class="space-y-2 text-sm text-gray-600">
+                  <li class="flex items-center gap-2"><i class="fas fa-check text-pink-500 text-xs"></i> แผนที่ความเสี่ยงภาพรวม (Heatmap)</li>
+                  <li class="flex items-center gap-2"><i class="fas fa-check text-pink-500 text-xs"></i> สถิติการประเมินวิกฤตรายแผนกตึก</li>
+                  <li class="flex items-center gap-2"><i class="fas fa-check text-pink-500 text-xs"></i> แผนจัดสรรงบประมาณจัดซื้อทดแทน</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="p-6 border border-pink-200 rounded-2xl bg-pink-50/10 flex flex-col justify-between">
+              <div>
+                <span class="text-[10px] font-extrabold tracking-wider text-pink-500 uppercase block mb-1">ชั้นที่ 2</span>
+                <h3 class="font-bold text-xl text-pink-700 mb-3 flex items-center gap-2">
+                  <i class="fas fa-screwdriver-wrench text-pink-600"></i> Maintenance Layer (ปฏิบัติการ)
+                </h3>
+                <p class="text-xs text-gray-500 mb-4">เครื่องมือตรวจสอบข้อมูลสุขภาพอุปกรณ์รายตัวของเจ้าหน้าที่ช่างหน้างาน</p>
+                <ul class="space-y-2 text-sm text-gray-600">
+                  <li class="flex items-center gap-2"><i class="fas fa-check text-pink-600 text-xs"></i> วิเคราะห์อุปกรณ์รายตัวอย่างลึกซึ้ง</li>
+                  <li class="flex items-center gap-2"><i class="fas fa-check text-pink-600 text-xs"></i> บันทึกข้อมูลระบบด้วย Metric จริง</li>
+                  <li class="flex items-center gap-2"><i class="fas fa-check text-pink-600 text-xs"></i> สร้างงานใบรับเคลม/ใบแจ้งซ่อมทันที</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 5: แนวคิดการแปลงผล (Impact-Based System) -->
+      <section id="sec5" class="scroll-mt-6">
+        <div class="card p-6 lg:p-8">
+          <div class="flex items-center gap-3 mb-6">
+            <span class="w-10 h-10 bg-pink-100 rounded-xl flex items-center justify-center text-pink-600 font-bold text-lg">05</span>
+            <h2 class="text-2xl font-bold text-gray-800">แนวคิดการจัดระดับผลกระทบ (Impact-Based)</h2>
+          </div>
+
+          <p class="text-sm text-gray-600 mb-6 leading-relaxed">
+            ระบบของเราจะหลีกเลี่ยงคำว่า "ปกติ/ไม่ปกติ" แต่จะใช้ <strong class="text-pink-600">ระดับคะแนนผลกระทบ (Impact-Based Scale) 4 ระดับ</strong> มาเป็นเกณฑ์คัดกรองเพื่อความแม่นยำทางสถิติ:
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Critical -->
+            <div class="border border-red-200 bg-red-50/40 p-4 rounded-xl relative overflow-hidden">
+              <div class="absolute top-0 left-0 w-full h-1 bg-red-500"></div>
+              <span class="text-xs font-bold text-red-700 bg-red-100 px-2.5 py-0.5 rounded-md">ระดับ 1</span>
+              <h4 class="font-bold text-gray-800 mt-2 mb-1">Critical Failure</h4>
+              <p class="text-xs text-gray-500 leading-normal">อุปกรณ์เสียสมบูรณ์ เปิดไม่ติด หรือใช้งานไม่ได้โดยตรง</p>
+            </div>
+            <!-- Major -->
+            <div class="border border-orange-200 bg-orange-50/40 p-4 rounded-xl relative overflow-hidden">
+              <div class="absolute top-0 left-0 w-full h-1 bg-orange-500"></div>
+              <span class="text-xs font-bold text-orange-700 bg-orange-100 px-2.5 py-0.5 rounded-md">ระดับ 2</span>
+              <h4 class="font-bold text-gray-800 mt-2 mb-1">Major Issue</h4>
+              <p class="text-xs text-gray-500 leading-normal">อุปกรณ์ยังทำงานได้ช้ามาก ค้างบ่อย หรือส่งความร้อนสูงวิกฤต</p>
+            </div>
+            <!-- Minor -->
+            <div class="border border-yellow-300 bg-yellow-50/20 p-4 rounded-xl relative overflow-hidden">
+              <div class="absolute top-0 left-0 w-full h-1 bg-yellow-400"></div>
+              <span class="text-xs font-bold text-yellow-800 bg-yellow-100 px-2.5 py-0.5 rounded-md">ระดับ 3</span>
+              <h4 class="font-bold text-gray-800 mt-2 mb-1">Minor Issue</h4>
+              <p class="text-xs text-gray-500 leading-normal">ทำงานได้ปกติ แต่มีตำหนิเล็กน้อย (พัดลมเสียงเริ่มดัง, สัญญาณเตือน)</p>
+            </div>
+            <!-- Normal -->
+            <div class="border border-green-200 bg-green-50/40 p-4 rounded-xl relative overflow-hidden">
+              <div class="absolute top-0 left-0 w-full h-1 bg-green-500"></div>
+              <span class="text-xs font-bold text-green-700 bg-green-100 px-2.5 py-0.5 rounded-md">ระดับ 4</span>
+              <h4 class="font-bold text-gray-800 mt-2 mb-1">Normal</h4>
+              <p class="text-xs text-gray-500 leading-normal">สถานะสมบูรณ์ สะอาด ไม่พบข้อผิดพลาดในระบบ</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 11: แนวคิดการออกแบบหัวข้อ PM ด้วยภาษาคำถาม -->
+      <section id="sec11" class="scroll-mt-6">
+        <div class="card p-6 lg:p-8">
+          <div class="flex items-center gap-3 mb-6">
+            <span class="w-10 h-10 bg-pink-100 rounded-xl flex items-center justify-center text-pink-600 font-bold text-lg">06</span>
+            <h2 class="text-2xl font-bold text-gray-800">การออกแบบระบบสำรวจด้วย "ภาษาคำถาม"</h2>
+          </div>
+
+          <div class="p-4 bg-pink-50/30 rounded-2xl border border-pink-100 mb-6 flex flex-col md:flex-row gap-4 items-center">
+            <div class="w-12 h-12 bg-pink-500 text-white rounded-full flex items-center justify-center text-xl shrink-0 shadow-md shadow-pink-100">
+              <i class="fas fa-lightbulb"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-gray-800 text-sm">หลักการแปลง: เปลี่ยน "ศัพท์เทคนิค" เป็น "สิ่งที่มนุษย์สัมผัสจริง"</h4>
+              <p class="text-xs text-gray-500 mt-0.5 leading-relaxed">
+                การตั้งคำถามจากความรู้สึกทางกายภาพภายนอก ช่วยให้พนักงานทุกคนมีมาตรฐานการประเมินตรงกัน ไม่ว่าผู้นั้นจะมีใบรับรองด้าน IT หรือไม่ก็ตาม
+              </p>
+            </div>
+          </div>
+
+          <!-- ตารางแสดงแนวทางคำถาม -->
+          <div class="overflow-hidden border border-gray-200 rounded-2xl shadow-sm bg-white">
+            <table class="w-full text-left text-sm text-gray-600">
+              <thead class="bg-gray-50 text-gray-800 border-b border-gray-200 font-bold">
+                <tr>
+                  <th class="p-3 w-1/4">ประเภทอุปกรณ์</th>
+                  <th class="p-3 text-rose-600">แบบเดิม (Checklist เชิงเทคนิค)</th>
+                  <th class="p-3 text-green-600">แบบใหม่ (คำถามเชิงพฤติกรรม)</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <tr>
+                  <td class="p-3 font-semibold text-gray-700 bg-gray-50/50 flex items-center gap-1.5">
+                    <i class="fas fa-desktop text-gray-400"></i> Computer (PC)
+                  </td>
+                  <td class="p-3 text-xs">ตรวจเช็กระดับ CPU Usage และอุณหภูมิความร้อนในวงจร</td>
+                  <td class="p-3 font-medium text-gray-800 text-xs text-green-700">“เครื่องทำงานช้ากว่าปกติหรือไม่?” / “พัดลมหลังเคสเสียงดังผิดปกติหรือไม่?”</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold text-gray-700 bg-gray-50/50 flex items-center gap-1.5">
+                    <i class="fas fa-print text-gray-400"></i> Printer
+                  </td>
+                  <td class="p-3 text-xs">ตรวจสอบสุขภาพฟันยาง Roller และฟีดป้อนกระดาษ</td>
+                  <td class="p-3 font-medium text-gray-800 text-xs text-green-700">“เกิดปัญหาดึงกระดาษติดบ่อยครั้งในการพิมพ์หรือไม่?” / “หมึกพ่นออกมาซีดจางไหม?”</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold text-gray-700 bg-gray-50/50 flex items-center gap-1.5">
+                    <i class="fas fa-car-battery text-gray-400"></i> UPS (เครื่องสำรองไฟ)
+                  </td>
+                  <td class="p-3 text-xs">ตรวจสุขภาพและวัดระดับประสิทธิภาพเซลล์แบตสำรอง SOH</td>
+                  <td class="p-3 font-medium text-gray-800 text-xs text-green-700">“เมื่อลองถอดปลั๊ก อุปกรณ์คอมฯ ดับทันทีไหม?” / “มีเสียงร้องเตือนเตือนผิดสังเกตไหม?”</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Interactive Simulator Section -->
+      <section id="simulator" class="scroll-mt-6 no-print">
+        <div class="card p-6 lg:p-8 border-2 border-pink-200 bg-gradient-to-tr from-white via-white to-pink-50/10">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-pink-100">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-pink-500 text-white rounded-xl flex items-center justify-center text-lg shadow-md shadow-pink-100">
+                <i class="fas fa-sliders"></i>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold text-gray-800">เครื่องมือตอบแบบประเมินจำลอง</h3>
+                <p class="text-xs text-gray-500">แปลงภาษาคำถามเป็นคะแนนความผิดปกติและผลลัพธ์แบบอัตโนมัติ</p>
+              </div>
+            </div>
+            <button onclick="resetSimulator()" class="text-xs font-bold text-pink-600 bg-pink-50 hover:bg-pink-100 px-4 py-2 rounded-full flex items-center gap-1.5 transition-all">
+              <i class="fas fa-rotate-left"></i> รีเซ็ตแบบสำรวจ
+            </button>
+          </div>
+
+          <!-- เลือกอุปกรณ์สำหรับการจำลอง -->
+          <div class="flex gap-2 mb-6 overflow-x-auto pb-1">
+            <button onclick="switchSimDevice('pc')" id="btnSimPC" class="sim-device-btn shrink-0 px-4 py-2.5 rounded-full text-xs font-bold shadow-sm transition-all bg-pink-500 text-white border border-pink-500">
+              <i class="fas fa-desktop mr-1.5"></i> ตรวจสอบ คอมพิวเตอร์ (PC)
+            </button>
+            <button onclick="switchSimDevice('printer')" id="btnSimPrinter" class="sim-device-btn shrink-0 px-4 py-2.5 rounded-full text-xs font-bold shadow-sm transition-all bg-white text-gray-600 border border-gray-200 hover:border-pink-300">
+              <i class="fas fa-print mr-1.5"></i> ตรวจสอบ เครื่องพิมพ์ (Printer)
+            </button>
+            <button onclick="switchSimDevice('ups')" id="btnSimUPS" class="sim-device-btn shrink-0 px-4 py-2.5 rounded-full text-xs font-bold shadow-sm transition-all bg-white text-gray-600 border border-gray-200 hover:border-pink-300">
+              <i class="fas fa-car-battery mr-1.5"></i> ตรวจสอบ เครื่องสำรองไฟ (UPS)
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- ซ้าย: รายการคำถามจำลอง -->
+            <div class="lg:col-span-7 space-y-4" id="questionsContainer">
+              <!-- Render จาก JS ไดนามิก -->
+            </div>
+
+            <!-- ขวา: แสดงคะแนนความเสี่ยงและการส่งผลแบบเรียลไทม์ -->
+            <div class="lg:col-span-5 bg-gray-50 border border-gray-200 rounded-2xl p-5 flex flex-col justify-between shadow-sm">
+              <div>
+                <h4 class="font-bold text-gray-700 text-sm border-b border-gray-200 pb-2 mb-4 flex items-center justify-between">
+                  <span>สถานะการประมวลผลดัชนี</span>
+                  <span class="text-[9px] bg-pink-500 text-white font-mono px-2 py-0.5 rounded shadow-sm">เรียลไทม์</span>
+                </h4>
+                
+                <div class="space-y-5">
+                  <!-- ระดับคะแนนรวมใหญ่ -->
+                  <div class="text-center py-6 bg-white border border-gray-200 rounded-2xl relative overflow-hidden shadow-sm">
+                    <span class="text-[10px] text-gray-400 block uppercase font-bold mb-1">ระดับความปลอดภัยโดยรวม (Overall Risk)</span>
+                    <div id="riskScoreValue" class="text-3xl font-extrabold text-green-500">ปกติ (Normal)</div>
+                    <div id="riskScoreLabel" class="text-[11px] text-gray-500 mt-2 px-4 leading-relaxed">
+                      อุปกรณ์อยู่ในสถานะการทำงานที่ดีเยี่ยม ไม่จำเป็นต้องบำรุงรักษาเป็นพิเศษ
+                    </div>
+                  </div>
+
+                  <!-- แถบประเมิน 2 มิติย่อย -->
+                  <div class="space-y-4">
+                    <div>
+                      <div class="flex justify-between text-xs font-bold text-gray-600 mb-1">
+                        <span>Physical / Hardware Metric</span>
+                        <span id="metricPhysVal" class="text-green-500">ปกติ</span>
+                      </div>
+                      <div class="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+                        <div id="metricPhysBar" class="bg-green-500 h-full w-full transition-all duration-300"></div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div class="flex justify-between text-xs font-bold text-gray-600 mb-1">
+                        <span>Performance / Software Metric</span>
+                        <span id="metricPerfVal" class="text-green-500">ปกติ</span>
+                      </div>
+                      <div class="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+                        <div id="metricPerfBar" class="bg-green-500 h-full w-full transition-all duration-300"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ปุ่มกดออกรายงานสำเร็จ -->
+              <div class="mt-6 pt-4 border-t border-gray-200">
+                <button onclick="submitSimReport()" class="btn w-full bg-gradient-to-r from-pink-600 to-rose-500 hover:from-pink-700 hover:to-rose-600 text-white font-bold py-3 px-4 text-xs shadow-md shadow-pink-100 flex items-center justify-center gap-2">
+                  <i class="fas fa-file-invoice"></i> บันทึกผลและออกใบตรวจสอบสถานะระบบ
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ท้ายเว็บ -->
+  <footer class="max-w-7xl mx-auto px-4 mt-12 text-center text-xs text-gray-400 border-t border-gray-200/50 pt-6 no-print">
+    <p>© 2026 กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์ โรงพยาบาลอุดรธานี</p>
+    <p class="mt-1">Preventive Maintenance Framework - Responsive Portal Tool</p>
+  </footer>
+
+  <!-- STEAMING_CHUNK:Adding Modals and Initialization scripts... -->
+  <!-- Modal สัญญานกล่องข้อความเตือนสำหรับจำลองการทำรายงาน (ไม่มีการใช้ alert() เด็ดขาด) -->
+  <div id="customModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4 no-print">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-xl border border-pink-50 relative animate-fade-in-down">
+      <div class="text-center">
+        <div id="modalIcon" class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <h4 id="modalTitle" class="text-xl font-bold text-gray-800 mb-2">สำเร็จ</h4>
+        <div id="modalContent" class="text-sm text-gray-600 leading-relaxed mb-6"></div>
+        <button onclick="closeModal()" class="btn bg-gradient-to-r from-pink-600 to-rose-500 hover:from-pink-700 hover:to-rose-600 text-white font-medium py-2 px-8 text-sm shadow-md shadow-pink-100">
+          ตกลง
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ฐานข้อมูลคำถามจำลองของแต่ละอุปกรณ์
+    const simQuestions = {
+      pc: [
+        {
+          id: 'pc_slow',
+          category: 'performance',
+          label: '“ความเร็วในการทำงานของคอมพิวเตอร์ปัจจุบันเป็นอย่างไร?”',
+          options: [
+            { text: 'เร็วปกติ สามารถเรียกใช้งานแอปเวชระเบียนได้ลื่นไหล', impact: 4, label: 'ปกติ' },
+            { text: 'เริ่มโหลดช้าเล็กน้อย แต่ยังไม่ค้างหรือสะดุด', impact: 3, label: 'เตือนเล็กน้อย' },
+            { text: 'ทำงานหน่วงช้าผิดสังเกต ดึงประวัติผู้ป่วยใช้เวลานาน', impact: 2, label: 'ช้าผิดปกติ' },
+            { text: 'ระบบค้างถาวร หรือเกิดหน้าจอสีฟ้า (BSOD) บ่อยครั้ง', impact: 1, label: 'วิกฤตค้างบ่อย' }
+          ]
+        },
+        {
+          id: 'pc_fan',
+          category: 'physical',
+          label: '“ระดับเสียงและสภาพของตัวระบายความร้อนตัวเครื่องเป็นอย่างไร?”',
+          options: [
+            { text: 'เงียบปกติ ไม่มีกลิ่น และเครื่องระบายลมดีเยี่ยม', impact: 4, label: 'ปกติ' },
+            { text: 'มีเสียงสั่นเล็กน้อยตอนเปิดเครื่อง แปบเดียวเงียบ', impact: 3, label: 'เฝ้าระวัง' },
+            { text: 'เสียงดังหวีดลั่นเคสตลอดเวลา ฝุ่นสะสมค่อนข้างหนา', impact: 2, label: 'เสียงดังเตือนรบกวน' },
+            { text: 'พัดลมไม่หมุน เครื่องตัดดับเองจากการสะสมความร้อน', impact: 1, label: 'พัดลมเสีย/ร้อนตัด' }
+          ]
+        }
+      ],
+      printer: [
+        {
+          id: 'pt_feed',
+          category: 'physical',
+          label: '“ระบบฟีดและการดึงกระดาษพบปัญหาการติดบ่อยครั้งหรือไม่?”',
+          options: [
+            { text: 'ป้อนกระดาษแม่นยำ ไม่พบปัญหากลไกติดขัดเลย', impact: 4, label: 'ปกติ' },
+            { text: 'ดึงกระดาษติดเฉลี่ยสัปดาห์ละครั้ง พอยอมรับได้', impact: 3, label: 'ติดเล็กน้อย' },
+            { text: 'ติดบ่อยแทบทุกวัน ต้องคอยเปิดฝาดึงกระดาษออก', impact: 2, label: 'กระดาษติดถี่' },
+            { text: 'กระดาษคาติดแน่นในแกนกลางถาวร ดึงไม่ได้', impact: 1, label: 'กลไกภายในพัง' }
+          ]
+        },
+        {
+          id: 'pt_ink',
+          category: 'performance',
+          label: '“ความคมชัดของลายเส้นหมึกพิมพ์บนกระดาษเป็นอย่างไร?”',
+          options: [
+            { text: 'พิมพ์ออกมาคมชัด สม่ำเสมอ ไม่เลอะเลือน', impact: 4, label: 'ปกติ' },
+            { text: 'เริ่มมีแถบจางๆ หรือขาดเส้นบางจุดบนใบสั่งยา', impact: 3, label: 'จางบางส่วน' },
+            { text: 'หมึกเปื้อนเป็นปื้นใหญ่ หรือตัวพิมพ์เอียงจนอ่านไม่ได้', impact: 2, label: 'เลอะเทอะ/จางมาก' },
+            { text: 'หัวฉีดชำรุดพิมพ์ออกมากระดาษขาวโพลนสมบูรณ์', impact: 1, label: 'หัวพิมพ์ชำรุด' }
+          ]
+        }
+      ],
+      ups: [
+        {
+          id: 'ups_backup',
+          category: 'performance',
+          label: '“เมื่อไฟฟ้าตึกลดหรือทดลองดึงปลั๊ก การสำรองไฟฟ้าเป็นอย่างไร?”',
+          options: [
+            { text: 'คอมพิวเตอร์ทำงานต่อเนื่องปกติ ได้นานมากกว่า 10 นาที', impact: 4, label: 'ปกติ' },
+            { text: 'สำรองไฟได้ค่อนข้างสั้นลง (ประมาณ 3-5 นาที)', impact: 3, label: 'แบตเสื่อมเล็กน้อย' },
+            { text: 'สำรองได้ไม่เกิน 1 นาที ส่งผลเกือบชัตดาวน์ไม่ทัน', impact: 2, label: 'แบตเสื่อมวิกฤต' },
+            { text: 'คอมพิวเตอร์ดับทันทีทันใด เหมือนไฟตกโดยตรง', impact: 1, label: 'แบตตายสมบูรณ์' }
+          ]
+        },
+        {
+          id: 'ups_noise',
+          category: 'physical',
+          label: '“มีเสียงร้องเตือนกะพริบแปลกๆ จากตัวอุปกรณ์หรือไม่?”',
+          options: [
+            { text: 'เงียบปกติ ไฟสีเขียวนิ่ง มั่นใจความปลอดภัย', impact: 4, label: 'ปกติ' },
+            { text: 'มีไฟกะพริบสีส้มห่างๆ นานทีครั้ง', impact: 3, label: 'ไฟเตือนเล็กน้อย' },
+            { text: 'ส่งเสียงกรีดร้องเตือนยาวถี่ๆ ตลอดเวลา', impact: 2, label: 'ร้องเตือนสม่ำเสมอ' },
+            { text: 'ตัวถังบวมเป่ง แบตเตอรี่มีความร้อนและกลิ่นไหม้', impact: 1, label: 'เสี่ยงระเบิด/เกิดไฟไหม้' }
+          ]
+        }
+      ]
+    };
+
+    let activeDevice = 'pc';
+    let simAnswers = {};
+
+    // จัดการเปลี่ยนกลุ่มการแสดงผลในหน้าสารบัญ
+    function scrollToSection(id) {
+      document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+      
+      const btns = document.querySelectorAll('.sidebar-btn');
+      btns.forEach(btn => {
+        btn.classList.remove('text-pink-600', 'bg-pink-50/70', 'border-l-4', 'border-pink-500');
+        btn.classList.add('text-gray-600', 'hover:text-pink-600', 'hover:bg-pink-50/50');
+      });
+      
+      const activeBtn = Array.from(btns).find(btn => btn.getAttribute('onclick').includes(id));
+      if (activeBtn) {
+        activeBtn.classList.remove('text-gray-600', 'hover:text-pink-600', 'hover:bg-pink-50/50');
+        activeBtn.classList.add('text-pink-600', 'bg-pink-50/70', 'border-l-4', 'border-pink-500');
+      }
+    }
+
+    // เปลี่ยนประเภทอุปกรณ์ใน Simulator
+    function switchSimDevice(deviceKey) {
+      activeDevice = deviceKey;
+      
+      document.querySelectorAll('.sim-device-btn').forEach(btn => {
+        btn.className = "sim-device-btn shrink-0 px-4 py-2.5 rounded-full text-xs font-bold shadow-sm transition-all bg-white text-gray-600 border border-gray-200 hover:border-pink-300";
+      });
+      
+      const idMap = { pc: 'btnSimPC', printer: 'btnSimPrinter', ups: 'btnSimUPS' };
+      document.getElementById(idMap[deviceKey]).className = "sim-device-btn shrink-0 px-4 py-2.5 rounded-full text-xs font-bold shadow-sm transition-all bg-pink-500 text-white border border-pink-500";
+      
+      renderQuestions();
+    }
+
+    // สร้างลิสต์คำถามจำลองระบบ PM
+    function renderQuestions() {
+      const questions = simQuestions[activeDevice];
+      const container = document.getElementById('questionsContainer');
+      container.innerHTML = '';
+
+      questions.forEach((q, idx) => {
+        if (!simAnswers[q.id]) {
+          simAnswers[q.id] = 4;
+        }
+
+        let optionsHtml = '';
+        q.options.forEach(opt => {
+          const checked = simAnswers[q.id] === opt.impact ? 'checked' : '';
+          optionsHtml += `
+            <label class="flex items-start gap-2.5 p-3 rounded-xl border border-gray-100 hover:bg-pink-50/20 cursor-pointer transition-all text-xs">
+              <input type="radio" name="${q.id}" value="${opt.impact}" ${checked} 
+                onchange="updateSimAnswer('${q.id}', ${opt.impact})" 
+                class="mt-0.5 text-pink-500 focus:ring-pink-400">
+              <div class="flex-1">
+                <span class="font-bold text-gray-800 block">${opt.label}</span>
+                <span class="text-gray-500">${opt.text}</span>
+              </div>
+            </label>
+          `;
+        });
+
+        const labelText = q.category === 'performance' ? 'Performance / Software' : 'Physical / Hardware';
+        const colorClass = q.category === 'performance' ? 'bg-indigo-50 text-indigo-600' : 'bg-pink-50 text-pink-600';
+
+        container.innerHTML += `
+          <div class="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-sm space-y-3">
+            <span class="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded ${colorClass} w-fit block">
+              ${labelText}
+            </span>
+            <h4 class="font-bold text-gray-800 text-sm leading-relaxed">${q.label}</h4>
+            <div class="space-y-2">
+              ${optionsHtml}
+            </div>
+          </div>
+        `;
+      });
+
+      calculateRiskScore();
+    }
+
+    // ปรับปรุงผลคะแนนเมื่อมีตัวเลือกเปลี่ยน
+    function updateSimAnswer(qId, impact) {
+      simAnswers[qId] = impact;
+      calculateRiskScore();
+    }
+
+    // แสดงสไตล์ตามคะแนนผลกระทบ
+    function getImpactUI(impact) {
+      switch (impact) {
+        case 1: return { text: 'วิกฤต (Critical)', color: 'text-red-500', bg: 'bg-red-500' };
+        case 2: return { text: 'บกพร่องหลัก (Major)', color: 'text-orange-500', bg: 'bg-orange-500' };
+        case 3: return { text: 'บกพร่องย่อย (Minor)', color: 'text-yellow-500', bg: 'bg-yellow-500' };
+        default: return { text: 'ปกติ (Normal)', color: 'text-green-500', bg: 'bg-green-500' };
+      }
+    }
+
+    // คำนวณสรุปความเสี่ยง Risk Score
+    function calculateRiskScore() {
+      const questions = simQuestions[activeDevice];
+      let physicalImpact = 4;
+      let performanceImpact = 4;
+
+      questions.forEach(q => {
+        const val = simAnswers[q.id] || 4;
+        if (q.category === 'physical') physicalImpact = val;
+        if (q.category === 'performance') performanceImpact = val;
+      });
+
+      const physStyle = getImpactUI(physicalImpact);
+      document.getElementById('metricPhysVal').innerText = physStyle.text;
+      document.getElementById('metricPhysVal').className = `text-xs font-bold ${physStyle.color}`;
+      document.getElementById('metricPhysBar').className = `${physStyle.bg} h-full transition-all duration-300`;
+      document.getElementById('metricPhysBar').style.width = `${(physicalImpact / 4) * 100}%`;
+
+      const perfStyle = getImpactUI(performanceImpact);
+      document.getElementById('metricPerfVal').innerText = perfStyle.text;
+      document.getElementById('metricPerfVal').className = `text-xs font-bold ${perfStyle.color}`;
+      document.getElementById('metricPerfBar').className = `${perfStyle.bg} h-full transition-all duration-300`;
+      document.getElementById('metricPerfBar').style.width = `${(performanceImpact / 4) * 100}%`;
+
+      const minScore = Math.min(physicalImpact, performanceImpact);
+      const riskEl = document.getElementById('riskScoreValue');
+      const labelEl = document.getElementById('riskScoreLabel');
+
+      if (minScore === 1) {
+        riskEl.innerText = 'วิกฤตสูงสุด (Critical)';
+        riskEl.className = 'text-3xl font-extrabold text-red-600';
+        labelEl.innerText = 'อุปกรณ์ชำรุดเสียหายหนัก ไม่ตอบสนอง ทำงานไม่ได้ หรือส่งความเสี่ยงด้านความร้อนสะสม/กระแสไฟลัดวงจร ต้องจัดส่งช่างซ่อมบำรุงรักษาโดยด่วนที่สุด!';
+      } else if (minScore === 2) {
+        riskEl.innerText = 'เสี่ยงสูง (Major)';
+        riskEl.className = 'text-3xl font-extrabold text-orange-500';
+        labelEl.innerText = 'เกิดความผิดปกติรุนแรง ระบบอืดช้า คลื่นความถี่เสียงหรือฝุ่นขัดขวางการป้อนงาน ควรวางแผนให้เจ้าหน้าที่เข้าแก้ไขเชิงลึกภายใน 48 ชั่วโมง';
+      } else if (minScore === 3) {
+        riskEl.innerText = 'เฝ้าระวัง (Minor)';
+        riskEl.className = 'text-3xl font-extrabold text-yellow-600';
+        labelEl.innerText = 'ทำงานได้ปกติ เริ่มมีส่วนบกพร่องย่อยไม่ส่งผลต่อวงงานหลัก บันทึกรายงานเก็บเป็นสถิติประวัติเพื่อวางแผนจัดการในรอบ PM ถัดไป';
+      } else {
+        riskEl.innerText = 'ปกติสุข (Normal)';
+        riskEl.className = 'text-3xl font-extrabold text-green-500';
+        labelEl.innerText = 'โครงสร้างฮาร์ดแวร์และซอฟต์แวร์ทำงานได้สมบูรณ์ ปราศจากความชื้น ฝุ่น และข้อผิดพลาดในระบบคลาวด์ พร้อมต่อการบริการ';
+      }
+    }
+
+    // ล้างข้อมูลผู้ตรวจ
+    function resetSimulator() {
+      simAnswers = {};
+      renderQuestions();
+    }
+
+    // ดึงหน้าต่างข้อความรายงานใบวิเคราะห์โดยไม่พึ่งระบบ alert()
+    function submitSimReport() {
+      const titleName = activeDevice === 'pc' ? 'คอมพิวเตอร์เวชระเบียน (PC)' : activeDevice === 'printer' ? 'เครื่องพิมพ์เวชระเบียน (Printer)' : 'เครื่องสำรองไฟฟ้า (UPS)';
+      const questions = simQuestions[activeDevice];
+      let scoreStr = '';
+      let minScore = 4;
+      
+      questions.forEach(q => {
+        const val = simAnswers[q.id] || 4;
+        if(val < minScore) minScore = val;
+        const subLabel = q.category === 'performance' ? 'สถิติด้าน Software' : 'สภาพด้าน Hardware';
+        const impactUI = getImpactUI(val);
+        scoreStr += `<p class="mt-1 text-xs">✔ <strong>${subLabel}:</strong> <span class="font-bold">${impactUI.text}</span></p>`;
+      });
+
+      let recText = "";
+      if(minScore === 1) recText = "🚨 ดำเนินการออกใบแจ้งเคลมระบบเร่งด่วนที่สุด ส่งทีมช่างเทคนิคหน้างานกู้คืนระบบ";
+      else if(minScore === 2) recText = "⚡ ส่งบันทึกรายงานรอบซ่อมบำรุง 48 ชั่วโมงถัดไป";
+      else if(minScore === 3) recText = "📅 จัดเก็บประวัติสุขภาพอุปกรณ์รอบปกติ เพื่อเฝ้าระวังฝุ่นสะสม";
+      else recText = "✅ บันทึกใบประเมินผล 'ปกติ' เข้าระบบประวัติส่วนกลางโรงพยาบาลอุดรธานี";
+
+      const titleEl = document.getElementById('modalTitle');
+      const contentEl = document.getElementById('modalContent');
+      const iconEl = document.getElementById('modalIcon');
+
+      titleEl.innerText = `ใบรับรองการสำรวจ ${titleName}`;
+      contentEl.innerHTML = `
+        <div class="text-left space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-100">
+          <p class="text-xs text-gray-400">เจ้าหน้าที่สำรวจ: <strong class="text-gray-800">IT Staff UTH</strong></p>
+          <div class="border-t border-gray-200 pt-2 text-gray-700">
+            ${scoreStr}
+          </div>
+          <div class="border-t border-gray-200 pt-2 font-bold text-xs text-pink-600">
+             คำสั่งแนะนำ: ${recText}
+          </div>
+        </div>
+      `;
+
+      if(minScore <= 2) {
+        iconEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+        iconEl.className = "w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4";
+      } else {
+        iconEl.innerHTML = '<i class="fas fa-check-circle"></i>';
+        iconEl.className = "w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4";
+      }
+
+      document.getElementById('customModal').className = "fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 no-print";
+    }
+
+    function closeModal() {
+      document.getElementById('customModal').className = "fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4 no-print";
+    }
+
+    window.onload = function() {
+      renderQuestions();
+    };
+  </script>
+</body>
+</html>
